@@ -365,7 +365,9 @@
                         <tr>
                             <th>State Name</th>
                             <th>College Name</th>
-                            <th>Course</th>
+                            <th>Category</th>
+                            <th>Round Name</th>
+                            <th>Local Area</th>
                             <th>Total Seats</th>
                             <th>GEN Closing Rank</th>
                             <th>GEN Closing Mark</th>
@@ -978,8 +980,20 @@ analysisTable = $('#analysis-table').DataTable({
                         }
                     },
                     {
-                        data: 'course',
-                        name: 'course',
+                        data: 'category',
+                        name: 'category',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'round_id',
+                        name: 'round_id',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'local_area',
+                        name: 'local_area',
                         orderable: false,
                         searchable: false
                     },

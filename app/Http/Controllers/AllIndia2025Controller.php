@@ -80,8 +80,14 @@ class AllIndia2025Controller extends Controller
             }
 
             return DataTables::of($query)
-                ->addColumn('course', function ($row) {
-                    return 'MBBS'; // Hardcoded context: MBBS Cutoff analysis
+                ->addColumn('category', function ($row) {
+                    return $row->category; // Hardcoded context: MBBS Cutoff analysis
+                })
+                ->editColumn('local_area', function ($row) {
+                    return $row->local_area ?? "- ";
+                })
+                ->editColumn('round_id', function($row){
+                    return $row->round_name;
                 })
                 ->editColumn('tuition_fee', function ($row) {
                     return $row->tuition_fee !== null ? (int) $row->tuition_fee : 0;
