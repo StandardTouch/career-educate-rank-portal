@@ -20,11 +20,47 @@
 
     <!-- DataTables CSS & JS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
 
     <style>
         body {
             font-family: 'Outfit', sans-serif;
+        }
+        #column-visibility-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .colvis-checkbox {
+            display: none;
+        }
+
+        .colvis-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 0.75rem;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .colvis-item.active .colvis-button {
+            background: #f43f5e; 
+            border-color: #f43f5e;
+            color: white;
+        }
+
+        .colvis-button:hover {
+            border-color: #f43f5e;
         }
 
         /* Custom scrollbar for modals */
@@ -171,12 +207,12 @@
 
             <!-- Rank Input Field -->
             <div>
-                <label for="rank-input"
+                <label for="marks-input"
                     class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                    Enter your rank
+                    Enter your marks    
                 </label>
                 <div class="relative">
-                    <input type="number" id="rank-input" placeholder="Enter your NEET 2025 All India Rank..."
+                    <input type="number" id="marks-input" placeholder="Enter your NEET 2025 All India marks..."
                         class="w-full text-lg border border-slate-200 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all placeholder-slate-400">
                 </div>
             </div>
@@ -884,6 +920,19 @@
         // YAJRA DATATABLES INTEGRATION
         // ==============================================
         let analysisTable = null;
+        // Container for custom column visibility checkboxes (vertical list)
+        const colVisContainer = document.createElement('div');
+        colVisContainer.id = 'column-visibility-list';
+        colVisContainer.style.marginBottom = '10px';
+        colVisContainer.style.display = 'flex';
+        colVisContainer.style.flexWrap = 'wrap';
+        colVisContainer.style.gap = '10px';
+        colVisContainer.style.marginBottom = '20px';
+// Insert container before the table element
+const tableEl = document.getElementById('analysis-table');
+if (tableEl && tableEl.parentNode) {
+    tableEl.parentNode.insertBefore(colVisContainer, tableEl);
+}
 
         $(document).ready(function() {
             // Initial tags and state
@@ -896,18 +945,19 @@
             updateFilterTags('local_areas');
 
             // Set up DataTable initialization
-            analysisTable = $('#analysis-table').DataTable({
+analysisTable = $('#analysis-table').DataTable({
+                // Removed default Buttons collection for column visibility
                 processing: true,
                 serverSide: true,
                 searching: true,
                 deferRender: true,
                 order: [
-                    [4, 'asc']
+                    [5, 'asc']
                 ], // Order by Gen Closing Rank by default
                 ajax: {
                     url: "{{ route('home') }}",
                     data: function(d) {
-                        d.rank = $('#rank-input').val();
+                        d.marks = $('#marks-input').val();
                         d.colleges = filterState.colleges.confirmed;
                         d.quotas = filterState.quotas.confirmed;
                         d.rounds = filterState.rounds.confirmed;
@@ -981,6 +1031,7 @@
                     $('#results-count').text(info.recordsDisplay);
                 }
             });
+            initColumnVisibility();
 
             // Get Analysis Button Click
             $('#btn-get-analysis').on('click', function() {
@@ -994,6 +1045,56 @@
                 analysisTable.ajax.reload();
             });
         });
+        // Define function to create vertical column visibility checkboxes
+        function initColumnVisibility() {
+    if (!analysisTable) return;
+
+    const container = document.getElementById('column-visibility-list');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    analysisTable.columns().every(function(idx) {
+        const col = this;
+        const title = $(col.header()).text().trim() || `Column ${idx + 1}`;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'colvis-item';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `colvis-${idx}`;
+        checkbox.checked = col.visible();
+        checkbox.className = 'colvis-checkbox';
+
+        checkbox.addEventListener('change', function() {
+            col.visible(this.checked);
+
+            if (this.checked) {
+                wrapper.classList.add('active');
+            } else {
+                wrapper.classList.remove('active');
+            }
+        });
+
+        const label = document.createElement('label');
+        label.setAttribute('for', `colvis-${idx}`);
+        label.className = 'colvis-button';
+        label.innerHTML = `
+            <span class="checkmark">✓</span>
+            <span>${title}</span>
+        `;
+
+        if (checkbox.checked) {
+            wrapper.classList.add('active');
+        }
+
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(label);
+
+        container.appendChild(wrapper);
+    });
+}
 
         // Update the textual description of applied filters above result table
         function updateResultsSummaryLabel() {
