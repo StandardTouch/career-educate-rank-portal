@@ -78,7 +78,7 @@ class AllIndia2025Controller extends Controller
             if ($request->filled('fee_max')) {
                 $query->where('tuition_fee', '<=', (int) $request->input('fee_max'));
             }
-
+                $query->orderBy('gen_closing_mark', 'desc');
             return DataTables::of($query)
                 ->addColumn('category', function ($row) {
                     return $row->category; // Hardcoded context: MBBS Cutoff analysis
