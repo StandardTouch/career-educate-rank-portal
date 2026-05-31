@@ -37,7 +37,7 @@ class AllIndia2025Controller extends Controller
             // }
             if ($request->filled('marks')) {
                 $marks = (float) $request->input('marks');
-                $query->where('gen_closing_mark', '>=', $marks);
+                $query->where('gen_closing_mark', '<=', $marks);
             }            
             // 2. Colleges Filter
             if ($request->has('colleges')) {
