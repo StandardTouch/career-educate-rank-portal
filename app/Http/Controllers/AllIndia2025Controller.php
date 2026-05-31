@@ -28,17 +28,17 @@ class AllIndia2025Controller extends Controller
             // 1. Rank Filter
             // Filters colleges where candidate qualifies. A candidate qualifies if their rank
             // is less than or equal to the closing rank. Therefore, closing rank must be >= candidate's rank.
-            // if ($request->filled('rank')) {
-            //     $rank = (int) $request->input('rank');
-            //     $query->where(function ($q) use ($rank) {
-            //         $q->where('gen_closing_rank', '>=', $rank)
-            //           ->orWhere('fem_closing_rank', '>=', $rank);
-            //     });
-            // }
-            if ($request->filled('marks')) {
-                $marks = (float) $request->input('marks');
-                $query->where('gen_closing_mark', '<=', $marks);
-            }            
+            if ($request->filled('rank')) {
+                $rank = (int) $request->input('rank');
+                $query->where(function ($q) use ($rank) {
+                    $q->where('gen_closing_rank', '>=', $rank)
+                      ->orWhere('fem_closing_rank', '>=', $rank);
+                });
+            }
+            // if ($request->filled('marks')) {
+            //     $marks = (float) $request->input('marks');
+            //     $query->where('gen_closing_mark', '<=', $marks);
+            // }            
             // 2. Colleges Filter
             if ($request->has('colleges')) {
                 $colleges = (array) $request->input('colleges');
@@ -78,7 +78,7 @@ class AllIndia2025Controller extends Controller
             if ($request->filled('fee_max')) {
                 $query->where('tuition_fee', '<=', (int) $request->input('fee_max'));
             }
-                $query->orderBy('gen_closing_mark', 'desc');
+
             return DataTables::of($query)
                 ->addColumn('category', function ($row) {
                     return $row->category; // Hardcoded context: MBBS Cutoff analysis

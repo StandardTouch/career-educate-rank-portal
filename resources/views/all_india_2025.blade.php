@@ -207,12 +207,12 @@
 
             <!-- Rank Input Field -->
             <div>
-                <label for="marks-input"
+                <label for="rank-input"
                     class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                    Enter your marks    
+                    Enter your rank    
                 </label>
                 <div class="relative">
-                    <input type="number" id="marks-input" placeholder="Enter your NEET 2025 All India marks..."
+                    <input type="number" id="rank-input" placeholder="Enter your NEET 2025 All India rank..."
                         class="w-full text-lg border border-slate-200 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all placeholder-slate-400">
                 </div>
             </div>
@@ -954,12 +954,12 @@ analysisTable = $('#analysis-table').DataTable({
                 searching: true,
                 deferRender: true,
                 order: [
-                    [8, 'desc']
+                    [7, 'desc']
                 ], // Order by Gen Closing Rank by default
                 ajax: {
                     url: "{{ route('home') }}",
                     data: function(d) {
-                        d.marks = $('#marks-input').val();
+                        d.rank = $('#rank-input').val();
                         d.colleges = filterState.colleges.confirmed;
                         d.quotas = filterState.quotas.confirmed;
                         d.rounds = filterState.rounds.confirmed;
