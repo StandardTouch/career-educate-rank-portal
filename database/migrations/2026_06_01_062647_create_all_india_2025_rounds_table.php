@@ -8,8 +8,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('all_india_2025', function (Blueprint $table) {
+        Schema::create('all_india_rounds_2025', function (Blueprint $table) {
             $table->id();
+
+            // Foreign key to rounds
+            $table->foreignId('round_id')
+                ->constrained('rounds')
+                ->cascadeOnDelete();
 
             // Core college info
             $table->string('state_name');
@@ -30,6 +35,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Indexes for common query patterns
+            $table->index('round_id');
             $table->index('state_name');
             $table->index('category');
             $table->index('gen_closing_rank');
@@ -39,6 +45,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('all_india_2025');
+        Schema::dropIfExists('all_india_rounds_2025');
     }
 };
