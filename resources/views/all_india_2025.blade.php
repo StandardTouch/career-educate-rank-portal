@@ -954,7 +954,7 @@ analysisTable = $('#analysis-table').DataTable({
                 searching: true,
                 deferRender: true,
                 order: [
-                    [7, 'desc']
+                    [6, 'desc']
                 ], // Order by Gen Closing Rank by default
                 ajax: {
                     url: "{{ route('home') }}",
