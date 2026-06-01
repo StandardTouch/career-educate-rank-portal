@@ -15,6 +15,8 @@ class RoundsSeeder extends Seeder
             ['name' => 'Mopup Round',        'slug' => 'mopup_round',        'sort_order' => 3],
             ['name' => 'Stray Round',        'slug' => 'stray_round',        'sort_order' => 4],
             ['name' => 'Special Stray Round','slug' => 'special_stray_round','sort_order' => 5],
+            ['name' => 'Special Stray 2 Round','slug' => 'special_stray_2_round','sort_order' => 6],
+
         ];
 
         DB::table('rounds')->insertOrIgnore(array_map(function ($r) {
