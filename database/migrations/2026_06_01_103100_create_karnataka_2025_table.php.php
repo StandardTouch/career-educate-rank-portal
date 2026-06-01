@@ -29,7 +29,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Indexes for common query patterns
-            $table->index('state_name');
+            // $table->index('state_name');
             $table->index('category');
             $table->index('gen_closing_rank');
             $table->index('gen_closing_mark');
