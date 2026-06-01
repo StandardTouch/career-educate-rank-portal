@@ -16,10 +16,10 @@ class Round extends Model
     /**
      * Get the NEET cutoff records for this round.
      *
-     * @return HasMany<AllIndia2025>
+     * @return HasMany<AllIndiaRounds2025>
      */
     public function cutoffs(): HasMany
     {
-        return $this->hasMany(AllIndia2025::class, 'round_id');
+        return $this->hasMany(AllIndiaRounds2025::class, 'round_id');
     }
 }

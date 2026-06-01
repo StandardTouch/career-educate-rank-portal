@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AllIndia2025;
+use App\Models\AllIndiaRounds2025;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
@@ -18,12 +19,34 @@ class AllIndia2025Controller extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = AllIndia2025::query()
-                ->select([
-                    'all_india_2025.*',
-                    'rounds.name as round_name'
-                ])
-                ->join('rounds', 'all_india_2025.round_id', '=', 'rounds.id');
+            $useRoundsTable = false;
+            $selectedRounds = [];
+
+            if ($request->has('rounds')) {
+                $selectedRounds = (array) $request->input('rounds');
+                // If the selected rounds are not empty and do not contain 'any' (Over All), we query round-wise data.
+                if (!empty($selectedRounds) && !in_array('any', $selectedRounds)) {
+                    $useRoundsTable = true;
+                }
+            }
+
+            if ($useRoundsTable) {
+                // Fetch round-wise cutoff data from all_india_rounds_2025
+                $query = AllIndiaRounds2025::query()
+                    ->select([
+                        'all_india_rounds_2025.*',
+                        'rounds.name as round_name'
+                    ])
+                    ->join('rounds', 'all_india_rounds_2025.round_id', '=', 'rounds.id')
+                    ->whereIn('all_india_rounds_2025.round_id', array_map('intval', $selectedRounds));
+            } else {
+                // Fetch overall cutoff data from all_india_2025 (no round check or joins needed)
+                $query = AllIndia2025::query()
+                    ->select([
+                        'all_india_2025.*',
+                        DB::raw("'Over All' as round_name")
+                    ]);
+            }
 
             // 1. Rank Filter
             // Filters colleges where candidate qualifies. A candidate qualifies if their rank
@@ -35,10 +58,7 @@ class AllIndia2025Controller extends Controller
                       ->orWhere('fem_closing_rank', '>=', $rank);
                 });
             }
-            // if ($request->filled('marks')) {
-            //     $marks = (float) $request->input('marks');
-            //     $query->where('gen_closing_mark', '<=', $marks);
-            // }            
+            
             // 2. Colleges Filter
             if ($request->has('colleges')) {
                 $colleges = (array) $request->input('colleges');
@@ -52,14 +72,6 @@ class AllIndia2025Controller extends Controller
                 $quotas = (array) $request->input('quotas');
                 if (!in_array('any', $quotas) && !empty($quotas)) {
                     $query->whereIn('category', $quotas);
-                }
-            }
-
-            // 4. Rounds Filter
-            if ($request->has('rounds')) {
-                $rounds = (array) $request->input('rounds');
-                if (!in_array('any', $rounds) && !empty($rounds)) {
-                    $query->whereIn('round_id', array_map('intval', $rounds));
                 }
             }
 
@@ -81,7 +93,7 @@ class AllIndia2025Controller extends Controller
 
             return DataTables::of($query)
                 ->addColumn('category', function ($row) {
-                    return $row->category; // Hardcoded context: MBBS Cutoff analysis
+                    return $row->category;
                 })
                 ->editColumn('local_area', function ($row) {
                     return $row->local_area ?? "- ";
@@ -95,18 +107,18 @@ class AllIndia2025Controller extends Controller
                 ->make(true);
         }
 
-        // Fetch distinct values for dropdown filters
-        $colleges = AllIndia2025::distinct()
+        // Fetch distinct values for dropdown filters from AllIndiaRounds2025
+        $colleges = AllIndiaRounds2025::distinct()
             ->orderBy('college_name')
             ->pluck('college_name')
             ->toArray();
 
-        $quotas = AllIndia2025::distinct()
+        $quotas = AllIndiaRounds2025::distinct()
             ->orderBy('category')
             ->pluck('category')
             ->toArray();
 
-        $localAreas = AllIndia2025::distinct()
+        $localAreas = AllIndiaRounds2025::distinct()
             ->orderBy('local_area')
             ->pluck('local_area')
             ->toArray();
@@ -116,7 +128,7 @@ class AllIndia2025Controller extends Controller
             ->get()
             ->toArray();
 
-        $maxFee = AllIndia2025::max('tuition_fee') ?? 10000000;
+        $maxFee = AllIndiaRounds2025::max('tuition_fee') ?? 10000000;
 
         return view('all_india_2025', compact('colleges', 'quotas', 'localAreas', 'rounds', 'maxFee'));
     }
