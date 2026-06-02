@@ -984,8 +984,6 @@ analysisTable = $('#analysis-table').DataTable({
                     {
                         data: 'category',
                         name: 'category',
-                        orderable: false,
-                        searchable: true
                     },
                     {
                         data: 'round_id',
