@@ -38,7 +38,7 @@ class Karnataka2024Controller extends Controller
                 // Fetch overall cutoff data from karnataka_2025 (no round check or joins needed)
                 $query = Karnataka2024::query()
                     ->select([
-                        'karnataka_2025.*',
+                        'karnataka_2024.*',
                         DB::raw("'Over All' as round_name"),
                         DB::raw("'Karnataka' as state_name")
                     ]);
@@ -88,6 +88,12 @@ class Karnataka2024Controller extends Controller
             }
 
             return DataTables::of($query)
+                ->filterColumn('state_name', function ($query, $keyword) {
+                    // No-op to prevent searching on virtual/constant column
+                })
+                ->orderColumn('state_name', function ($query, $order) {
+                    // No-op to prevent sorting on virtual/constant column
+                })
                 ->addColumn('category', function ($row) {
                     return $row->category;
                 })

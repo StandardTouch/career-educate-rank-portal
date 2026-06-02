@@ -89,6 +89,12 @@ class Karnataka2023Controller extends Controller
             }
 
             return DataTables::of($query)
+                ->filterColumn('state_name', function ($query, $keyword) {
+                    // No-op to prevent searching on virtual/constant column
+                })
+                ->orderColumn('state_name', function ($query, $order) {
+                    // No-op to prevent sorting on virtual/constant column
+                })
                 ->addColumn('category', function ($row) {
                     return $row->category;
                 })

@@ -970,7 +970,9 @@ analysisTable = $('#analysis-table').DataTable({
                 },
                 columns: [{
                         data: 'state_name',
-                        name: 'state_name'
+                        name: 'state_name',
+                        searchable: false,
+                        orderable: false
                     },
                     {
                         data: 'college_name',
