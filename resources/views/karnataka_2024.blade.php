@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Karnataka Quota MBBS - 2025 Cutoff Analysis</title>
+    <title>Karnataka Quota MBBS - 2024 Cutoff Analysis</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -174,7 +174,7 @@
                 <div
                     class="hidden sm:flex items-center gap-1.5 text-sm text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full">
                     <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    NEET 2025 Live Data
+                    NEET 2024 Live Data
                 </div>
             </div>
         </div>
@@ -195,7 +195,7 @@
         <!-- Page Title -->
         <div class="text-center my-6">
             <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
-                Karnataka MBBS - 2025 Analysis
+                Karnataka MBBS - 2024 Analysis
             </h1>
             <p class="text-slate-500 mt-2 text-sm sm:text-base">
                 Find eligible medical colleges based on closing ranks, quotas, rounds, and local areas.
@@ -212,7 +212,7 @@
                     Enter your rank    
                 </label>
                 <div class="relative">
-                    <input type="number" id="rank-input" placeholder="Enter your NEET 2025 All India rank..."
+                    <input type="number" id="rank-input" placeholder="Enter your NEET 2024 All India rank..."
                         class="w-full text-lg border border-slate-200 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all placeholder-slate-400">
                 </div>
             </div>
