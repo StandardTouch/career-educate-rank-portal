@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Karnataka2024 extends Model
 {
-        protected $table = 'karnataka_2025';
+        protected $table = 'karnataka_2024';
 
     protected $fillable = [
         'college_name',

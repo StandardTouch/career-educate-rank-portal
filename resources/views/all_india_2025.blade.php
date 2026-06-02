@@ -983,7 +983,7 @@ analysisTable = $('#analysis-table').DataTable({
                         data: 'category',
                         name: 'category',
                         orderable: false,
-                        searchable: false
+                        searchable: true
                     },
                     {
                         data: 'round_id',
@@ -995,7 +995,7 @@ analysisTable = $('#analysis-table').DataTable({
                         data: 'local_area',
                         name: 'local_area',
                         orderable: false,
-                        searchable: false
+                        searchable: true
                     },
                     {
                         data: 'total_seats',
