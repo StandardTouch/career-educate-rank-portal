@@ -7,14 +7,14 @@
  * Place this file in your Laravel project root (same folder as .env, vendor/)
  * e.g. C:\xampp\htdocs\career_educate\import_neet2025.php
  *
- * TABLE 1 → karnataka_2025
+ * TABLE 1 → karnataka_2024
  *   Source : "ALL INDIA Over all" sheet (2840 rows)
  *   Columns: state_name, college_name, category, local_area, total_seats,
  *            gen_closing_rank, fem_closing_rank, gen_closing_mark,
  *            fem_closing_mark, tuition_fee
  *   No round_id column.
  *
- * TABLE 2 → karnataka_2025_rounds
+ * TABLE 2 → karnataka_2024_rounds
  *   Source : ROUND 1, ROUND 2, MOPUP Round, Stray Round, Special Stray Round
  *   Columns: same 10 columns + round_id (FK to rounds table)
  *
@@ -35,7 +35,7 @@ ini_set('memory_limit', '512M');
 
 $projectRoot = __DIR__;
 $envFile = $projectRoot.DIRECTORY_SEPARATOR.'.env';
-$xlsxFile = $projectRoot.DIRECTORY_SEPARATOR.'KARNATAKA_DATA_2025.xlsx';
+$xlsxFile = $projectRoot.DIRECTORY_SEPARATOR.'KARNATAKA_DATA_2024.xlsx';
 
 require_once $projectRoot.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'autoload.php';
 
@@ -190,27 +190,27 @@ const BATCH_SIZE = 500;
 $now = date('Y-m-d H:i:s');
 
 // ═════════════════════════════════════════════════════════════════════════════
-// IMPORT 1 — karnataka_2025
+// IMPORT 1 — karnataka_2024
 // Source: "ALL INDIA Over all" sheet
 // No round_id column
 // ═════════════════════════════════════════════════════════════════════════════
 
 log_msg('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-log_msg('IMPORT 1: karnataka_2025 (Overall sheet)');
+log_msg('IMPORT 1: karnataka_2024 (Overall sheet)');
 log_msg('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
-$overallSheet = $spreadsheet->getSheetByName('Over all');
+$overallSheet = $spreadsheet->getSheetByName('Karnataka Medical Colleges');
 if ($overallSheet === null) {
-    exit("[ERROR] Sheet 'Over all' not found in xlsx.\n");
+    exit("[ERROR] Sheet 'Karnataka Medical Colleges' not found in xlsx.\n");
 }
 
 $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
-$pdo->exec('TRUNCATE TABLE karnataka_2025');
+$pdo->exec('TRUNCATE TABLE karnataka_2024');
 $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
-log_msg('Truncated karnataka_2025');
+log_msg('Truncated karnataka_2024');
 
 $stmtOverall = $pdo->prepare('
-    INSERT INTO karnataka_2025
+    INSERT INTO karnataka_2024
         (college_name, category, local_area, total_seats,
          gen_closing_rank, fem_closing_rank, gen_closing_mark, fem_closing_mark,
          tuition_fee, created_at, updated_at)
@@ -258,20 +258,20 @@ foreach ($overallRows as $row) {
 }
 
 $pdo->commit();
-log_msg("  [Overall] Done. {$inserted} rows inserted into karnataka_2025.");
+log_msg("  [Overall] Done. {$inserted} rows inserted into karnataka_2024.");
 
 // Verify
-$count = $pdo->query('SELECT COUNT(*) as c FROM karnataka_2025')->fetch()['c'];
-log_msg("  DB check: karnataka_2025 has {$count} rows.");
+$count = $pdo->query('SELECT COUNT(*) as c FROM karnataka_2024')->fetch()['c'];
+log_msg("  DB check: karnataka_2024 has {$count} rows.");
 
 // ═════════════════════════════════════════════════════════════════════════════
-// IMPORT 2 — karnataka_2025_rounds
+// IMPORT 2 — karnataka_2024_rounds
 // Source: ROUND 1, ROUND 2, MOPUP Round, Stray Round, Special Stray Round
 // Includes round_id column
 // ═════════════════════════════════════════════════════════════════════════════
 
 log_msg('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-log_msg('IMPORT 2: karnataka_2025_rounds (5 round sheets)');
+log_msg('IMPORT 2: karnataka_2024_rounds (5 round sheets)');
 log_msg('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
 // Sheet name → round slug mapping
@@ -286,12 +286,12 @@ $sheetRoundMap = [
 ];
 
 $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
-$pdo->exec('TRUNCATE TABLE karnataka_2025_rounds');
+$pdo->exec('TRUNCATE TABLE karnataka_2024_rounds');
 $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
-log_msg('Truncated karnataka_2025_rounds.');
+log_msg('Truncated karnataka_2024_rounds.');
 
 $stmtRound = $pdo->prepare('
-    INSERT INTO karnataka_2025_rounds
+    INSERT INTO karnataka_2024_rounds
         (round_id, college_name, category, local_area, total_seats,
          gen_closing_rank, fem_closing_rank, gen_closing_mark, fem_closing_mark,
          tuition_fee, created_at, updated_at)
@@ -363,14 +363,14 @@ foreach ($sheetRoundMap as $sheetName => $roundSlug) {
 }
 
 // Verify
-$count = $pdo->query('SELECT COUNT(*) as c FROM karnataka_2025_rounds')->fetch()['c'];
-log_msg("  DB check: karnataka_2025_rounds has {$count} rows.");
+$count = $pdo->query('SELECT COUNT(*) as c FROM karnataka_2024_rounds')->fetch()['c'];
+log_msg("  DB check: karnataka_2024_rounds has {$count} rows.");
 
 // ─── Final Summary ────────────────────────────────────────────────────────────
 
 $elapsed = round(microtime(true) - START_TIME, 2);
 log_msg('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 log_msg("All done in {$elapsed}s");
-log_msg("  karnataka_2025        → {$inserted} rows (Overall sheet)");
-log_msg("  karnataka_2025_rounds → {$totalRoundRows} rows (5 round sheets)");
+log_msg("  karnataka_2024        → {$inserted} rows (Overall sheet)");
+log_msg("  karnataka_2024_rounds → {$totalRoundRows} rows (5 round sheets)");
 log_msg('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

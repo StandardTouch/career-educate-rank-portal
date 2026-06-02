@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Karnataka2025;
-use App\Models\KarnatakaRounds2025;
+use App\Models\Karnataka2024;
+use App\Models\KarnatakaRounds2024;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
-class Karnataka2025Controller extends Controller
+class Karnataka2024Controller extends Controller
 {
-    public function index(Request $request)
+     public function index(Request $request)
     {
-        if ($request->ajax() || $request->wantsJson()) {
+        if ($request->ajax()) {
             $useRoundsTable = false;
             $selectedRounds = [];
 
@@ -25,24 +25,23 @@ class Karnataka2025Controller extends Controller
             }
 
             if ($useRoundsTable) {
-                // Fetch round-wise cutoff data from karnataka_2025_rounds
-                $query = KarnatakaRounds2025::query()
+                // Fetch round-wise cutoff data from karnataka_2024_rounds
+                $query = KarnatakaRounds2024::query()
                     ->select([
-                        'karnataka_2025_rounds.*',
+                        'karnataka_2024_rounds.*',
                         'rounds.name as round_name',
                         DB::raw("'Karnataka' as state_name")
                     ])
-                    ->join('rounds', 'karnataka_2025_rounds.round_id', '=', 'rounds.id')
-                    ->whereIn('karnataka_2025_rounds.round_id', array_map('intval', $selectedRounds));
+                    ->join('rounds', 'karnataka_2024_rounds.round_id', '=', 'rounds.id')
+                    ->whereIn('karnataka_2024_rounds.round_id', array_map('intval', $selectedRounds));
             } else {
-                                // Fetch overall cutoff data from karnataka_2025 (no round check or joins needed)
-                $query = Karnataka2025::query()
+                // Fetch overall cutoff data from karnataka_2025 (no round check or joins needed)
+                $query = Karnataka2024::query()
                     ->select([
                         'karnataka_2025.*',
-                        DB::raw("'Karnataka' as state_name"),
-                        DB::raw("'Over All' as round_name")
+                        DB::raw("'Over All' as round_name"),
+                        DB::raw("'Karnataka' as state_name")
                     ]);
-
             }
 
             // 1. Rank Filter
@@ -104,18 +103,18 @@ class Karnataka2025Controller extends Controller
                 ->make(true);
         }
 
-        // Fetch distinct values for dropdown filters from KarnatakaRounds2025
-        $colleges = KarnatakaRounds2025::distinct()
+        // Fetch distinct values for dropdown filters from KarnatakaRounds2024
+        $colleges = KarnatakaRounds2024::distinct()
             ->orderBy('college_name')
             ->pluck('college_name')
             ->toArray();
 
-        $quotas = KarnatakaRounds2025::distinct()
+        $quotas = KarnatakaRounds2024::distinct()
             ->orderBy('category')
             ->pluck('category')
             ->toArray();
 
-        $localAreas = KarnatakaRounds2025::distinct()
+        $localAreas = KarnatakaRounds2024::distinct()
             ->orderBy('local_area')
             ->pluck('local_area')
             ->toArray();
@@ -125,8 +124,8 @@ class Karnataka2025Controller extends Controller
             ->get()
             ->toArray();
 
-        $maxFee = KarnatakaRounds2025::max('tuition_fee') ?? 10000000;
+        $maxFee = KarnatakaRounds2024::max('tuition_fee') ?? 10000000;
 
-        return view('karnataka_2025', compact('colleges', 'quotas', 'localAreas', 'rounds', 'maxFee'));
+        return view('karnataka_2024', compact('colleges', 'quotas', 'localAreas', 'rounds', 'maxFee'));
     }
 }

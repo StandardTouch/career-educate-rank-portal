@@ -957,7 +957,7 @@ analysisTable = $('#analysis-table').DataTable({
                     [6, 'desc']
                 ], // Order by Gen Closing Rank by default
                 ajax: {
-                    url: "{{ route('karnataka-2025') }}",
+                    url: "{{ route('karnataka-2024') }}",
                     data: function(d) {
                         d.rank = $('#rank-input').val();
                         d.colleges = filterState.colleges.confirmed;

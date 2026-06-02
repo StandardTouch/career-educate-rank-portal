@@ -16,6 +16,7 @@ class RoundsSeeder extends Seeder
             ['name' => 'Stray Round',        'slug' => 'stray_round',        'sort_order' => 4],
             ['name' => 'Special Stray Round','slug' => 'special_stray_round','sort_order' => 5],
             ['name' => 'Special Stray 2 Round','slug' => 'special_stray_2_round','sort_order' => 6],
+            ['name' => 'Karnataka Medical Colleges', 'slug' => 'karnataka_medical_colleges', 'sort_order' => 7],
 
         ];
 
