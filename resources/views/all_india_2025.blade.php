@@ -1006,7 +1006,7 @@ analysisTable = $('#analysis-table').DataTable({
                         data: 'gen_closing_rank',
                         name: 'gen_closing_rank',
                         render: function(data) {
-                            return data ? parseInt(data).toLocaleString() : '-';
+                            return data ? parseInt(data) : '-';
                         }
                     },
                     {
@@ -1020,7 +1020,7 @@ analysisTable = $('#analysis-table').DataTable({
                         data: 'fem_closing_rank',
                         name: 'fem_closing_rank',
                         render: function(data) {
-                            return data ? parseInt(data).toLocaleString() : '-';
+                            return data ? parseInt(data) : '-';
                         }
                     },
                     {
