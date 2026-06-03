@@ -128,7 +128,7 @@ class AllIndia2025Controller extends Controller
             ->get()
             ->toArray();
 
-        $seatsCount = AllIndiaRounds2025::count();
+        $seatsCount = AllIndia2025::where('category', 'OPEN')->count();
         $maxFee = AllIndiaRounds2025::max('tuition_fee') ?? 10000000;
 
         return view('all_india_2025', compact('colleges', 'quotas', 'localAreas', 'rounds', 'maxFee', 'seatsCount'));

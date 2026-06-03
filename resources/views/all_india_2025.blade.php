@@ -368,7 +368,7 @@
                             <th>Category</th>
                             <th>Round Name</th>
                             <th>Local Area</th>
-                            <th>Total Seats <span style="font-size: 10px;">({{ $seatsCount }})</span></th>
+                            <th>Total Seats <span style="font-size: 10px;" id="total-seats-count">({{ $seatsCount }})</span></th>
                             <th>GEN Closing Rank</th>
                             <th>GEN Closing Mark</th>
                             <th>FEM Closing Rank</th>
@@ -1043,6 +1043,7 @@ analysisTable = $('#analysis-table').DataTable({
                     const api = this.api();
                     const info = api.page.info();
                     $('#results-count').text(info.recordsDisplay);
+                    $('#total-seats-count').text('(' + info.recordsDisplay + ')');
                 }
             });
             initColumnVisibility();

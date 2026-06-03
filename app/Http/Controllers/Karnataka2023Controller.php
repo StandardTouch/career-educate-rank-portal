@@ -131,7 +131,7 @@ class Karnataka2023Controller extends Controller
             ->get()
             ->toArray();
 
-        $seatsCount = KarnatakaRounds2023::count();
+        $seatsCount = Karnataka2023::count();
 
         $maxFee = KarnatakaRounds2023::max('tuition_fee') ?? 10000000;
 
