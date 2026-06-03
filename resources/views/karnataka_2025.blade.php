@@ -1013,7 +1013,7 @@ analysisTable = $('#analysis-table').DataTable({
                         data: 'gen_closing_mark',
                         name: 'gen_closing_mark',
                         render: function(data) {
-                            return data ? parseFloat(data).toFixed(2) : '-';
+                            return data ? parseFloat(data) : '-';
                         }
                     },
                     {
