@@ -368,7 +368,7 @@
                             <th>Category</th>
                             <th>Round Name</th>
                             <th>Local Area</th>
-                            <th>Total Seats</th>
+                            <th>Total Seats <span style="font-size: 10px;">({{ $seatsCount }})</span></th>
                             <th>GEN Closing Rank</th>
                             <th>GEN Closing Mark</th>
                             <th>FEM Closing Rank</th>

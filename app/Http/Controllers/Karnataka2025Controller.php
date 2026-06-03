@@ -131,8 +131,10 @@ class Karnataka2025Controller extends Controller
             ->get()
             ->toArray();
 
+        $seatsCount = KarnatakaRounds2025::count();
+
         $maxFee = KarnatakaRounds2025::max('tuition_fee') ?? 10000000;
 
-        return view('karnataka_2025', compact('colleges', 'quotas', 'localAreas', 'rounds', 'maxFee'));
+        return view('karnataka_2025', compact('colleges', 'quotas', 'localAreas', 'rounds', 'maxFee', 'seatsCount'));
     }
 }
