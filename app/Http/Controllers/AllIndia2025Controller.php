@@ -54,8 +54,8 @@ class AllIndia2025Controller extends Controller
             if ($request->filled('rank')) {
                 $rank = (int) $request->input('rank');
                 $query->where(function ($q) use ($rank) {
-                    $q->where('gen_closing_rank', '>=', $rank)
-                      ->orWhere('fem_closing_rank', '>=', $rank);
+                    $q->where('gen_closing_rank', '>=', $rank);
+                    //   ->orWhere('fem_closing_rank', '>=', $rank);
                 });
             }
             

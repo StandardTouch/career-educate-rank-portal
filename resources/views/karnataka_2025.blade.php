@@ -163,22 +163,7 @@
 
 <body class="min-h-screen text-slate-800 flex flex-col">
 
-    <!-- Header Navigation -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <img src="{{ asset('logo.png') }}" alt="Logo" class="w-15 h-15">
-            </div>
-
-            <div class="flex items-center gap-4">
-                <div
-                    class="hidden sm:flex items-center gap-1.5 text-sm text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full">
-                    <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    NEET 2025 Live Data
-                </div>
-            </div>
-        </div>
-    </header>
+    @include('partials.results-header')
 
     <!-- Main Content Container -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -347,7 +332,7 @@
             <div class="text-center pb-6 border-b border-slate-100 mb-6">
                 <h3 class="text-xl font-bold text-slate-800">All India Quota MBBS</h3>
                 <p class="text-sm text-slate-500 mt-1" id="results-summary-text">
-                    [Rounds: Over All, Categories: OPEN, Local Areas: All Over India]
+                    [Rounds: Over All, Categories: Any Quotas, Local Areas: All Over India]
                 </p>
             </div>
 
@@ -1043,7 +1028,7 @@ analysisTable = $('#analysis-table').DataTable({
                     const api = this.api();
                     const info = api.page.info();
                     $('#results-count').text(info.recordsDisplay);
-                    $('#total-seats-count').text('(' + info.recordsDisplay + ')');
+                    $('#total-seats-count').text('(' + info.recordsTotal + ')');
                 }
             });
             initColumnVisibility();

@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');           // e.g. "Round 1"
             $table->string('slug')->unique(); // e.g. "round_1"
-            $table->unsignedTinyInteger('sort_order');
+            $table->unsignedTinyInteger('sort_order')->default(0);
             $table->timestamps();
         });
     }

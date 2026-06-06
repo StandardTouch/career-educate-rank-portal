@@ -163,22 +163,7 @@
 
 <body class="min-h-screen text-slate-800 flex flex-col">
 
-    <!-- Header Navigation -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <img src="{{ asset('logo.png') }}" alt="Logo" class="w-15 h-15">
-            </div>
-
-            <div class="flex items-center gap-4">
-                <div
-                    class="hidden sm:flex items-center gap-1.5 text-sm text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full">
-                    <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    NEET 2025 Live Data
-                </div>
-            </div>
-        </div>
-    </header>
+    @include('partials.results-header')
 
     <!-- Main Content Container -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -252,7 +237,7 @@
                             <div class="flex items-center gap-2">
                                 <span
                                     class="bg-slate-200 text-slate-700 font-medium text-xs px-2.5 py-1 rounded-md">Quotas</span>
-                                <span id="quotas-summary" class="text-slate-700 font-medium text-sm">OPEN</span>
+                                <span id="quotas-summary" class="text-slate-700 font-medium text-sm">Any Quotas</span>
                             </div>
                             <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
@@ -347,7 +332,7 @@
             <div class="text-center pb-6 border-b border-slate-100 mb-6">
                 <h3 class="text-xl font-bold text-slate-800">All India Quota MBBS</h3>
                 <p class="text-sm text-slate-500 mt-1" id="results-summary-text">
-                    [Rounds: Over All, Categories: OPEN, Local Areas: All Over India]
+                    [Rounds: Over All, Categories: Any Quotas, Local Areas: All Over India]
                 </p>
             </div>
 
@@ -660,8 +645,8 @@
                 temp: ['any']
             },
             quotas: {
-                confirmed: ['OPEN'], // Default set to OPEN as shown in screenshot
-                temp: ['OPEN']
+                confirmed: ['any'], // Default to all quotas
+                temp: ['any']
             },
             rounds: {
                 confirmed: ['any'], // 'any' maps to Over All
@@ -957,7 +942,7 @@ analysisTable = $('#analysis-table').DataTable({
                     [6, 'desc']
                 ], // Order by Gen Closing Rank by default
                 ajax: {
-                    url: "{{ route('home') }}",
+                    url: "{{ route('all-india-2025') }}",
                     data: function(d) {
                         d.rank = $('#rank-input').val();
                         d.colleges = filterState.colleges.confirmed;
