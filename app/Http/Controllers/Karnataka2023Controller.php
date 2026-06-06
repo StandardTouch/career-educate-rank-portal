@@ -50,10 +50,7 @@ class Karnataka2023Controller extends Controller
             // is less than or equal to the closing rank. Therefore, closing rank must be >= candidate's rank.
             if ($request->filled('rank')) {
                 $rank = (int) $request->input('rank');
-                $query->where(function ($q) use ($rank) {
-                    $q->where('gen_closing_rank', '>=', $rank)
-                      ->orWhere('fem_closing_rank', '>=', $rank);
-                });
+                $query->where('gen_closing_rank', '>=', $rank);
             }
             
             // 2. Colleges Filter

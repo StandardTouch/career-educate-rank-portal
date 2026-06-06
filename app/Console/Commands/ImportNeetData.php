@@ -68,7 +68,7 @@ class ImportNeetData extends Command
                 }
             }
             // Scaffold controller for descriptor (if descriptor present)
-            $controllerClass = "App\\Http\\Controllers\\" . ucfirst($state) . $year . ($descriptor ? ucfirst($descriptor) : '') . 'Controller';
+            $controllerClass = "App\\Http\\Controllers\\" . $this->controllerClassName($state, $year, $descriptor);
             if (!ScaffoldHelper::controllerExists($controllerClass)) {
                 ScaffoldHelper::createController($controllerClass, $state, $year, $descriptor);
             }
@@ -77,8 +77,9 @@ class ImportNeetData extends Command
             if (!ScaffoldHelper::viewExists($viewName)) {
                 $this->createView($viewName);
             }
+            $this->ensureControllerUsesGeneric($controllerClass, $table, $roundTable, $viewName, $state);
             // Scaffold route
-            $uri = $state . ($year ? "-{$year}" : '') . ($descriptor ? "-{$descriptor}" : '');
+            $uri = $this->routeUri($state, $year, $descriptor);
             if (!ScaffoldHelper::routeExists($uri)) {
                 $this->appendRoute($uri, $controllerClass);
             }
@@ -101,16 +102,7 @@ class ImportNeetData extends Command
                 $this->info("Creating table {$table} via fallback schema...");
                 Schema::create($table, function (Blueprint $tbl) {
                     $tbl->id();
-                    $tbl->string('college_name')->nullable();
-                    $tbl->string('category')->nullable();
-                    $tbl->string('local_area')->nullable();
-                    $tbl->string('quota')->nullable();
-                    $tbl->string('admission')->nullable();
-                    $tbl->integer('rank')->nullable();
-                    $tbl->decimal('fees', 10, 2)->nullable();
-                    $tbl->decimal('tuition_fee', 10, 2)->nullable();
-                    $tbl->decimal('total_fee', 10, 2)->nullable();
-                    $tbl->string('seat_type')->nullable();
+                    $this->addPredictorColumns($tbl);
                     $tbl->timestamps();
                 });
             }
@@ -125,20 +117,13 @@ class ImportNeetData extends Command
                                         $fkHash = substr(md5($roundTable . '_' . uniqid()), 0, 6);
                     $fkName = 'fk_' . $fkBase . '_' . $fkHash . '_rnd';
                     $tbl->foreign('round_id', $fkName)->references('id')->on('rounds');
-                    $tbl->string('college_name')->nullable();
-                    $tbl->string('category')->nullable();
-                    $tbl->string('local_area')->nullable();
-                    $tbl->string('quota')->nullable();
-                    $tbl->string('admission')->nullable();
-                    $tbl->integer('rank')->nullable();
-                    $tbl->decimal('fees', 10, 2)->nullable();
-                    $tbl->decimal('tuition_fee', 10, 2)->nullable();
-                    $tbl->decimal('total_fee', 10, 2)->nullable();
-                    $tbl->string('seat_type')->nullable();
+                    $this->addPredictorColumns($tbl);
                     $tbl->integer('sort_order')->default(0);
                     $tbl->timestamps();
                 });
             }
+            $this->ensurePredictorColumns($table, false);
+            $this->ensurePredictorColumns($roundTable, true);
 
             // Recreate tables with proper schema before import to avoid column mismatches
             if ($force) {
@@ -149,16 +134,7 @@ class ImportNeetData extends Command
                 // Create main data table
                 Schema::create($table, function (Blueprint $tbl) {
                     $tbl->id();
-                    $tbl->string('college_name')->nullable();
-                    $tbl->string('category')->nullable();
-                    $tbl->string('local_area')->nullable();
-                    $tbl->string('quota')->nullable();
-                    $tbl->string('admission')->nullable();
-                    $tbl->integer('rank')->nullable();
-                    $tbl->decimal('fees', 20, 2)->nullable();
-                    $tbl->decimal('tuition_fee', 20, 2)->nullable();
-                    $tbl->decimal('total_fee', 20, 2)->nullable();
-                    $tbl->string('seat_type')->nullable();
+                    $this->addPredictorColumns($tbl);
                     $tbl->timestamps();
                 });
                 // Create round table
@@ -171,21 +147,14 @@ class ImportNeetData extends Command
                                         $fkHash = substr(md5($roundTable . '_' . uniqid()), 0, 6);
                     $fkName = 'fk_' . $fkBase . '_' . $fkHash . '_rnd';
                     $tbl->foreign('round_id', $fkName)->references('id')->on('rounds');
-                    $tbl->string('college_name')->nullable();
-                    $tbl->string('category')->nullable();
-                    $tbl->string('local_area')->nullable();
-                    $tbl->string('quota')->nullable();
-                    $tbl->string('admission')->nullable();
-                    $tbl->integer('rank')->nullable();
-                    $tbl->decimal('fees', 20, 2)->nullable();
-                    $tbl->decimal('tuition_fee', 20, 2)->nullable();
-                    $tbl->decimal('total_fee', 20, 2)->nullable();
-                    $tbl->string('seat_type')->nullable();
+                    $this->addPredictorColumns($tbl);
                     $tbl->integer('sort_order')->default(0);
                     $tbl->timestamps();
                 });
                 $this->info("Recreated tables {$table} and {$roundTable} with proper schema.");
             }
+            $this->ensureModelUsesGuarded($modelClass, $table);
+            $this->ensureModelUsesGuarded($modelClass . 'Round', $roundTable);
 
 
 
@@ -196,6 +165,143 @@ class ImportNeetData extends Command
         }
         $this->info('Import process completed.');
         return 0;
+    }
+
+    protected function addPredictorColumns(Blueprint $tbl): void
+    {
+        $tbl->string('state_name')->nullable();
+        $tbl->string('college_name')->nullable();
+        $tbl->string('category')->nullable();
+        $tbl->string('local_area')->nullable();
+        $tbl->unsignedInteger('total_seats')->nullable();
+        $tbl->string('quota')->nullable();
+        $tbl->string('admission')->nullable();
+        $tbl->unsignedBigInteger('rank')->nullable();
+        $tbl->unsignedBigInteger('gen_closing_rank')->nullable();
+        $tbl->unsignedBigInteger('fem_closing_rank')->nullable();
+        $tbl->decimal('gen_closing_mark', 8, 2)->nullable();
+        $tbl->decimal('fem_closing_mark', 8, 2)->nullable();
+        $tbl->decimal('fees', 20, 2)->nullable();
+        $tbl->decimal('tuition_fee', 20, 2)->nullable();
+        $tbl->decimal('total_fee', 20, 2)->nullable();
+        $tbl->string('seat_type')->nullable();
+    }
+
+    protected function ensurePredictorColumns(string $tableName, bool $isRoundTable): void
+    {
+        if (! Schema::hasTable($tableName)) {
+            return;
+        }
+
+        $definitions = $this->predictorColumnDefinitions($isRoundTable);
+        $missing = array_filter(array_keys($definitions), fn ($column) => ! Schema::hasColumn($tableName, $column));
+
+        if (empty($missing)) {
+            return;
+        }
+
+        Schema::table($tableName, function (Blueprint $table) use ($definitions, $missing) {
+            foreach ($missing as $column) {
+                $definitions[$column]($table);
+            }
+        });
+
+        $this->info('Added missing columns to ' . $tableName . ': ' . implode(', ', $missing));
+    }
+
+    protected function predictorColumnDefinitions(bool $isRoundTable): array
+    {
+        $columns = [
+            'state_name' => fn (Blueprint $table) => $table->string('state_name')->nullable(),
+            'college_name' => fn (Blueprint $table) => $table->string('college_name')->nullable(),
+            'category' => fn (Blueprint $table) => $table->string('category')->nullable(),
+            'local_area' => fn (Blueprint $table) => $table->string('local_area')->nullable(),
+            'total_seats' => fn (Blueprint $table) => $table->unsignedInteger('total_seats')->nullable(),
+            'quota' => fn (Blueprint $table) => $table->string('quota')->nullable(),
+            'admission' => fn (Blueprint $table) => $table->string('admission')->nullable(),
+            'rank' => fn (Blueprint $table) => $table->unsignedBigInteger('rank')->nullable(),
+            'gen_closing_rank' => fn (Blueprint $table) => $table->unsignedBigInteger('gen_closing_rank')->nullable(),
+            'fem_closing_rank' => fn (Blueprint $table) => $table->unsignedBigInteger('fem_closing_rank')->nullable(),
+            'gen_closing_mark' => fn (Blueprint $table) => $table->decimal('gen_closing_mark', 8, 2)->nullable(),
+            'fem_closing_mark' => fn (Blueprint $table) => $table->decimal('fem_closing_mark', 8, 2)->nullable(),
+            'fees' => fn (Blueprint $table) => $table->decimal('fees', 20, 2)->nullable(),
+            'tuition_fee' => fn (Blueprint $table) => $table->decimal('tuition_fee', 20, 2)->nullable(),
+            'total_fee' => fn (Blueprint $table) => $table->decimal('total_fee', 20, 2)->nullable(),
+            'seat_type' => fn (Blueprint $table) => $table->string('seat_type')->nullable(),
+        ];
+
+        if ($isRoundTable) {
+            $columns['sort_order'] = fn (Blueprint $table) => $table->integer('sort_order')->default(0);
+        }
+
+        return $columns;
+    }
+
+    protected function ensureModelUsesGuarded(string $fullClass, string $table): void
+    {
+        $path = $this->classPath($fullClass, 'app/Models');
+        if (! file_exists($path)) {
+            return;
+        }
+
+        $parts = explode('\\', $fullClass);
+        $className = array_pop($parts);
+        $namespace = implode('\\', $parts);
+        $content = "<?php\n\nnamespace {$namespace};\n\nuse Illuminate\Database\Eloquent\Model;\n\nclass {$className} extends Model\n{\n    protected \$table = '{$table}';\n    protected \$guarded = [];\n}\n?>";
+
+        file_put_contents($path, $content);
+    }
+
+    protected function ensureControllerUsesGeneric(string $controllerClass, string $table, string $roundTable, string $viewName, string $state): void
+    {
+        $path = $this->classPath($controllerClass, 'app/Http/Controllers');
+        $dir = dirname($path);
+        if (! is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $parts = explode('\\', $controllerClass);
+        $className = array_pop($parts);
+        $namespace = implode('\\', $parts);
+        $stateLabel = ucwords(str_replace('_', ' ', $state));
+        $content = "<?php\n\nnamespace {$namespace};\n\nclass {$className} extends GenericPredictorController\n{\n    protected string \$mainTable = '{$table}';\n    protected string \$roundTable = '{$roundTable}';\n    protected string \$viewName = '{$viewName}';\n    protected string \$stateLabel = '{$stateLabel}';\n}\n?>";
+
+        file_put_contents($path, $content);
+    }
+
+    protected function classPath(string $fullClass, string $baseDirectory): string
+    {
+        $prefix = str_starts_with($fullClass, 'App\\') ? 'App\\' : '';
+        $relative = $prefix ? substr($fullClass, strlen($prefix)) : $fullClass;
+        $relative = preg_replace('#^(Models|Http\\\\Controllers)\\\\#', '', $relative);
+
+        return base_path($baseDirectory . '/' . str_replace('\\', '/', $relative) . '.php');
+    }
+
+    protected function controllerClassName(string $state, string $year, string $descriptor): string
+    {
+        return ucfirst($this->codeSegment($state))
+            . $year
+            . ($descriptor ? ucfirst($this->codeSegment($descriptor)) : '')
+            . 'Controller';
+    }
+
+    protected function routeUri(string $state, string $year, string $descriptor): string
+    {
+        $parts = array_filter([$state, $year, $descriptor], fn ($part) => $part !== '');
+        $uri = implode('-', $parts);
+        $uri = preg_replace('/[^A-Za-z0-9]+/', '-', $uri);
+        $uri = strtolower(trim($uri, '-'));
+
+        return preg_replace('/-+/', '-', $uri);
+    }
+
+    protected function codeSegment(string $value): string
+    {
+        $value = preg_replace('/[^A-Za-z0-9_]+/', '_', $value);
+        $value = preg_replace('/_+/', '_', $value);
+
+        return trim($value, '_');
     }
 
     protected function createMigration(string $tableName, bool $isRound)
@@ -241,13 +347,18 @@ class {$className} extends Migration
 
     protected function mainTableColumns(): string
     {
-        // Mirrors existing karnataka_2025 schema (simplified for demo)
-        return "\$table->string('college_name')->nullable();
+        return "\$table->string('state_name')->nullable();
+            \$table->string('college_name')->nullable();
             \$table->string('category')->nullable();
             \$table->string('local_area')->nullable();
+            \$table->unsignedInteger('total_seats')->nullable();
             \$table->string('quota')->nullable();
             \$table->string('admission')->nullable();
-            \$table->integer('rank')->nullable();
+            \$table->unsignedBigInteger('rank')->nullable();
+            \$table->unsignedBigInteger('gen_closing_rank')->nullable();
+            \$table->unsignedBigInteger('fem_closing_rank')->nullable();
+            \$table->decimal('gen_closing_mark', 8, 2)->nullable();
+            \$table->decimal('fem_closing_mark', 8, 2)->nullable();
             \$table->decimal('fees', 20, 2)->nullable();
             \$table->decimal('tuition_fee', 20, 2)->nullable();
             \$table->decimal('total_fee', 20, 2)->nullable();
@@ -262,7 +373,7 @@ class {$className} extends Migration
         // Use hash to guarantee unique constraint names
                 $fkHash = substr(md5($tableName . '_' . uniqid()), 0, 6);
         $fkName = 'fk_' . $fkBase . '_' . $fkHash . '_rnd';
-        return "\$table->unsignedBigInteger('round_id');\n            \$table->foreign('round_id', '{$fkName}')->references('id')->on('rounds');\n            \$table->string('college_name')->nullable();\n            \$table->string('category')->nullable();\n            \$table->string('local_area')->nullable();\n            \$table->string('quota')->nullable();\n            \$table->string('admission')->nullable();\n            \$table->integer('rank')->nullable();\n            \$table->decimal('fees', 20, 2)->nullable();\n            \$table->decimal('tuition_fee', 20, 2)->nullable();\n            \$table->decimal('total_fee', 20, 2)->nullable();\n            \$table->string('seat_type')->nullable();\n            \$table->integer('sort_order')->default(0);";
+        return "\$table->unsignedBigInteger('round_id');\n            \$table->foreign('round_id', '{$fkName}')->references('id')->on('rounds');\n            \$table->string('state_name')->nullable();\n            \$table->string('college_name')->nullable();\n            \$table->string('category')->nullable();\n            \$table->string('local_area')->nullable();\n            \$table->unsignedInteger('total_seats')->nullable();\n            \$table->string('quota')->nullable();\n            \$table->string('admission')->nullable();\n            \$table->unsignedBigInteger('rank')->nullable();\n            \$table->unsignedBigInteger('gen_closing_rank')->nullable();\n            \$table->unsignedBigInteger('fem_closing_rank')->nullable();\n            \$table->decimal('gen_closing_mark', 8, 2)->nullable();\n            \$table->decimal('fem_closing_mark', 8, 2)->nullable();\n            \$table->decimal('fees', 20, 2)->nullable();\n            \$table->decimal('tuition_fee', 20, 2)->nullable();\n            \$table->decimal('total_fee', 20, 2)->nullable();\n            \$table->string('seat_type')->nullable();\n            \$table->integer('sort_order')->default(0);";
     }
 
     protected function createModel(string $fullClass, string $table)

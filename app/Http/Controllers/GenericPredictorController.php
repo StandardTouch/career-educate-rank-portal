@@ -61,20 +61,9 @@ abstract class GenericPredictorController extends Controller
             $query = DB::table($this->mainTable)->select($selectColumns);
         }
 
-        if ($request->filled('rank') && $rankColumn !== null) {
+        if ($request->filled('rank') && $this->hasColumn($sourceTable, 'gen_closing_rank')) {
             $rank = (int) $request->input('rank');
-            $query->where(function ($q) use ($rank, $sourceTable) {
-                $primary = $this->getRankColumn($sourceTable);
-                $secondary = $this->getSecondaryRankColumn($sourceTable);
-
-                if ($primary !== null) {
-                    $q->where($primary, '>=', $rank);
-                }
-
-                if ($secondary !== null) {
-                    $q->orWhere($secondary, '>=', $rank);
-                }
-            });
+            $query->where('gen_closing_rank', '>=', $rank);
         }
 
         if ($request->has('colleges')) {

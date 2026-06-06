@@ -13,7 +13,7 @@ class ScaffoldHelper
     public static function controllerExists(string $controllerClass): bool
     {
         // Convert fully qualified class name to file path
-        $relative = str_replace('App\\', '', $controllerClass);
+        $relative = preg_replace('/^App\\\\Http\\\\Controllers\\\\/', '', $controllerClass);
         $path = base_path('app/Http/Controllers/' . str_replace('\\', '/', $relative) . '.php');
         return File::exists($path);
     }
@@ -91,7 +91,7 @@ class ScaffoldHelper
      */
     public static function modelExists(string $fullClass): bool
     {
-        $classPath = str_replace('App\\', '', $fullClass);
+        $classPath = preg_replace('/^App\\\\Models\\\\/', '', $fullClass);
         $path = base_path('app/Models/' . str_replace('\\', '/', $classPath) . '.php');
         return File::exists($path);
     }
@@ -105,7 +105,8 @@ class ScaffoldHelper
         $parts = explode('\\', $controllerClass);
         $className = array_pop($parts);
         $namespace = implode('\\', $parts);
-        $path = base_path('app/Http/Controllers/' . str_replace('\\', '/', $controllerClass) . '.php');
+        $relative = preg_replace('/^App\\\\Http\\\\Controllers\\\\/', '', $controllerClass);
+        $path = base_path('app/Http/Controllers/' . str_replace('\\', '/', $relative) . '.php');
         $dir = dirname($path);
         if (!File::exists($dir)) {
             File::makeDirectory($dir, 0755, true);
