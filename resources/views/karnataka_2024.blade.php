@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Karnataka Quota MBBS - 2024 Cutoff Analysis</title>
+    <title>{{ $pageTitle }} - Cutoff Analysis</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -174,13 +174,13 @@
             <span class="text-slate-300">/</span>
             <span class="hover:text-slate-800 transition-colors cursor-pointer">BiPC</span>
             <span class="text-slate-300">/</span>
-            <span class="text-slate-800 font-medium">Karnataka Quota MBBS</span>
+            <span class="text-slate-800 font-medium">{{ $pageTitle }}</span>
         </nav>
 
         <!-- Page Title -->
         <div class="text-center my-6">
             <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
-                Karnataka MBBS - 2024 Analysis
+                {{ $pageTitle }} Analysis
             </h1>
             <p class="text-slate-500 mt-2 text-sm sm:text-base">
                 Find eligible medical colleges based on closing ranks, quotas, rounds, and local areas.
@@ -330,7 +330,7 @@
 
             <!-- Result Title Header -->
             <div class="text-center pb-6 border-b border-slate-100 mb-6">
-                <h3 class="text-xl font-bold text-slate-800">All India Quota MBBS</h3>
+                <h3 class="text-xl font-bold text-slate-800">{{ $pageTitle }}</h3>
                 <p class="text-sm text-slate-500 mt-1" id="results-summary-text">
                     [Rounds: Over All, Categories: Any Quotas, Local Areas: All Over India]
                 </p>

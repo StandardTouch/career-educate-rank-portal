@@ -89,7 +89,8 @@
                                     <div class="w-3 h-3 rounded-full bg-green-500"></div>
                                 </div>
                                 <div class="text-[11px] font-medium text-slate-400 tracking-wider uppercase bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700/50">
-                                    careereducate.org/predictor
+                                    <!-- careereducate.org/predictor -->
+                                     rank.careereducate.com
                                 </div>
                                 <div class="w-4"></div>
                             </div>
