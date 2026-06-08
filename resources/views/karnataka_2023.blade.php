@@ -896,8 +896,10 @@
         // ==============================================
         const feeSlider = document.getElementById('fee-slider');
         const feeSelectedText = document.getElementById('fee-selected-text');
+        let feeFilterChanged = false;
 
         feeSlider.addEventListener('input', function(e) {
+            feeFilterChanged = true;
             const val = parseInt(e.target.value);
             feeSelectedText.innerText = `Selected: ₹${val.toLocaleString('en-IN')}`;
         });
@@ -949,8 +951,11 @@ analysisTable = $('#analysis-table').DataTable({
                         d.quotas = filterState.quotas.confirmed;
                         d.rounds = filterState.rounds.confirmed;
                         d.local_areas = filterState.local_areas.confirmed;
-                        d.fee_min = 0;
-                        d.fee_max = $('#fee-slider').val();
+                        d.fee_filter_active = feeFilterChanged ? 1 : 0;
+                        if (feeFilterChanged) {
+                            d.fee_min = 0;
+                            d.fee_max = $('#fee-slider').val();
+                        }
                     }
                 },
                 columns: [{

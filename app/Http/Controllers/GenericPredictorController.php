@@ -88,12 +88,28 @@ abstract class GenericPredictorController extends Controller
             }
         }
 
-        if ($request->filled('fee_min')) {
-            $query->where('tuition_fee', '>=', (int) $request->input('fee_min'));
-        }
+        if ($request->boolean('fee_filter_active') && ($request->filled('fee_min') || $request->filled('fee_max'))) {
+            $feeMin = $request->filled('fee_min') ? (int) $request->input('fee_min') : null;
+            $feeMax = $request->filled('fee_max') ? (int) $request->input('fee_max') : null;
+            $actualMaxFee = (int) (DB::table($sourceTable)->max('tuition_fee') ?? 0);
+            $includeUnknownFees = ($feeMin === null || $feeMin <= 0)
+                && ($feeMax === null || $actualMaxFee === 0 || $feeMax >= $actualMaxFee);
 
-        if ($request->filled('fee_max')) {
-            $query->where('tuition_fee', '<=', (int) $request->input('fee_max'));
+            $query->where(function ($feeQuery) use ($feeMin, $feeMax, $includeUnknownFees) {
+                $feeQuery->where(function ($knownFeeQuery) use ($feeMin, $feeMax) {
+                    if ($feeMin !== null) {
+                        $knownFeeQuery->where('tuition_fee', '>=', $feeMin);
+                    }
+
+                    if ($feeMax !== null) {
+                        $knownFeeQuery->where('tuition_fee', '<=', $feeMax);
+                    }
+                });
+
+                if ($includeUnknownFees) {
+                    $feeQuery->orWhereNull('tuition_fee');
+                }
+            });
         }
 
         return DataTables::of($query)
