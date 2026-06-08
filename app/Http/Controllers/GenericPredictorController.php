@@ -13,6 +13,7 @@ abstract class GenericPredictorController extends Controller
     protected string $roundTable = '';
     protected string $viewName = '';
     protected string $stateLabel = '';
+    protected string $pageTitle = '';
     protected array $columnCache = [];
 
     public function index(Request $request)
@@ -163,6 +164,7 @@ abstract class GenericPredictorController extends Controller
         $rounds = DB::table('rounds')->orderBy('sort_order')->get()->toArray();
         $seatsCount = 0;
         $maxFee = 10000000;
+        $pageTitle = $this->resolvedPageTitle();
 
         if (Schema::hasTable($filterTable)) {
             $colleges = DB::table($filterTable)->distinct()->orderBy('college_name')->pluck('college_name')->toArray();
@@ -175,7 +177,7 @@ abstract class GenericPredictorController extends Controller
             $seatsCount = (int) DB::table($this->mainTable)->sum('total_seats');
         }
 
-        return view($this->viewName, compact('colleges', 'quotas', 'localAreas', 'rounds', 'maxFee', 'seatsCount'));
+        return view($this->viewName, compact('colleges', 'quotas', 'localAreas', 'rounds', 'maxFee', 'seatsCount', 'pageTitle'));
     }
 
     protected function renderEmptyPage()
@@ -186,8 +188,22 @@ abstract class GenericPredictorController extends Controller
         $rounds = DB::table('rounds')->orderBy('sort_order')->get()->toArray();
         $seatsCount = 0;
         $maxFee = 10000000;
+        $pageTitle = $this->resolvedPageTitle();
 
-        return view($this->viewName, compact('colleges', 'quotas', 'localAreas', 'rounds', 'maxFee', 'seatsCount'));
+        return view($this->viewName, compact('colleges', 'quotas', 'localAreas', 'rounds', 'maxFee', 'seatsCount', 'pageTitle'));
+    }
+
+    protected function resolvedPageTitle(): string
+    {
+        if ($this->pageTitle !== '') {
+            return $this->pageTitle;
+        }
+
+        if ($this->stateLabel !== '') {
+            return $this->stateLabel;
+        }
+
+        return ucwords(str_replace('_', ' ', $this->viewName));
     }
 
     protected function buildSelectColumns(string $table, bool $isRoundTable): array

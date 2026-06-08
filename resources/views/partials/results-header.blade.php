@@ -5,9 +5,12 @@
 
     $activeYear = null;
 
-    foreach (array_keys($yearMenus) as $year) {
-        if ($routeName && str_contains($routeName, $year)) {
-            $activeYear = $year;
+    foreach (array_keys($yearMenus) as $yearGroup) {
+        preg_match('/\d{4}/', $yearGroup, $matches);
+        $yearNumber = $matches[0] ?? $yearGroup;
+
+        if ($routeName && str_contains($routeName, $yearNumber)) {
+            $activeYear = $yearGroup;
             break;
         }
     }
@@ -27,6 +30,9 @@
             <a href="{{ route('home') }}" class="{{ $routeName === 'home' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
                 Home
             </a>
+            <a href="{{ route('import.excel') }}" class="{{ $routeName === 'import.excel' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
+                Import
+            </a>
 
             @foreach ($yearMenus as $year => $items)
                 <div class="relative group results-year-menu">
@@ -42,7 +48,7 @@
                         class="results-year-panel hidden fixed z-50 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl p-2"
                         style="width: min(42rem, calc(100vw - 2rem)); max-height: min(32rem, calc(100vh - 7rem));"
                     >
-                        <div class="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Results {{ $year }}</div>
+                        <div class="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">{{ $year }}</div>
                         <div class="grid gap-1">
                             @foreach ($items as $item)
                                 <a href="{{ route($item['route']) }}"

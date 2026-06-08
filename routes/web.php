@@ -6,6 +6,9 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
+Route::get('/import-excel', [App\Http\Controllers\ImportExcelController::class, 'create'])->name('import.excel');
+Route::post('/import-excel', [App\Http\Controllers\ImportExcelController::class, 'store'])->name('import.excel.store');
+
 // Core routes
 Route::get('/all-india-2025', [App\Http\Controllers\AllIndia2025Controller::class, 'index'])->name('all-india-2025');
 Route::get('/all-india-2022', [App\Http\Controllers\AllIndia2022Controller::class, 'index'])->name('all-india-2022');
