@@ -17,9 +17,9 @@
 <body class="min-h-screen bg-slate-50 text-slate-800">
     @include('partials.results-header')
 
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 mt-12">
         <section class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-            <div class="px-6 py-5 border-b border-slate-200">
+            <div class="px-6 pt-8 pb-5 border-b border-slate-200 mb-8">
                 <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">Excel Import</p>
                 <h1 class="mt-2 text-3xl font-bold text-slate-950">Import NEET Result Sheet</h1>
                 <p class="mt-2 text-slate-500 max-w-2xl">
@@ -27,7 +27,7 @@
                 </p>
             </div>
 
-            <form id="importForm" action="{{ route('import.excel.store') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-6" onsubmit="showLoading()">
+            <form action="{{ route('import.excel.store') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-6 mt-6">
                 @csrf
 
                 @if (session('status'))
@@ -68,38 +68,13 @@
             </form>
         </section>
 
-@if (session('import_output'))
-    <section class="mt-6 rounded-2xl border border-slate-800 bg-slate-950 p-5 shadow-sm">
-        <div class="text-xs font-bold uppercase tracking-[0.18em]" style="color: #cbd5e1;">Import Log</div>
-        <div class="mt-3 max-h-[28rem] overflow-auto text-sm leading-6" style="color: #f8fafc;">
-            @foreach (explode("\n", session('import_output')) as $line)
-                @php
-                    $class = 'text-gray-400';
-                    if (Str::contains($line, 'Success')) {
-                        $class = 'text-emerald-400';
-                    } elseif (Str::contains($line, 'Error') || Str::contains($line, 'Failed')) {
-                        $class = 'text-rose-400';
-                    } elseif (Str::contains($line, 'Warning')) {
-                        $class = 'text-amber-400';
-                    }
-                @endphp
-                <div class="{{ $class }}">{{ $line }}</div>
-            @endforeach
-        </div>
-    </section>
-@endif
+        @if (session('import_output'))
+            <section class="mt-6 rounded-2xl border border-slate-800 bg-slate-950 p-5 shadow-sm">
+                <div class="text-xs font-bold uppercase tracking-[0.18em]" style="color: #cbd5e1;">Import Log</div>
+                <pre class="mt-3 max-h-[28rem] overflow-auto whitespace-pre-wrap break-words text-sm leading-6" style="color: #f8fafc;">{{ session('import_output') }}</pre>
+            </section>
+        @endif
     </main>
-<div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-    <svg class="animate-spin h-12 w-12 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-    </svg>
-</div>
 </body>
 
-<script>
-function showLoading() {
-    document.getElementById('loadingOverlay').classList.remove('hidden');
-}
-</script>
 </html>
