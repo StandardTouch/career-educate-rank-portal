@@ -31,16 +31,23 @@ class ImportExcelController extends Controller
         $file->move($dataSheetPath, $safeName);
         $absolutePath = $dataSheetPath . DIRECTORY_SEPARATOR . $safeName;
 
-        Artisan::call('neet:import', [
-            'file' => $absolutePath,
-        ]);
-        $importOutput = trim(Artisan::output());
+        try {
+            Artisan::call('neet:import', [
+                'file' => $absolutePath,
+            ]);
+            $importOutput = trim(Artisan::output());
 
-        Artisan::call('route:clear');
-        Artisan::call('config:clear');
+            Artisan::call('route:clear');
+            Artisan::call('config:clear');
 
-        $parts = ScaffoldHelper::parseFileName($safeName);
-        $route = $this->routeUri($parts['state'], $parts['year'], $parts['descriptor']);
+            $parts = ScaffoldHelper::parseFileName($safeName);
+            $route = $this->routeUri($parts['state'], $parts['year'], $parts['descriptor']);
+        } catch (\Throwable $exception) {
+            return redirect()
+                ->route('import.excel')
+                ->withErrors(['excel_file' => 'Import failed: ' . $exception->getMessage()])
+                ->with('import_output', trim(Artisan::output()));
+        }
 
         return redirect()
             ->route('import.excel')

@@ -104,7 +104,7 @@ class NeetDataImporter
         foreach ($rows as $row) {
             $record = [];
             foreach ($columns as $colIdx => $colName) {
-                $value = $row[$colIdx];
+                $value = $this->normalizeCellValue($row[$colIdx] ?? null);
                 // Clean numeric values (fees, tuition_fee, total_fee)
                 if (in_array($colName, ['fees', 'tuition_fee', 'total_fee', 'gen_closing_mark', 'fem_closing_mark'], true)) {
                     // Remove any non‑numeric characters (currency symbols, commas, spaces)
@@ -116,6 +116,7 @@ class NeetDataImporter
                 $record[$colName] = $value;
             }
             $record = $this->fixRankMarkMisplacements($record);
+            $record = $this->repairShiftedCollegeRecord($record);
             if ($roundSlug !== null) {
                 if (in_array('round_id', $existingColumns)) {
                     $record['round_id'] = $roundId;
@@ -210,6 +211,78 @@ class NeetDataImporter
         }
 
         return $record;
+    }
+
+    protected function repairShiftedCollegeRecord(array $record): array
+    {
+        $category = trim((string) ($record['category'] ?? ''));
+        $localArea = trim((string) ($record['local_area'] ?? ''));
+        $genMark = $record['gen_closing_mark'] ?? null;
+        $genRank = $record['gen_closing_rank'] ?? null;
+        $tuitionFee = $record['tuition_fee'] ?? null;
+
+        if (
+            $this->looksLikeCollegeName($category)
+            && $this->looksLikeQuota($localArea)
+            && is_numeric($genMark)
+            && (float) $genMark > 720
+            && is_numeric($genRank)
+            && (int) $genRank > 0
+            && (int) $genRank <= 300
+            && ($tuitionFee === null || ((float) $tuitionFee >= 0 && (float) $tuitionFee <= 720))
+        ) {
+            $record['college_name'] = $category;
+            $record['category'] = $localArea;
+            $record['local_area'] = $this->localAreaFromQuota($localArea);
+            $record['total_seats'] = (int) $genRank;
+            $record['gen_closing_rank'] = (int) $genMark;
+            $record['gen_closing_mark'] = $tuitionFee !== null ? (float) $tuitionFee : null;
+            $record['tuition_fee'] = null;
+        }
+
+        return $record;
+    }
+
+    protected function looksLikeCollegeName(string $value): bool
+    {
+        return $value !== '' && preg_match('/college|dental|medical|institute|\[[^\]]+\]/i', $value);
+    }
+
+    protected function looksLikeQuota(string $value): bool
+    {
+        return $value !== '' && preg_match('/quota|management|nri|govt|government|minority/i', $value);
+    }
+
+    protected function localAreaFromQuota(string $quota): string
+    {
+        if (preg_match('/all\s+over\s+india/i', $quota)) {
+            return 'All Over India';
+        }
+
+        if (preg_match('/ap\s+local|andhra\s+pradesh\s+local/i', $quota)) {
+            return 'Andhra Pradesh Local';
+        }
+
+        if (preg_match('/local/i', $quota)) {
+            return 'Local';
+        }
+
+        return 'All Over India';
+    }
+
+    protected function normalizeCellValue($value)
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = is_string($value) ? trim($value) : $value;
+
+        if (is_string($value) && preg_match('/^(?:-|--|—|\?|n\/a|na|null)$/i', $value)) {
+            return null;
+        }
+
+        return $value;
     }
 
     protected function cleanDecimal($value): ?float

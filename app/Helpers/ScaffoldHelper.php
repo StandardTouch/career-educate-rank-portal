@@ -48,8 +48,9 @@ class ScaffoldHelper
     {
         // Remove extension
         $name = pathinfo($filename, PATHINFO_FILENAME);
+        $name = preg_replace('/\s*-\s*/', ' ', $name);
         // Split by spaces
-        $parts = preg_split('/\s+/', $name);
+        $parts = array_values(array_filter(preg_split('/\s+/', $name), fn ($part) => trim($part) !== ''));
         // Find year (4 digits)
         $year = null;
         foreach ($parts as $i => $part) {
@@ -63,13 +64,22 @@ class ScaffoldHelper
         if ($year === null) {
             throw new \Exception("Year not found in filename {$filename}");
         }
-        $state = strtolower(implode('_', $stateParts));
-        $descriptor = strtolower(implode('_', $descriptorParts));
+        $state = self::slugParts($stateParts);
+        $descriptor = self::slugParts($descriptorParts);
         return [
             'state' => $state,
             'year' => $year,
             'descriptor' => $descriptor,
         ];
+    }
+
+    protected static function slugParts(array $parts): string
+    {
+        $value = strtolower(implode('_', $parts));
+        $value = preg_replace('/[^a-z0-9]+/', '_', $value);
+        $value = trim($value, '_');
+
+        return preg_replace('/_+/', '_', $value);
     }
 
     /**
