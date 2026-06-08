@@ -2,7 +2,7 @@
 
 return [
     'Results 2025' => [
-        ['label' => 'All India 2025', 'route' => 'all-india-2025'],
+        // ['label' => 'All India 2025', 'route' => 'all-india-2025'],
         ['label' => 'All India Quota BDS 2025', 'route' => 'all-indida-quota-bds-2025'],
         ['label' => 'All Over India Data MBBS 2025', 'route' => 'all-over-india-data-mbbs-2025'],
         ['label' => 'Andhra Pradesh BDS Govt Quota 2025', 'route' => 'andhra-pradesh-bds-govt-quota-2025-analysis-completed'],
@@ -17,7 +17,7 @@ return [
         ['label' => 'Deemed University MBBS 2025', 'route' => 'deemed-university-mbbs-2025'],
         ['label' => 'Haryana BDS 2025', 'route' => 'haryana-bds-2025'],
         ['label' => 'Haryana MBBS 2025', 'route' => 'haryana-mbbs-2025'],
-        ['label' => 'Karnataka 2025', 'route' => 'karnataka-2025'],
+        // ['label' => 'Karnataka 2025', 'route' => 'karnataka-2025'],
         ['label' => 'Karnataka BDS 2025', 'route' => 'karnataka-bds-2025'],
         ['label' => 'Karnataka MBBS 2025', 'route' => 'karnataka-mbbs-2025-analysis'],
         ['label' => 'Keral MBBS 2025', 'route' => 'keral-mbbs-2025'],
