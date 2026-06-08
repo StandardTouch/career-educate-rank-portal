@@ -135,6 +135,13 @@ abstract class GenericPredictorController extends Controller
             ->addColumn('category', function ($row) {
                 return $row->category;
             })
+            ->editColumn('state_name', function ($row) {
+                $val = trim($row->state_name ?? '');
+                if ($val === '') {
+                    return $this->getCleanStateName();
+                }
+                return $val;
+            })
             ->editColumn('local_area', function ($row) {
                 return $row->local_area ?? '- ';
             })
@@ -194,7 +201,7 @@ abstract class GenericPredictorController extends Controller
         $hasFemMark = $this->hasColumn($table, 'fem_closing_mark');
 
         if (! $hasStateName) {
-            $columns[] = DB::raw("'" . str_replace("'", "\\'", $this->stateLabel) . "' as state_name");
+            $columns[] = DB::raw("'" . str_replace("'", "\\'", $this->getCleanStateName()) . "' as state_name");
         }
 
         if ($isRoundTable) {
@@ -276,5 +283,67 @@ abstract class GenericPredictorController extends Controller
         if ($this->hasColumn($sourceTable, $fallbackName)) {
             $query->orderBy($fallbackName, $order);
         }
+    }
+
+    protected function getCleanStateName(): string
+    {
+        $name = strtolower($this->viewName);
+
+        if (str_contains($name, 'all_india') || str_contains($name, 'all_over_india') || str_contains($name, 'all_indida')) {
+            return 'All India';
+        }
+        if (str_contains($name, 'andhra_pradesh') || str_contains($name, 'andra_pradesh')) {
+            return 'Andhra Pradesh';
+        }
+        if (str_contains($name, 'bihar')) {
+            return 'Bihar';
+        }
+        if (str_contains($name, 'chhatisgarh') || str_contains($name, 'chhattisgarh')) {
+            return 'Chhattisgarh';
+        }
+        if (str_contains($name, 'deemed_universities') || str_contains($name, 'deemed_university')) {
+            return 'Deemed Universities';
+        }
+        if (str_contains($name, 'haryana')) {
+            return 'Haryana';
+        }
+        if (str_contains($name, 'jharkhand')) {
+            return 'Jharkhand';
+        }
+        if (str_contains($name, 'karnataka')) {
+            return 'Karnataka';
+        }
+        if (str_contains($name, 'keral') || str_contains($name, 'kerala')) {
+            return 'Kerala';
+        }
+        if (str_contains($name, 'madhya_pradesh')) {
+            return 'Madhya Pradesh';
+        }
+        if (str_contains($name, 'puducherry')) {
+            return 'Puducherry';
+        }
+        if (str_contains($name, 'rajasthan')) {
+            return 'Rajasthan';
+        }
+        if (str_contains($name, 'tamil_nadu') || str_contains($name, 'tamilnadu')) {
+            return 'Tamil Nadu';
+        }
+        if (str_contains($name, 'telanaga') || str_contains($name, 'telangana')) {
+            return 'Telangana';
+        }
+        if (str_contains($name, 'uttar_pradesh') || str_contains($name, 'up_')) {
+            return 'Uttar Pradesh';
+        }
+        if (str_contains($name, 'uttarakhand')) {
+            return 'Uttarakhand';
+        }
+        if (str_contains($name, 'west_bengal')) {
+            return 'West Bengal';
+        }
+
+        // Fallback to stripping suffixes from stateLabel
+        $cleanState = $this->stateLabel;
+        $cleanState = preg_replace('/\s+(mbbs|bds|data|analysis|completed)$/i', '', $cleanState);
+        return trim($cleanState, ' -');
     }
 }
