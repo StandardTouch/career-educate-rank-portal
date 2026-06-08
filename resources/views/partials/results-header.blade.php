@@ -21,9 +21,6 @@
                 <span class="font-bold text-lg text-slate-900 tracking-tight">Career Educate</span>
             </a>
 
-            <a href="{{ route('home') }}" class="lg:hidden inline-flex items-center justify-center px-3 py-2 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 hover:border-rose-300 hover:text-rose-600 transition-colors">
-                Show Page
-            </a>
         </div>
 
         <nav class="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-600">
