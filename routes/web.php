@@ -6,8 +6,20 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
-Route::get('/import-excel', [App\Http\Controllers\ImportExcelController::class, 'create'])->name('import.excel');
-Route::post('/import-excel', [App\Http\Controllers\ImportExcelController::class, 'store'])->name('import.excel.store');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [App\Http\Controllers\AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [App\Http\Controllers\AuthController::class, 'login'])->name('login.store');
+});
+
+Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])
+    ->middleware('auth')
+    ->name('logout');
+
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/dashboard', [App\Http\Controllers\AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/import-excel', [App\Http\Controllers\ImportExcelController::class, 'create'])->name('import.excel');
+    Route::post('/import-excel', [App\Http\Controllers\ImportExcelController::class, 'store'])->name('import.excel.store');
+});
 
 // Core routes
 Route::get('/all-india-2025', [App\Http\Controllers\AllIndia2025Controller::class, 'index'])->name('all-india-2025');
@@ -82,5 +94,3 @@ Route::get('/uttarakhand-mbbs-2025', [App\Http\Controllers\Uttarakhand_mbbs2025C
 Route::get('/west-bengal-bds-2025', [App\Http\Controllers\West_bengal_bds2025Controller::class, 'index'])->name('west-bengal-bds-2025');
 Route::get('/west-bengal-mbbs-2025', [App\Http\Controllers\West_bengal_mbbs2025Controller::class, 'index'])->name('west-bengal-mbbs-2025');
 Route::get('/all-india-quota-bds-2023-analysis', [App\Http\Controllers\All_india_quota_bds2023AnalysisController::class, 'index'])->name('all-india-quota-bds-2023-analysis');
-
-Route::get('/test-all-india-quota-bds-2023-analysis', [App\Http\Controllers\Test_all_india_quota_bds2023AnalysisController::class, 'index'])->name('test-all-india-quota-bds-2023-analysis');

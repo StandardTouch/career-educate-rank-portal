@@ -30,9 +30,16 @@
             <a href="{{ route('home') }}" class="{{ $routeName === 'home' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
                 Home
             </a>
-            <a href="{{ route('import.excel') }}" class="{{ $routeName === 'import.excel' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
-                Import
-            </a>
+            @auth
+                @if (auth()->user()->is_admin)
+                    <a href="{{ route('admin.dashboard') }}" class="{{ $routeName === 'admin.dashboard' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
+                        Admin
+                    </a>
+                    <a href="{{ route('import.excel') }}" class="{{ $routeName === 'import.excel' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
+                        Import
+                    </a>
+                @endif
+            @endauth
 
             @foreach ($yearMenus as $year => $items)
                 <div class="relative group results-year-menu">
@@ -67,6 +74,13 @@
                 <a href="#predictors" class="bg-rose-500 hover:bg-rose-600 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-all shadow-md shadow-rose-500/10 active:scale-95">
                     Start Predicting
                 </a>
+            @elseif (auth()->check())
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-rose-300 hover:text-rose-600 transition-colors">
+                        Logout
+                    </button>
+                </form>
             @else
                 <div class="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
                     <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
