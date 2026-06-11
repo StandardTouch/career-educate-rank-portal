@@ -349,5 +349,7 @@ return array (
       'label' => 'West Bengal 2023',
       'route' => 'west-bengal-2023',
     ),
-  ),
+      'label' => 'Karnataka 2023',
+      'route' => 'karnataka-2023',
+    )
 );
