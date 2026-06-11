@@ -94,3 +94,7 @@ Route::get('/uttarakhand-mbbs-2025', [App\Http\Controllers\Uttarakhand_mbbs2025C
 Route::get('/west-bengal-bds-2025', [App\Http\Controllers\West_bengal_bds2025Controller::class, 'index'])->name('west-bengal-bds-2025');
 Route::get('/west-bengal-mbbs-2025', [App\Http\Controllers\West_bengal_mbbs2025Controller::class, 'index'])->name('west-bengal-mbbs-2025');
 Route::get('/all-india-quota-bds-2023-analysis', [App\Http\Controllers\All_india_quota_bds2023AnalysisController::class, 'index'])->name('all-india-quota-bds-2023-analysis');
+
+Route::get('/west-bengal-2023', [App\Http\Controllers\West_bengal2023Controller::class, 'index'])->name('west-bengal-2023');
+
+Route::get('/andhra-pradesh-bds-govt-quota-2023-analysis', [App\Http\Controllers\Andhra_pradesh_bds_govt_quota2023AnalysisController::class, 'index'])->name('andhra-pradesh-bds-govt-quota-2023-analysis');

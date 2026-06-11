@@ -336,13 +336,18 @@ return array (
     ),
     1 => 
     array (
-      'label' => 'Karnataka 2023',
-      'route' => 'karnataka-2023',
+      'label' => 'Andhra Pradesh Bds Govt Quota 2023 Analysis',
+      'route' => 'andhra-pradesh-bds-govt-quota-2023-analysis',
     ),
     2 => 
     array (
-      'label' => 'Test All India Quota Bds 2023 Analysis',
-      'route' => 'test-all-india-quota-bds-2023-analysis',
+      'label' => 'Karnataka 2023',
+      'route' => 'karnataka-2023',
+    ),
+    3 => 
+    array (
+      'label' => 'West Bengal 2023',
+      'route' => 'west-bengal-2023',
     ),
   ),
 );
