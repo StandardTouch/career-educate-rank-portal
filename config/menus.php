@@ -338,11 +338,6 @@ return array (
     array (
       'label' => 'Karnataka 2023',
       'route' => 'karnataka-2023',
-    ),
-    2 => 
-    array (
-      'label' => 'Test All India Quota Bds 2023 Analysis',
-      'route' => 'test-all-india-quota-bds-2023-analysis',
-    ),
+    )
   ),
 );
