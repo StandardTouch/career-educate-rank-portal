@@ -9,11 +9,21 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [App\Http\Controllers\AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [App\Http\Controllers\AuthController::class, 'login'])->name('login.store');
+    Route::get('/register', [App\Http\Controllers\AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register/send-otp', [App\Http\Controllers\AuthController::class, 'sendRegistrationOtp'])->name('register.send-otp');
+    Route::get('/register/verify-mobile', [App\Http\Controllers\AuthController::class, 'showVerifyMobile'])->name('register.verify');
+    Route::post('/register/verify-mobile', [App\Http\Controllers\AuthController::class, 'verifyRegistrationOtp'])->name('register.verify.store');
+    Route::get('/register/details', [App\Http\Controllers\AuthController::class, 'showRegisterDetails'])->name('register.details');
+    Route::post('/register/details', [App\Http\Controllers\AuthController::class, 'completeRegistration'])->name('register.details.store');
 });
 
 Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware('auth')->name('dashboard');
 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/dashboard', [App\Http\Controllers\AdminDashboardController::class, 'index'])->name('admin.dashboard');
@@ -21,6 +31,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/import-excel', [App\Http\Controllers\ImportExcelController::class, 'store'])->name('import.excel.store');
 });
 
+Route::middleware('auth')->group(function () {
 // Core routes
 Route::get('/all-india-2025', [App\Http\Controllers\AllIndia2025Controller::class, 'index'])->name('all-india-2025');
 Route::get('/all-india-2022', [App\Http\Controllers\AllIndia2022Controller::class, 'index'])->name('all-india-2022');
@@ -95,6 +106,9 @@ Route::get('/west-bengal-bds-2025', [App\Http\Controllers\West_bengal_bds2025Con
 Route::get('/west-bengal-mbbs-2025', [App\Http\Controllers\West_bengal_mbbs2025Controller::class, 'index'])->name('west-bengal-mbbs-2025');
 Route::get('/all-india-quota-bds-2023-analysis', [App\Http\Controllers\All_india_quota_bds2023AnalysisController::class, 'index'])->name('all-india-quota-bds-2023-analysis');
 
+
 Route::get('/west-bengal-2023', [App\Http\Controllers\West_bengal2023Controller::class, 'index'])->name('west-bengal-2023');
 
 Route::get('/andhra-pradesh-bds-govt-quota-2023-analysis', [App\Http\Controllers\Andhra_pradesh_bds_govt_quota2023AnalysisController::class, 'index'])->name('andhra-pradesh-bds-govt-quota-2023-analysis');
+
+});
