@@ -85,7 +85,7 @@
                                         <div class="grid gap-1 px-2 pb-2">
                                             @foreach ($items as $item)
                                                 <a href="{{ route($item['route']) }}"
-                                                   class="{{ $routeName === $item['route'] ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-slate-50' }} rounded-xl px-3 py-2 text-sm transition-colors">
+                                                   class="{{ $routeName === ($item['route'] ?? null) ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-slate-50' }} rounded-xl px-3 py-2 text-sm transition-colors">
                                                     {{ $item['label'] }}
                                                 </a>
                                             @endforeach
