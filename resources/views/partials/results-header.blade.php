@@ -1,17 +1,32 @@
 @php
     $routeName = Route::currentRouteName();
 
-    $yearMenus = config('menus');
+    $rawYearMenus = config('menus');
+    $yearMenus = [];
 
     $activeYear = null;
 
-    foreach (array_keys($yearMenus) as $yearGroup) {
+    foreach ($rawYearMenus as $yearGroup => $items) {
         preg_match('/\d{4}/', $yearGroup, $matches);
         $yearNumber = $matches[0] ?? $yearGroup;
+        $displayYear = preg_match('/^\s*neet\s+/i', $yearGroup) ? $yearGroup : 'NEET ' . $yearNumber;
+
+        $yearMenus[$yearGroup] = [
+            'label' => $displayYear,
+            'ug' => [
+                'MBBS' => [],
+                'BDS' => [],
+            ],
+        ];
+
+        foreach ($items as $item) {
+            $courseText = strtolower(($item['label'] ?? '') . ' ' . ($item['route'] ?? ''));
+            $course = (str_contains($courseText, 'bds') || str_contains($courseText, 'dental')) ? 'BDS' : 'MBBS';
+            $yearMenus[$yearGroup]['ug'][$course][] = $item;
+        }
 
         if ($routeName && str_contains($routeName, $yearNumber)) {
             $activeYear = $yearGroup;
-            break;
         }
     }
 @endphp
@@ -38,32 +53,47 @@
                     <a href="{{ route('import.excel') }}" class="{{ $routeName === 'import.excel' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
                         Import
                     </a>
+                @else
+                    <a href="{{ route('dashboard') }}" class="{{ $routeName === 'dashboard' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
+                        Dashboard
+                    </a>
                 @endif
             @endauth
 
-            @foreach ($yearMenus as $year => $items)
+            @foreach ($yearMenus as $year => $menu)
                 <div class="relative group results-year-menu">
                     <button
                         type="button"
                         class="results-year-trigger px-3 py-2 rounded-lg border {{ $activeYear === $year ? 'border-rose-300 text-rose-600 bg-rose-50' : 'border-slate-200 text-slate-700 hover:border-rose-300 hover:text-rose-600' }} transition-colors inline-flex items-center gap-2"
                         aria-expanded="false"
                     >
-                        <span>{{ $year }}</span>
-                        <span class="results-year-caret text-[10px] leading-none transition-transform">▼</span>
+                        <span>{{ $menu['label'] }}</span>
+                        <span class="results-year-caret text-[10px] leading-none transition-transform">v</span>
                     </button>
                     <div
                         class="results-year-panel hidden fixed z-50 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl p-2"
                         style="width: min(42rem, calc(100vw - 2rem)); max-height: min(32rem, calc(100vh - 7rem));"
                     >
-                        <div class="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">{{ $year }}</div>
-                        <div class="grid gap-1">
-                            @foreach ($items as $item)
-                                <a href="{{ route($item['route']) }}"
-                                   class="{{ $routeName === $item['route'] ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-slate-50' }} rounded-xl px-3 py-2 text-sm transition-colors">
-                                    {{ $item['label'] }}
-                                </a>
-                            @endforeach
-                        </div>
+                        <div class="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">{{ $menu['label'] }}</div>
+                        <details class="results-course-group rounded-xl border border-slate-100 bg-slate-50/60" open>
+                            <summary class="cursor-pointer select-none px-3 py-2 text-sm font-bold text-slate-800">UG</summary>
+                            <div class="grid gap-2 p-2">
+                                @foreach ($menu['ug'] as $course => $items)
+                                    @continue(count($items) === 0)
+                                    <details class="rounded-xl bg-white border border-slate-100" {{ collect($items)->contains(fn ($item) => $routeName === $item['route']) ? 'open' : '' }}>
+                                        <summary class="cursor-pointer select-none px-3 py-2 text-sm font-bold text-rose-600">{{ $course }}</summary>
+                                        <div class="grid gap-1 px-2 pb-2">
+                                            @foreach ($items as $item)
+                                                <a href="{{ route($item['route']) }}"
+                                                   class="{{ $routeName === $item['route'] ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-slate-50' }} rounded-xl px-3 py-2 text-sm transition-colors">
+                                                    {{ $item['label'] }}
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    </details>
+                                @endforeach
+                            </div>
+                        </details>
                     </div>
                 </div>
             @endforeach
@@ -71,7 +101,7 @@
 
         <div class="flex items-center gap-3">
             @if ($routeName === 'home')
-                <a href="#predictors" class="bg-rose-500 hover:bg-rose-600 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-all shadow-md shadow-rose-500/10 active:scale-95">
+                <a href="{{ auth()->check() ? route('dashboard') : route('register') }}" class="bg-rose-500 hover:bg-rose-600 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-all shadow-md shadow-rose-500/10 active:scale-95">
                     Start Predicting
                 </a>
             @elseif (auth()->check())
@@ -82,10 +112,9 @@
                     </button>
                 </form>
             @else
-                <div class="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
-                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    NEET Results Portal
-                </div>
+                <a href="{{ route('login') }}" class="text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-rose-300 hover:text-rose-600 transition-colors">
+                    Login
+                </a>
             @endif
         </div>
     </div>
