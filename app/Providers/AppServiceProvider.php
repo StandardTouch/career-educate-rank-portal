@@ -30,8 +30,8 @@ class AppServiceProvider extends ServiceProvider
 
                 foreach ($menus as $year => $items) {
                     foreach ($items as $item) {
-                        if ($item['route'] === $routeName) {
-                            $foundLabel = $item['label'];
+                        if (($item['route'] ?? null) === $routeName) {
+                            $foundLabel = $item['label'] ?? null;
                             break 2;
                         }
                     }
