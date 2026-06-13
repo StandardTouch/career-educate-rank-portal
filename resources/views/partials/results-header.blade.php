@@ -80,12 +80,12 @@
                             <div class="grid gap-2 p-2">
                                 @foreach ($menu['ug'] as $course => $items)
                                     @continue(count($items) === 0)
-                                    <details class="rounded-xl bg-white border border-slate-100" {{ collect($items)->contains(fn ($item) => $routeName === $item['route']) ? 'open' : '' }}>
+                                    <details class="rounded-xl bg-white border border-slate-100" {{ collect($items)->contains(fn ($item) => $routeName === ($item['route'] ?? null)) ? 'open' : '' }}>
                                         <summary class="cursor-pointer select-none px-3 py-2 text-sm font-bold text-rose-600">{{ $course }}</summary>
                                         <div class="grid gap-1 px-2 pb-2">
                                             @foreach ($items as $item)
                                                 <a href="{{ route($item['route']) }}"
-                                                   class="{{ $routeName === $item['route'] ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-slate-50' }} rounded-xl px-3 py-2 text-sm transition-colors">
+                                                   class="{{ $routeName === ($item['route'] ?? null) ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-slate-50' }} rounded-xl px-3 py-2 text-sm transition-colors">
                                                     {{ $item['label'] }}
                                                 </a>
                                             @endforeach
