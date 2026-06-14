@@ -90,7 +90,7 @@
                                                     <a href="#"
                                                 @endif
                                                     class="{{ $routeName === ($item['route'] ?? null) ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-slate-50' }} rounded-xl px-3 py-2 text-sm transition-colors">
-                                                    {{ $item['label'] }}
+                                                    {{ $item['label'] ?? '#' }}
                                                 </a>
                                             @endforeach
                                         </div>
