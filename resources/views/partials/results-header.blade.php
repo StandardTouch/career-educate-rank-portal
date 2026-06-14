@@ -2,6 +2,34 @@
     $routeName = Route::currentRouteName();
 
     $rawYearMenus = config('menus');
+    $currentDataset = request()->route('dataset');
+    $currentDatasetSlug = is_object($currentDataset) ? ($currentDataset->slug ?? null) : $currentDataset;
+
+    try {
+        if (\Illuminate\Support\Facades\Schema::hasTable('datasets')) {
+            $datasets = \App\Models\Dataset::query()
+                ->where('is_active', true)
+                ->orderByDesc('year')
+                ->orderByRaw('sort_order is null')
+                ->orderBy('sort_order')
+                ->orderBy('title')
+                ->get();
+
+            foreach ($datasets as $dataset) {
+                $group = 'Results ' . ($dataset->year ?? 'Dynamic');
+                $rawYearMenus[$group] = $rawYearMenus[$group] ?? [];
+                $rawYearMenus[$group][] = [
+                    'label' => $dataset->title,
+                    'route' => 'results.show',
+                    'params' => ['dataset' => $dataset->slug],
+                    'dataset_slug' => $dataset->slug,
+                ];
+            }
+        }
+    } catch (\Throwable $exception) {
+        $rawYearMenus = config('menus');
+    }
+
     $yearMenus = [];
 
     $activeYear = null;
@@ -75,21 +103,28 @@
                         style="width: min(42rem, calc(100vw - 2rem)); max-height: min(32rem, calc(100vh - 7rem));"
                     >
                         <div class="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">{{ $menu['label'] }}</div>
+                        <div class="px-2 pb-2">
+                            <input type="search" class="results-menu-search w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20" placeholder="Search results...">
+                        </div>
                         <details class="results-course-group rounded-xl border border-slate-100 bg-slate-50/60" open>
                             <summary class="cursor-pointer select-none px-3 py-2 text-sm font-bold text-slate-800">UG</summary>
                             <div class="grid gap-2 p-2">
                                 @foreach ($menu['ug'] as $course => $items)
                                     @continue(count($items) === 0)
-                                    <details class="rounded-xl bg-white border border-slate-100" {{ collect($items)->contains(fn ($item) => $routeName === ($item['route'] ?? null)) ? 'open' : '' }}>
+                                    <details class="rounded-xl bg-white border border-slate-100" {{ collect($items)->contains(fn ($item) => $routeName === ($item['route'] ?? null) && (($item['dataset_slug'] ?? null) === null || ($item['dataset_slug'] ?? null) === $currentDatasetSlug)) ? 'open' : '' }}>
                                         <summary class="cursor-pointer select-none px-3 py-2 text-sm font-bold text-rose-600">{{ $course }}</summary>
                                         <div class="grid gap-1 px-2 pb-2">
                                             @foreach ($items as $item)
+                                                @php
+                                                    $isActiveItem = $routeName === ($item['route'] ?? null)
+                                                        && (($item['dataset_slug'] ?? null) === null || ($item['dataset_slug'] ?? null) === $currentDatasetSlug);
+                                                @endphp
                                                 @if(is_array($item) && !empty($item['route']) && Route::has($item['route']))
-                                                    <a href="{{ route($item['route']) }}"
+                                                    <a href="{{ route($item['route'], $item['params'] ?? []) }}"
                                                 @else
                                                     <a href="#"
                                                 @endif
-                                                    class="{{ $routeName === ($item['route'] ?? null) ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-slate-50' }} rounded-xl px-3 py-2 text-sm transition-colors">
+                                                    class="results-menu-link {{ $isActiveItem ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-slate-50' }} rounded-xl px-3 py-2 text-sm transition-colors">
                                                     {{ $item['label'] ?? '#' }}
                                                 </a>
                                             @endforeach
@@ -190,6 +225,7 @@
             const trigger = menu.querySelector('.results-year-trigger');
             const panel = menu.querySelector('.results-year-panel');
             const caret = menu.querySelector('.results-year-caret');
+            const search = menu.querySelector('.results-menu-search');
 
             function positionPanel() {
                 const rect = trigger.getBoundingClientRect();
@@ -224,8 +260,21 @@
                 positionPanel();
                 panel.classList.remove('hidden');
                 trigger.setAttribute('aria-expanded', 'true');
+                search?.focus();
                 document.body.style.overflow = 'hidden';
                 if (caret) caret.style.transform = 'rotate(180deg)';
+            });
+
+            search?.addEventListener('input', () => {
+                const term = search.value.trim().toLowerCase();
+
+                menu.querySelectorAll('.results-menu-link').forEach((link) => {
+                    link.hidden = term !== '' && !link.textContent.toLowerCase().includes(term);
+                });
+
+                menu.querySelectorAll('.results-course-group details').forEach((group) => {
+                    group.hidden = Array.from(group.querySelectorAll('.results-menu-link')).every((link) => link.hidden);
+                });
             });
 
             window.addEventListener('resize', () => {

@@ -25,6 +25,11 @@
 
     @include('partials.results-header')
 
+    @php
+        $fallbackResultsUrl = auth()->check() ? route('dashboard') : route('register');
+        $legacyResultUrl = fn (string $routeName) => Route::has($routeName) ? route($routeName) : $fallbackResultsUrl;
+    @endphp
+
     <!-- Main Content -->
     <main class="flex-1">
 
@@ -191,7 +196,7 @@
                             </p>
                         </div>
                         <div class="mt-6">
-                            <a href="{{ route('all-india-2025') }}" class="w-full inline-flex justify-center items-center gap-2 px-4 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-rose-500/10">
+                            <a href="{{ $legacyResultUrl('all-india-2025') }}" class="w-full inline-flex justify-center items-center gap-2 px-4 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-rose-500/10">
                                 Access Predictor ➔
                             </a>
                         </div>
@@ -209,7 +214,7 @@
                             </p>
                         </div>
                         <div class="mt-6">
-                            <a href="{{ route('karnataka-2025') }}" class="w-full inline-flex justify-center items-center gap-2 px-4 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-rose-500/10">
+                            <a href="{{ $legacyResultUrl('karnataka-2025') }}" class="w-full inline-flex justify-center items-center gap-2 px-4 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-rose-500/10">
                                 Access Predictor ➔
                             </a>
                         </div>
@@ -227,7 +232,7 @@
                             </p>
                         </div>
                         <div class="mt-6">
-                            <a href="{{ route('karnataka-2024') }}" class="w-full inline-flex justify-center items-center gap-2 px-4 py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm rounded-xl transition-all">
+                            <a href="{{ $legacyResultUrl('karnataka-2024') }}" class="w-full inline-flex justify-center items-center gap-2 px-4 py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm rounded-xl transition-all">
                                 View 2024 Cutoffs ➔
                             </a>
                         </div>
@@ -245,7 +250,7 @@
                             </p>
                         </div>
                         <div class="mt-6">
-                            <a href="{{ route('karnataka-2023') }}" class="w-full inline-flex justify-center items-center gap-2 px-4 py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm rounded-xl transition-all">
+                            <a href="{{ $legacyResultUrl('karnataka-2023') }}" class="w-full inline-flex justify-center items-center gap-2 px-4 py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm rounded-xl transition-all">
                                 View 2023 Cutoffs ➔
                             </a>
                         </div>
@@ -678,10 +683,10 @@
                 <div>
                     <h4 class="text-white font-bold text-xs uppercase tracking-wider mb-4">Predictor Portals</h4>
                     <ul class="space-y-2">
-                        <li><a href="{{ route('all-india-2025') }}" class="hover:text-white transition-colors">All India Quota 2025</a></li>
-                        <li><a href="{{ route('karnataka-2025') }}" class="hover:text-white transition-colors">Karnataka State 2025</a></li>
-                        <li><a href="{{ route('karnataka-2024') }}" class="hover:text-white transition-colors">Karnataka State 2024</a></li>
-                        <li><a href="{{ route('karnataka-2023') }}" class="hover:text-white transition-colors">Karnataka State 2023</a></li>
+                        <li><a href="{{ $legacyResultUrl('all-india-2025') }}" class="hover:text-white transition-colors">All India Quota 2025</a></li>
+                        <li><a href="{{ $legacyResultUrl('karnataka-2025') }}" class="hover:text-white transition-colors">Karnataka State 2025</a></li>
+                        <li><a href="{{ $legacyResultUrl('karnataka-2024') }}" class="hover:text-white transition-colors">Karnataka State 2024</a></li>
+                        <li><a href="{{ $legacyResultUrl('karnataka-2023') }}" class="hover:text-white transition-colors">Karnataka State 2023</a></li>
                     </ul>
                 </div>
                 <div>

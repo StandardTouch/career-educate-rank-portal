@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ScaffoldHelper;
+use App\Services\DynamicRankImportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 
@@ -13,13 +14,31 @@ class ImportExcelController extends Controller
         return view('import-excel');
     }
 
-    public function store(Request $request)
+    public function store(Request $request, DynamicRankImportService $dynamicImporter)
     {
         $validated = $request->validate([
             'excel_file' => ['required', 'file', 'mimes:xlsx', 'max:51200'],
         ]);
 
         $file = $validated['excel_file'];
+
+        if ($this->usesDbImportMode()) {
+            try {
+                $dataset = $dynamicImporter->importUploadedFile($file, $request->user()?->id);
+            } catch (\Throwable $exception) {
+                return redirect()
+                    ->route('import.excel')
+                    ->withErrors(['excel_file' => 'Import failed: ' . $exception->getMessage()]);
+            }
+
+            return redirect()
+                ->route('import.excel')
+                ->with('status', 'Imported ' . $file->getClientOriginalName() . ' successfully.')
+                ->with('import_output', 'DB import completed. No Laravel source files were generated or modified.')
+                ->with('page_route', route('results.show', $dataset, false))
+                ->with('page_url', route('results.show', $dataset));
+        }
+
         $originalName = $file->getClientOriginalName();
         $safeName = $this->safeFilename($originalName);
         $dataSheetPath = base_path('data_sheets');
@@ -75,5 +94,11 @@ class ImportExcelController extends Controller
         $uri = strtolower(trim($uri, '-'));
 
         return preg_replace('/-+/', '-', $uri);
+    }
+
+    protected function usesDbImportMode(): bool
+    {
+        return config('imports.mode', 'db') === 'db'
+            || ! (bool) config('imports.enable_code_generation', false);
     }
 }
