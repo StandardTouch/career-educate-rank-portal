@@ -313,15 +313,43 @@ class ResetDynamicRankData extends Command
             }
         }
 
+        $tables = array_merge($tables, $this->generatedDatabaseTables());
+
         $tables = array_unique(array_filter($tables, function (string $table): bool {
-            return ! in_array($table, $this->protectedTables, true)
-                && (preg_match('/20\d{2}/', $table) === 1 || str_ends_with($table, '_rounds'));
+            return $this->isGeneratedRankTable($table);
         }));
 
         $tables = array_values(array_filter($tables, fn ($table) => Schema::hasTable($table)));
         sort($tables);
 
         return $tables;
+    }
+
+    protected function generatedDatabaseTables(): array
+    {
+        $rows = DB::select('SHOW TABLES');
+        $tables = [];
+
+        foreach ($rows as $row) {
+            $values = array_values((array) $row);
+            if (isset($values[0]) && is_string($values[0])) {
+                $tables[] = $values[0];
+            }
+        }
+
+        return array_values(array_filter($tables, fn (string $table): bool => $this->isGeneratedRankTable($table)));
+    }
+
+    protected function isGeneratedRankTable(string $table): bool
+    {
+        if (in_array($table, $this->protectedTables, true)) {
+            return false;
+        }
+
+        // Old code-generation imports created standalone rank tables with a year in the table name
+        // and separate round tables ending in _rounds. New dynamic tables are explicitly protected above.
+        return preg_match('/20\d{2}/', $table) === 1
+            || str_ends_with($table, '_rounds');
     }
 
     protected function deleteFiles(array $files): int
