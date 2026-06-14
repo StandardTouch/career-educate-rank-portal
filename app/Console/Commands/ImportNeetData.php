@@ -7,6 +7,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\ScaffoldHelper;
+use App\Services\DynamicRankImportService;
 use App\Services\NeetDataImporter;
 
 class ImportNeetData extends Command
@@ -34,6 +35,20 @@ class ImportNeetData extends Command
             $this->info('No Excel files found in data_sheets.');
             return 0;
         }
+
+        if ($this->usesDbImportMode()) {
+            $importer = app(DynamicRankImportService::class);
+
+            foreach ($files as $filePath) {
+                $this->info('DB importing ' . basename($filePath));
+                $dataset = $importer->importFile($filePath, basename($filePath), $this->storedPathForCliImport($filePath));
+                $this->info('Available at: ' . route('results.show', $dataset, false));
+            }
+
+            $this->info('DB import process completed. No Laravel source files were generated or modified.');
+            return 0;
+        }
+
         $newMigrations = [];
         foreach ($files as $filePath) {
             $filename = basename($filePath);
@@ -190,6 +205,24 @@ class ImportNeetData extends Command
         $tbl->decimal('tuition_fee', 20, 2)->nullable();
         $tbl->decimal('total_fee', 20, 2)->nullable();
         $tbl->string('seat_type')->nullable();
+    }
+
+    protected function usesDbImportMode(): bool
+    {
+        return config('imports.mode', 'db') === 'db'
+            || ! (bool) config('imports.enable_code_generation', false);
+    }
+
+    protected function storedPathForCliImport(string $filePath): string
+    {
+        $basePath = rtrim(str_replace('\\', '/', base_path()), '/');
+        $normalized = str_replace('\\', '/', $filePath);
+
+        if (str_starts_with($normalized, $basePath . '/')) {
+            return ltrim(substr($normalized, strlen($basePath)), '/');
+        }
+
+        return basename($filePath);
     }
 
     protected function ensurePredictorColumns(string $tableName, bool $isRoundTable): void

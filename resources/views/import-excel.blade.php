@@ -23,7 +23,7 @@
                 <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">Excel Import</p>
                 <h1 class="mt-2 text-3xl font-bold text-slate-950">Import NEET Result Sheet</h1>
                 <p class="mt-2 text-slate-500 max-w-2xl">
-                    Upload an Excel workbook to create or update the table, round table, model, controller, page, route, and year menu entry.
+                    Upload an Excel workbook to create or update a dynamic result page from database records. New imports do not generate Laravel source files.
                 </p>
             </div>
 

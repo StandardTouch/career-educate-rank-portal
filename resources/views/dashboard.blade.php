@@ -15,6 +15,11 @@
 <body class="min-h-screen bg-slate-50 text-slate-800">
     @include('partials.results-header')
 
+    @php
+        $fallbackResultsUrl = route('dashboard');
+        $legacyResultUrl = fn (string $routeName) => Route::has($routeName) ? route($routeName) : $fallbackResultsUrl;
+    @endphp
+
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">Student Dashboard</p>
@@ -23,10 +28,10 @@
                 Your mobile number is verified. You now have access to the NEET result pages and predictor tools.
             </p>
             <div class="mt-6 flex flex-wrap gap-3">
-                <a href="{{ route('all-over-india-data-mbbs-2025') }}" class="rounded-xl bg-rose-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-rose-600">
+                <a href="{{ $legacyResultUrl('all-over-india-data-mbbs-2025') }}" class="rounded-xl bg-rose-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-rose-600">
                     Open NEET 2025 MBBS
                 </a>
-                <a href="{{ route('all-indida-quota-bds-2025') }}" class="rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
+                <a href="{{ $legacyResultUrl('all-indida-quota-bds-2025') }}" class="rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
                     Open NEET 2025 BDS
                 </a>
             </div>

@@ -6,14 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Round extends Model
+class Import extends Model
 {
     protected $fillable = [
         'dataset_id',
-        'name',
-        'slug',
-        'round_number',
-        'sort_order',
+        'original_filename',
+        'stored_path',
+        'status',
+        'imported_by',
+        'total_rows',
+        'error_message',
     ];
 
     public function dataset(): BelongsTo
@@ -21,13 +23,8 @@ class Round extends Model
         return $this->belongsTo(Dataset::class);
     }
 
-    /**
-     * Get the NEET cutoff records for this round.
-     *
-     * @return HasMany<AllIndiaRounds2025>
-     */
-    public function cutoffs(): HasMany
+    public function sheets(): HasMany
     {
-        return $this->hasMany(AllIndiaRounds2025::class, 'round_id');
+        return $this->hasMany(ImportSheet::class);
     }
 }
