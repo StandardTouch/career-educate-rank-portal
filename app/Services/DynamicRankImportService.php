@@ -227,11 +227,12 @@ class DynamicRankImportService
     {
         $roundNumber = $this->roundNumberFromSheetName($sheetName);
         $baseSlug = $this->deriveRoundSlug($sheetName);
+        $slug = $this->uniqueRoundSlug($dataset->slug . '-' . $baseSlug);
 
         return Round::create([
             'dataset_id' => $dataset->id,
             'name' => trim($sheetName) !== '' ? trim($sheetName) : ucwords(str_replace('_', ' ', $baseSlug)),
-            'slug' => $dataset->slug . '-' . $baseSlug,
+            'slug' => $slug,
             'round_number' => $roundNumber,
             'sort_order' => $roundNumber ?? 0,
         ]);
@@ -413,11 +414,20 @@ class DynamicRankImportService
 
     protected function deriveRoundSlug(string $sheetName): string
     {
-        if (preg_match('/(\d+)/', $sheetName, $matches)) {
-            return 'round-' . $matches[1];
+        return Str::slug($sheetName) ?: 'round';
+    }
+
+    protected function uniqueRoundSlug(string $slug): string
+    {
+        $candidate = $slug;
+        $suffix = 2;
+
+        while (Round::where('slug', $candidate)->exists()) {
+            $candidate = $slug . '-' . $suffix;
+            $suffix++;
         }
 
-        return Str::slug($sheetName) ?: 'round';
+        return $candidate;
     }
 
     protected function roundNumberFromSheetName(string $sheetName): ?int
