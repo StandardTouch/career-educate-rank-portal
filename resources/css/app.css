@@ -9,3 +9,9 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+.header-logo {
+    height: 65px; /* 56px, slightly larger than the previous 48px */
+    width: auto;
+    object-fit: contain;
+}
