@@ -63,8 +63,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-16 py-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div class="flex items-center justify-between gap-4">
             <a href="{{ route('home') }}" class="flex items-center gap-2">
-                <img src="{{ asset('logo.png') }}" alt="Logo" class="w-10 h-10 object-contain">
-                <span class="font-bold text-lg text-slate-900 tracking-tight">Career Educate</span>
+                <img src="{{ asset('logo.png') }}" alt="Logo" class="w-12 h-12 object-contain">
+                <!-- <span class="font-bold text-lg text-slate-900 tracking-tight">Career Educate</span> -->
             </a>
 
         </div>

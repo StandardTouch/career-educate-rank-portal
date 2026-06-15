@@ -674,7 +674,7 @@
                 <div class="space-y-4">
                     <div class="flex items-center gap-2">
                         <img src="{{ asset('logo.png') }}" alt="Logo" class="w-8 h-8 object-contain">
-                        <span class="font-bold text-base text-white tracking-tight">Career Educate</span>
+                        <!-- <span class="font-bold text-base text-white tracking-tight">Career Educate</span> -->
                     </div>
                     <p class="text-slate-500 text-xs leading-relaxed">
                         Data-backed guidance solutions to empower medical aspirants across India. We turn NEET aspirations into successful doctor careers.
