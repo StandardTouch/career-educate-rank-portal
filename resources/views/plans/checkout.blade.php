@@ -42,11 +42,13 @@
                 </div>
             </div>
 
-            <form id="payment-form" action="{{ route('plans.pay') }}" method="POST" class="p-6 space-y-5">
+            <form id="payment-form" action="{{ route('plans.verify') }}" method="POST" class="p-6 space-y-5">
                 @csrf
-                <input type="hidden" name="plan" value="{{ $plan }}">
-                <input type="hidden" name="amount" value="{{ $price }}">
-                <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+                <input type="hidden" name="plan"                  value="{{ $plan }}">
+                <input type="hidden" name="amount"                value="{{ $price }}">
+                <input type="hidden" name="razorpay_payment_id"   id="razorpay_payment_id">
+                <input type="hidden" name="razorpay_order_id"     id="razorpay_order_id"   value="{{ $orderId }}">
+                <input type="hidden" name="razorpay_signature"    id="razorpay_signature">
 
                 <div class="rounded-xl border border-slate-100 bg-slate-50 p-4 text-xs text-slate-500">
                     <p class="font-bold text-slate-700">Secure Checkout</p>
@@ -63,27 +65,31 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
         const options = {
-            "key": "{{ env('RAZORPAY_KEY') }}",
-            "amount": "{{ $price * 100 }}",
-            "currency": "INR",
-            "name": "Career Educate",
-            "description": "Purchase of {{ $planName }}",
-            "handler": function (response) {
-                document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+            key:         "{{ config('services.razorpay.key') }}",
+            amount:      {{ $price * 100 }},
+            currency:    "INR",
+            name:        "Career Educate",
+            description: "{{ $planName }}",
+            order_id:    "{{ $orderId }}",
+            handler: function (response) {
+                document.getElementById('razorpay_payment_id').value  = response.razorpay_payment_id;
+                document.getElementById('razorpay_order_id').value    = response.razorpay_order_id;
+                document.getElementById('razorpay_signature').value   = response.razorpay_signature;
                 document.getElementById('payment-form').submit();
             },
-            "prefill": {
-                "name": "{{ auth()->user()->name }}",
-                "email": "{{ auth()->user()->email }}"
+            prefill: {
+                name:  "{{ auth()->user()->name }}",
+                email: "{{ auth()->user()->email }}"
             },
-            "theme": { "color": "#f43f5e" }
+            theme: { color: "#f43f5e" }
         };
         const rzp = new Razorpay(options);
-        document.getElementById('rzp-button').onclick = function(e) {
-            rzp.open();
+        document.getElementById('rzp-button').onclick = function (e) {
             e.preventDefault();
-        }
+            rzp.open();
+        };
     </script>
+
 </body>
 
 </html>
