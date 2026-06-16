@@ -30,7 +30,7 @@ class PaymentController extends Controller
             ? 'Counselling Information & Web Access Support' 
             : 'Complete Counselling Guidance (Phone & Physical Support)';
         
-        $price = $plan === 'basic' ? 2000 : 5000;
+        $price = $plan === 'basic' ? 20 : 5000;
 
         // Amount in paise for Razorpay
         $amountPaise = $price * 100;
