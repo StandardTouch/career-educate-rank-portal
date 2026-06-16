@@ -64,11 +64,29 @@ class ResultController extends Controller
             });
         }
 
-        foreach (['college_name', 'quota', 'category', 'local_area'] as $field) {
+        // Handle College Name and Local Area filters normally (if passed in request)
+        foreach (['college_name', 'local_area'] as $field) {
             $selected = $this->selectedValues($request, $field);
 
             if ($selected !== []) {
                 $query->whereIn($field, $selected);
+            }
+        }
+
+        // Handle merged Quota and Category selection
+        $quotaInput = $this->selectedValues($request, 'quota');
+        if ($quotaInput !== []) {
+            $allQuotas = $this->distinctValues($dataset, 'quota')->toArray();
+            $allCategories = $this->distinctValues($dataset, 'category')->toArray();
+
+            $selectedQuotas = array_intersect($quotaInput, $allQuotas);
+            $selectedCategories = array_intersect($quotaInput, $allCategories);
+
+            if ($selectedQuotas !== []) {
+                $query->whereIn('quota', $selectedQuotas);
+            }
+            if ($selectedCategories !== []) {
+                $query->whereIn('category', $selectedCategories);
             }
         }
 
@@ -105,8 +123,8 @@ class ResultController extends Controller
         $selectedFilters = [
             'round_id' => $selectedRounds,
             'college_name' => $this->selectedValues($request, 'college_name'),
-            'quota' => $this->selectedValues($request, 'quota'),
-            'category' => $this->selectedValues($request, 'category'),
+            'quota' => $quotaInput,
+            'category' => [], // Category dropdown is removed
             'local_area' => $this->selectedValues($request, 'local_area'),
         ];
 

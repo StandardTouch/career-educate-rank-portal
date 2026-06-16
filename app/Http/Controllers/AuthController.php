@@ -34,9 +34,38 @@ class AuthController extends Controller
 
     public function showRegister()
     {
-        return view('auth.register-phone');
+        return view('auth.register');
     }
 
+    public function register(Request $request)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'phone' => ['required', 'digits_between:10,12', 'unique:users,phone'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $this->normalizePhone($data['phone']),
+            'password' => $data['password'],
+            'mobile_verified_at' => now(), // OTP bypassed
+            'is_admin' => false,
+            'plan' => 'none',
+            'payment_status' => 'unpaid',
+        ]);
+
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return redirect()->route('plans.index')
+            ->with('status', 'Registration successful! Choose a package to start using the portal.');
+    }
+
+    /* Commented out OTP verification process as requested
+    
     public function sendRegistrationOtp(Request $request)
     {
         $data = $request->validate([
@@ -139,6 +168,8 @@ class AuthController extends Controller
 
         return redirect()->route('dashboard');
     }
+    
+    */
 
     public function logout(Request $request)
     {

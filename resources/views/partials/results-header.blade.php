@@ -85,6 +85,9 @@
                     <a href="{{ route('dashboard') }}" class="{{ $routeName === 'dashboard' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
                         Dashboard
                     </a>
+                    <a href="{{ route('profile') }}" class="{{ $routeName === 'profile' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
+                        Profile
+                    </a>
                 @endif
             @endauth
 

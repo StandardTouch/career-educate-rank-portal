@@ -25,6 +25,13 @@ class User extends Authenticatable
         'password',
         'mobile_verified_at',
         'is_admin',
+        'neet_rank',
+        'neet_marks',
+        'quota',
+        'category',
+        'state',
+        'plan',
+        'payment_status',
     ];
 
     /**
@@ -49,6 +56,8 @@ class User extends Authenticatable
             'mobile_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'neet_rank' => 'integer',
+            'neet_marks' => 'decimal:2',
         ];
     }
 }

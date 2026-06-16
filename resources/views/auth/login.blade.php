@@ -56,7 +56,7 @@
 
                 <p class="text-center text-sm text-slate-500">
                     New student?
-                    <a href="{{ route('register') }}" class="font-bold text-rose-500 hover:text-rose-600">Register with mobile OTP</a>
+                    <a href="{{ route('register') }}" class="font-bold text-rose-500 hover:text-rose-600">Create an account</a>
                 </p>
             </form>
         </section>
