@@ -46,63 +46,43 @@
                 @csrf
                 <input type="hidden" name="plan" value="{{ $plan }}">
                 <input type="hidden" name="amount" value="{{ $price }}">
-
-                <div>
-                    <label for="card_name" class="block text-sm font-bold uppercase tracking-wide text-slate-600">Cardholder Name</label>
-                    <input id="card_name" name="card_name" type="text" required
-                        value="{{ auth()->user()->name }}"
-                        placeholder="John Doe"
-                        class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
-                </div>
-
-                <div>
-                    <label for="card_number" class="block text-sm font-bold uppercase tracking-wide text-slate-600">Card Number (Mock)</label>
-                    <input id="card_number" name="card_number" type="text" required
-                        placeholder="4111 1111 1111 1111"
-                        value="4111 1111 1111 1111"
-                        class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label for="card_expiry" class="block text-sm font-bold uppercase tracking-wide text-slate-600">Expiry Date</label>
-                        <input id="card_expiry" name="card_expiry" type="text" required
-                            placeholder="12/28"
-                            value="12/28"
-                            class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
-                    </div>
-                    <div>
-                        <label for="card_cvv" class="block text-sm font-bold uppercase tracking-wide text-slate-600">CVV</label>
-                        <input id="card_cvv" name="card_cvv" type="password" required
-                            placeholder="123"
-                            value="123"
-                            class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
-                    </div>
-                </div>
+                <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
 
                 <div class="rounded-xl border border-slate-100 bg-slate-50 p-4 text-xs text-slate-500">
-                    <p class="font-bold text-slate-700">Developers Sandbox Note:</p>
-                    <p class="mt-1">This payment is a simulation. It does not transfer real funds. Clicking "Pay Now" will immediately register a successful mock purchase.</p>
+                    <p class="font-bold text-slate-700">Secure Checkout</p>
+                    <p class="mt-1">By clicking "Pay Now", you will be redirected to our secure payment gateway to complete your purchase.</p>
                 </div>
 
-                <button type="submit" class="w-full rounded-xl bg-rose-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-rose-500/10 transition hover:bg-rose-600 active:scale-95">
+                <button id="rzp-button" type="button" class="w-full rounded-xl bg-rose-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-rose-500/10 transition hover:bg-rose-600 active:scale-95">
                     Pay ₹{{ number_format($price) }} Now
                 </button>
             </form>
         </section>
     </main>
 
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
-        document.getElementById('payment-form')?.addEventListener('submit', function (e) {
+        const options = {
+            "key": "{{ env('RAZORPAY_KEY') }}",
+            "amount": "{{ $price * 100 }}",
+            "currency": "INR",
+            "name": "Career Educate",
+            "description": "Purchase of {{ $planName }}",
+            "handler": function (response) {
+                document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+                document.getElementById('payment-form').submit();
+            },
+            "prefill": {
+                "name": "{{ auth()->user()->name }}",
+                "email": "{{ auth()->user()->email }}"
+            },
+            "theme": { "color": "#f43f5e" }
+        };
+        const rzp = new Razorpay(options);
+        document.getElementById('rzp-button').onclick = function(e) {
+            rzp.open();
             e.preventDefault();
-            const spinner = document.getElementById('payment-spinner');
-            if (spinner) {
-                spinner.classList.remove('hidden');
-            }
-            setTimeout(() => {
-                this.submit();
-            }, 2500); // 2.5 seconds simulated latency
-        });
+        }
     </script>
 </body>
 

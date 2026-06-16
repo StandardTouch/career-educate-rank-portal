@@ -36,6 +36,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/plans', [App\Http\Controllers\PaymentController::class, 'index'])->name('plans.index');
     Route::get('/plans/checkout/{plan}', [App\Http\Controllers\PaymentController::class, 'checkout'])->name('plans.checkout');
     Route::post('/plans/pay', [App\Http\Controllers\PaymentController::class, 'pay'])->name('plans.pay');
+    Route::post('/plans/verify', [App\Http\Controllers\PaymentController::class, 'verify'])->name('plans.verify');
+    Route::post('/razorpay/webhook', [App\Http\Controllers\PaymentController::class, 'webhook'])->name('razorpay.webhook');
     Route::get('/payment/success', [App\Http\Controllers\PaymentController::class, 'success'])->name('payment.success');
 });
 
