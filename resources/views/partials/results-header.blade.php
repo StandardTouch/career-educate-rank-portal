@@ -92,7 +92,7 @@
                         Dashboard
                     </a>
                     <a href="{{ route('neet.analysis') }}" class="{{ $routeName === 'neet.analysis' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
-                        NEET Analysis
+                        NEET Analysis 2025
                     </a>
                     <a href="{{ route('profile') }}" class="{{ $routeName === 'profile' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
                         Profile
