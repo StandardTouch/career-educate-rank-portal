@@ -303,9 +303,9 @@
                                 <td data-col="local_area" class="px-4 py-3">{{ $record->local_area ?? '-' }}</td>
                                 <td data-col="total_seats" class="px-4 py-3 text-right">{{ $record->seats !== null ? $record->seats : '-' }}</td>
                                 <td data-col="gen_closing_rank" class="px-4 py-3 text-right font-bold text-rose-600">{{ $record->closing_rank !== null ? $record->closing_rank : '-' }}</td>
-                                <td data-col="gen_closing_mark" class="px-4 py-3 text-right">{{ $record->marks !== null ? number_format((float) $record->marks, 2) : '-' }}</td>
+                                <td data-col="gen_closing_mark" class="px-4 py-3 text-right">{{ $record->marks !== null ? (int) $record->marks : '-' }}</td>
                                 <td data-col="fem_closing_rank" class="px-4 py-3 text-right">{{ $femClosingRank !== null && $femClosingRank !== '' ? (int) $femClosingRank : '-' }}</td>
-                                <td data-col="fem_closing_mark" class="px-4 py-3 text-right">{{ $femClosingMark !== null && $femClosingMark !== '' ? number_format((float) $femClosingMark, 2) : '-' }}</td>
+                                <td data-col="fem_closing_mark" class="px-4 py-3 text-right">{{ $femClosingMark !== null && $femClosingMark !== '' ? (int) $femClosingMark : '-' }}</td>
                                 <td data-col="tuition_fee" class="px-4 py-3 text-right">{{ $record->fees !== null ? (int) $record->fees : '-' }}</td>
                             </tr>
                         @empty
