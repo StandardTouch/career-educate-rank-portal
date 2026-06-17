@@ -118,6 +118,45 @@ class AdminDashboardController extends Controller
             ->take(8)
             ->values();
 
+        $neetOverview = [
+            ['label' => 'Candidates Registered', 'value' => 2276069, 'note' => 'NEET UG 2025'],
+            ['label' => 'Exam Centres', 'value' => 5468, 'note' => 'Across India and abroad'],
+            ['label' => 'Cities Covered', 'value' => 566, 'note' => 'Including 14 outside India'],
+            ['label' => 'Female Candidates', 'value' => 1310062, 'note' => 'Higher than male registrations'],
+        ];
+
+        $categoryFunnel = collect([
+            ['category' => 'GENERAL', 'registered' => 689366, 'appeared' => 665853, 'qualified' => 338728],
+            ['category' => 'OBC', 'registered' => 948507, 'appeared' => 925739, 'qualified' => 564611],
+            ['category' => 'SC', 'registered' => 333646, 'appeared' => 322538, 'qualified' => 168873],
+            ['category' => 'ST', 'registered' => 150224, 'appeared' => 143602, 'qualified' => 67234],
+            ['category' => 'EWS', 'registered' => 154326, 'appeared' => 151586, 'qualified' => 97085],
+        ]);
+
+        $yearComparison = collect([
+            ['metric' => 'Registered', '2023' => 2087462, '2024' => 2406079, '2025' => 2276069, 'shift' => -5.40],
+            ['metric' => 'Appeared', '2023' => 2038596, '2024' => 2333297, '2025' => 2209318, 'shift' => -5.31],
+            ['metric' => 'Qualified', '2023' => 1145976, '2024' => 1315853, '2025' => 1236531, 'shift' => -6.03],
+            ['metric' => 'Centres', '2023' => 4097, '2024' => 4750, '2025' => 5468, 'shift' => 15.12],
+            ['metric' => 'Observers', '2023' => 5804, '2024' => 7500, '2025' => 10936, 'shift' => 45.81],
+        ]);
+
+        $seatGrowthStates = collect([
+            ['state' => 'Karnataka', 'seats_2024' => 12395, 'seats_2025' => 13944, 'increase' => 1549],
+            ['state' => 'Tamil Nadu', 'seats_2024' => 12050, 'seats_2025' => 13050, 'increase' => 1000],
+            ['state' => 'Maharashtra', 'seats_2024' => 11845, 'seats_2025' => 12824, 'increase' => 979],
+            ['state' => 'Uttar Pradesh', 'seats_2024' => 12475, 'seats_2025' => 13425, 'increase' => 950],
+            ['state' => 'Rajasthan', 'seats_2024' => 6505, 'seats_2025' => 7330, 'increase' => 825],
+            ['state' => 'West Bengal', 'seats_2024' => 5700, 'seats_2025' => 6499, 'increase' => 799],
+        ]);
+
+        $collegeTypeComparison = collect([
+            ['type' => 'Government', '2024' => 398, '2025' => 421],
+            ['type' => 'Private', '2024' => 297, '2025' => 315],
+            ['type' => 'Deemed University', '2024' => 57, '2025' => 59],
+            ['type' => 'AIIMS/JIPMER/CU/AFMC', '2024' => 25, '2025' => 25],
+        ]);
+
         return view('admin.dashboard', compact(
             'menus',
             'pageCount',
@@ -147,7 +186,12 @@ class AdminDashboardController extends Controller
             'datasetsByYear',
             'datasetsByCourse',
             'topDatasets',
-            'latestPages'
+            'latestPages',
+            'neetOverview',
+            'categoryFunnel',
+            'yearComparison',
+            'seatGrowthStates',
+            'collegeTypeComparison'
         ));
     }
 

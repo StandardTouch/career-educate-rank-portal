@@ -25,6 +25,9 @@
         $maxYearCount = max(1, (int) $datasetsByYear->max('count'));
         $maxCourseCount = max(1, (int) $datasetsByCourse->max('count'));
         $maxDatasetRecords = max(1, (int) $topDatasets->max('rank_records_count'));
+        $maxCategoryRegistered = max(1, (int) $categoryFunnel->max('registered'));
+        $maxSeatIncrease = max(1, (int) $seatGrowthStates->max('increase'));
+        $maxCollegeTypeCount = max(1, (int) $collegeTypeComparison->max('2025'));
         $latestResultDataset = $latestImport?->dataset ?? $topDatasets->first();
     @endphp
 
@@ -247,6 +250,148 @@
                     @empty
                         <div class="px-5 py-8 text-center text-xs font-semibold text-slate-400">No payments found.</div>
                     @endforelse
+                </div>
+            </div>
+        </section>
+
+        <section class="mt-8 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+            <div class="flex flex-col gap-3 border-b border-slate-100 pb-5 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">NEET UG 2025 Analytics</p>
+                    <h2 class="mt-2 text-2xl font-extrabold text-slate-950">National Admission Intelligence</h2>
+                    <p class="mt-1 text-sm text-slate-500">At-a-glance counselling indicators inspired by the client presentation format.</p>
+                </div>
+                <span class="inline-flex w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">Reference dashboard view</span>
+            </div>
+
+            <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                @foreach ($neetOverview as $item)
+                    <div class="rounded-2xl border border-slate-100 bg-slate-50 p-5">
+                        <div class="text-2xl font-extrabold text-slate-950">{{ number_format($item['value']) }}</div>
+                        <div class="mt-1 text-sm font-bold text-slate-700">{{ $item['label'] }}</div>
+                        <div class="mt-2 text-xs text-slate-400">{{ $item['note'] }}</div>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="mt-6 grid gap-6 xl:grid-cols-2">
+                <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900">Category Funnel</h3>
+                            <p class="text-xs text-slate-400">Registered to appeared to qualified candidates.</p>
+                        </div>
+                    </div>
+                    <div class="mt-5 space-y-5">
+                        @foreach ($categoryFunnel as $item)
+                            @php
+                                $appearedWidth = round(($item['appeared'] / $maxCategoryRegistered) * 100);
+                                $qualifiedWidth = round(($item['qualified'] / $maxCategoryRegistered) * 100);
+                            @endphp
+                            <div>
+                                <div class="mb-2 flex items-center justify-between text-xs font-bold text-slate-600">
+                                    <span>{{ $item['category'] }}</span>
+                                    <span>{{ number_format($item['qualified']) }} qualified</span>
+                                </div>
+                                <div class="space-y-1.5">
+                                    <div class="h-2 rounded-full bg-rose-100">
+                                        <div class="h-2 rounded-full bg-rose-500" style="width: {{ round(($item['registered'] / $maxCategoryRegistered) * 100) }}%"></div>
+                                    </div>
+                                    <div class="h-2 rounded-full bg-blue-100">
+                                        <div class="h-2 rounded-full bg-blue-500" style="width: {{ $appearedWidth }}%"></div>
+                                    </div>
+                                    <div class="h-2 rounded-full bg-emerald-100">
+                                        <div class="h-2 rounded-full bg-emerald-500" style="width: {{ $qualifiedWidth }}%"></div>
+                                    </div>
+                                </div>
+                                <div class="mt-2 grid grid-cols-3 gap-2 text-[10px] font-semibold text-slate-400">
+                                    <span>Reg: {{ number_format($item['registered']) }}</span>
+                                    <span>App: {{ number_format($item['appeared']) }}</span>
+                                    <span>Qual: {{ number_format($item['qualified']) }}</span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                    <h3 class="text-base font-bold text-slate-900">Year-wise Shift Analysis</h3>
+                    <p class="text-xs text-slate-400">2023 to 2025 movement for key NEET indicators.</p>
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead class="text-left text-xs font-bold uppercase tracking-wide text-slate-400">
+                                <tr>
+                                    <th class="py-2 pr-4">Metric</th>
+                                    <th class="py-2 pr-4">2023</th>
+                                    <th class="py-2 pr-4">2024</th>
+                                    <th class="py-2 pr-4">2025</th>
+                                    <th class="py-2 text-right">Shift</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                @foreach ($yearComparison as $item)
+                                    <tr>
+                                        <td class="py-3 pr-4 font-bold text-slate-800">{{ $item['metric'] }}</td>
+                                        <td class="py-3 pr-4 text-slate-600">{{ number_format($item['2023']) }}</td>
+                                        <td class="py-3 pr-4 text-slate-600">{{ number_format($item['2024']) }}</td>
+                                        <td class="py-3 pr-4 font-bold text-slate-950">{{ number_format($item['2025']) }}</td>
+                                        <td class="py-3 text-right">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-bold {{ $item['shift'] >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700' }}">
+                                                {{ $item['shift'] > 0 ? '+' : '' }}{{ number_format($item['shift'], 2) }}%
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 grid gap-6 xl:grid-cols-2">
+                <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                    <h3 class="text-base font-bold text-slate-900">Top Seat Growth States</h3>
+                    <p class="text-xs text-slate-400">2025 increase compared with 2024 total medical seats.</p>
+                    <div class="mt-5 space-y-4">
+                        @foreach ($seatGrowthStates as $item)
+                            <div>
+                                <div class="mb-1.5 flex justify-between text-xs font-bold text-slate-600">
+                                    <span>{{ $item['state'] }}</span>
+                                    <span>+{{ number_format($item['increase']) }} seats</span>
+                                </div>
+                                <div class="h-2 rounded-full bg-slate-100">
+                                    <div class="h-2 rounded-full bg-rose-500" style="width: {{ max(8, round(($item['increase'] / $maxSeatIncrease) * 100)) }}%"></div>
+                                </div>
+                                <div class="mt-1 text-[10px] font-semibold text-slate-400">2024: {{ number_format($item['seats_2024']) }} | 2025: {{ number_format($item['seats_2025']) }}</div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                    <h3 class="text-base font-bold text-slate-900">Medical Colleges: 2024 vs 2025</h3>
+                    <p class="text-xs text-slate-400">Institution type comparison from the reference deck.</p>
+                    <div class="mt-5 grid gap-4 sm:grid-cols-2">
+                        @foreach ($collegeTypeComparison as $item)
+                            @php $change = $item['2025'] - $item['2024']; @endphp
+                            <div class="rounded-xl bg-slate-50 p-4">
+                                <div class="text-xs font-bold uppercase tracking-wide text-slate-500">{{ $item['type'] }}</div>
+                                <div class="mt-3 flex items-end justify-between gap-4">
+                                    <div>
+                                        <div class="text-2xl font-extrabold text-slate-950">{{ number_format($item['2025']) }}</div>
+                                        <div class="text-xs text-slate-400">2025 colleges</div>
+                                    </div>
+                                    <span class="rounded-full px-2 py-0.5 text-xs font-bold {{ $change > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
+                                        {{ $change > 0 ? '+' : '' }}{{ number_format($change) }}
+                                    </span>
+                                </div>
+                                <div class="mt-3 h-2 rounded-full bg-white">
+                                    <div class="h-2 rounded-full bg-slate-800" style="width: {{ max(8, round(($item['2025'] / $maxCollegeTypeCount) * 100)) }}%"></div>
+                                </div>
+                                <div class="mt-1 text-[10px] font-semibold text-slate-400">2024: {{ number_format($item['2024']) }}</div>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </section>

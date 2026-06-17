@@ -33,7 +33,7 @@
                 <div class="px-6 py-5 border-b border-slate-200 bg-slate-50/50">
                     <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">Student Account</p>
                     <h1 class="mt-2 text-2xl font-extrabold text-slate-950">Profile Settings</h1>
-                    <p class="mt-1 text-sm text-slate-500">Update your account credentials and NEET counselling details.</p>
+                    <p class="mt-1 text-sm text-slate-500">Update your account details and NEET counselling defaults.</p>
                 </div>
 
                 <form action="{{ route('profile.update') }}" method="POST" class="p-6 space-y-6">
@@ -105,16 +105,9 @@
                                 </select>
                             </div>
 
-                            <div class="md:col-span-2">
-                                <label for="category" class="block text-xs font-bold uppercase tracking-wide text-slate-500">Default Category</label>
-                                <select id="category" name="category"
-                                    class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
-                                    <option value="">Select Category</option>
-                                    @foreach ($categories as $cVal)
-                                        <option value="{{ $cVal }}" @selected(old('category', $user->category) === $cVal)>{{ $cVal }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                            <p class="md:col-span-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-medium leading-5 text-slate-500">
+                                Category values such as OPEN, OBC, SC, ST, EWS, and sheet-specific category labels are now available inside Default Quota.
+                            </p>
                         </div>
                     </div>
 

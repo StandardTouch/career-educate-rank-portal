@@ -28,7 +28,43 @@ Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])
 // Routes protected by authentication AND having a paid plan
 Route::middleware(['auth', 'single.device', 'paid'])->group(function () {
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        $user = auth()->user();
+        $datasets = \App\Models\Dataset::query()
+            ->where('is_active', true)
+            ->withCount('rankRecords')
+            ->orderByDesc('year')
+            ->orderBy('course')
+            ->orderBy('title')
+            ->take(8)
+            ->get();
+
+        $latestMbbs = $datasets->first(fn ($dataset) => strtoupper((string) $dataset->course) === 'MBBS');
+        $latestBds = $datasets->first(fn ($dataset) => strtoupper((string) $dataset->course) === 'BDS');
+        $datasetCount = \App\Models\Dataset::where('is_active', true)->count();
+        $recordCount = \App\Models\RankRecord::count();
+        $availableYears = \App\Models\Dataset::where('is_active', true)->whereNotNull('year')->distinct()->count('year');
+
+        $profileFields = collect([
+            $user->name,
+            $user->email,
+            $user->phone,
+            $user->neet_rank,
+            $user->neet_marks,
+            $user->state,
+            $user->quota,
+        ]);
+        $profileCompletion = (int) round(($profileFields->filter(fn ($value) => filled($value))->count() / $profileFields->count()) * 100);
+
+        return view('dashboard', compact(
+            'user',
+            'datasets',
+            'latestMbbs',
+            'latestBds',
+            'datasetCount',
+            'recordCount',
+            'availableYears',
+            'profileCompletion'
+        ));
     })->name('dashboard');
 
     Route::get('/results/{dataset:slug}', [App\Http\Controllers\ResultController::class, 'show'])->name('results.show');

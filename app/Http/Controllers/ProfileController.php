@@ -13,31 +13,78 @@ class ProfileController extends Controller
     {
         $user = auth()->user();
 
-        // Get distinct quotas and categories from database dynamically to show as select options
+        // Default Quota intentionally includes quota and category-like values because legacy sheets
+        // use both columns for the student's default counselling preference.
         $quotas = RankRecord::whereNotNull('quota')
             ->where('quota', '!=', '')
             ->distinct()
             ->orderBy('quota')
-            ->pluck('quota');
-
-        $categories = RankRecord::whereNotNull('category')
-            ->where('category', '!=', '')
-            ->distinct()
-            ->orderBy('category')
-            ->pluck('category');
-
-        // Extract distinct state names from rank records raw payload or model table
-        $states = RankRecord::whereNotNull('dataset_id')
-            ->whereNotNull('college_name') // just to verify it's a real record
-            ->distinct()
-            ->orderBy('quota') // fallback order
-            ->pluck('quota') // fallback
-            ->merge(['Karnataka', 'West Bengal', 'Andhra Pradesh', 'Maharashtra', 'Tamil Nadu', 'Delhi', 'Kerala'])
+            ->pluck('quota')
+            ->merge(
+                RankRecord::whereNotNull('category')
+                    ->where('category', '!=', '')
+                    ->distinct()
+                    ->orderBy('category')
+                    ->pluck('category')
+            )
+            ->merge([
+                'All India',
+                'State Quota',
+                'Management Quota',
+                'NRI Quota',
+                'OPEN',
+                'GENERAL',
+                'EWS',
+                'OBC',
+                'SC',
+                'ST',
+            ])
+            ->map(fn ($value) => trim((string) $value))
+            ->filter()
             ->unique()
             ->sort()
             ->values();
 
-        return view('profile.edit', compact('user', 'quotas', 'categories', 'states'));
+        $states = collect([
+            'Andaman and Nicobar Islands',
+            'Andhra Pradesh',
+            'Arunachal Pradesh',
+            'Assam',
+            'Bihar',
+            'Chandigarh',
+            'Chhattisgarh',
+            'Dadra and Nagar Haveli and Daman and Diu',
+            'Delhi',
+            'Goa',
+            'Gujarat',
+            'Haryana',
+            'Himachal Pradesh',
+            'Jammu and Kashmir',
+            'Jharkhand',
+            'Karnataka',
+            'Kerala',
+            'Ladakh',
+            'Lakshadweep',
+            'Madhya Pradesh',
+            'Maharashtra',
+            'Manipur',
+            'Meghalaya',
+            'Mizoram',
+            'Nagaland',
+            'Odisha',
+            'Puducherry',
+            'Punjab',
+            'Rajasthan',
+            'Sikkim',
+            'Tamil Nadu',
+            'Telangana',
+            'Tripura',
+            'Uttar Pradesh',
+            'Uttarakhand',
+            'West Bengal',
+        ]);
+
+        return view('profile.edit', compact('user', 'quotas', 'states'));
     }
 
     public function update(Request $request)
@@ -51,7 +98,6 @@ class ProfileController extends Controller
             'neet_rank' => ['nullable', 'integer', 'min:1'],
             'neet_marks' => ['nullable', 'numeric', 'min:0', 'max:720'],
             'quota' => ['nullable', 'string', 'max:255'],
-            'category' => ['nullable', 'string', 'max:255'],
             'state' => ['nullable', 'string', 'max:255'],
             'current_password' => ['nullable', 'required_with:new_password', 'string'],
             'new_password' => ['nullable', 'string', 'min:8', 'confirmed'],
@@ -71,7 +117,7 @@ class ProfileController extends Controller
             'neet_rank' => $data['neet_rank'],
             'neet_marks' => $data['neet_marks'],
             'quota' => $data['quota'],
-            'category' => $data['category'],
+            'category' => null,
             'state' => $data['state'],
         ]);
 
