@@ -29,19 +29,39 @@
         $selectedRoundLabel = count($selectedRounds) > 1
             ? count($selectedRounds) . ' selected'
             : ($selectedSheet?->sheet_name ?? 'Overall');
-        $columnOptions = [
-            'state_name' => 'State Name',
-            'college_name' => 'College Name',
-            'category' => 'Category',
-            'round_name' => 'Round Name',
-            'local_area' => 'Local Area',
-            'total_seats' => 'Total Seats',
-            'gen_closing_rank' => 'Gen Closing Rank',
-            'gen_closing_mark' => 'Gen Closing Mark',
-            'fem_closing_rank' => 'Fem Closing Rank',
-            'fem_closing_mark' => 'Fem Closing Mark',
-            'tuition_fee' => 'Tuition Fee',
-        ];
+        if ($roundComparisonMode ?? false) {
+            $columnOptions = [
+                'state_name' => 'State Name',
+                'college_name' => 'College Name',
+                'category' => 'Category',
+                'local_area' => 'Local Area',
+                'course' => 'Course',
+                'total_seats' => 'Total Seats',
+            ];
+
+            foreach ($roundComparisonColumns as $roundColumn) {
+                $columnOptions[$roundColumn['gen_rank_key']] = 'GEN ' . $roundColumn['label'] . ' Rank';
+                $columnOptions[$roundColumn['gen_mark_key']] = 'GEN ' . $roundColumn['label'] . ' Mark';
+                $columnOptions[$roundColumn['fem_rank_key']] = 'FEM ' . $roundColumn['label'] . ' Rank';
+                $columnOptions[$roundColumn['fem_mark_key']] = 'FEM ' . $roundColumn['label'] . ' Mark';
+            }
+
+            $columnOptions['tuition_fee'] = 'Tuition Fee';
+        } else {
+            $columnOptions = [
+                'state_name' => 'State Name',
+                'college_name' => 'College Name',
+                'category' => 'Category',
+                'round_name' => 'Round Name',
+                'local_area' => 'Local Area',
+                'total_seats' => 'Total Seats',
+                'gen_closing_rank' => 'Gen Closing Rank',
+                'gen_closing_mark' => 'Gen Closing Mark',
+                'fem_closing_rank' => 'Fem Closing Rank',
+                'fem_closing_mark' => 'Fem Closing Mark',
+                'tuition_fee' => 'Tuition Fee',
+            ];
+        }
     @endphp
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-10">
@@ -57,7 +77,7 @@
                     </p>
                 </div>
                 <div class="text-sm font-semibold text-slate-500">
-                    {{ number_format($records->total()) }} matching records
+                    {{ number_format($resultCount ?? $records->total()) }} matching records
                 </div>
             </div>
 
@@ -269,6 +289,26 @@
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
                     <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                        @if ($roundComparisonMode ?? false)
+                        <tr>
+                            <th data-col="state_name" class="px-4 py-3 text-left">State Name</th>
+                            <th data-col="college_name" class="px-4 py-3 text-left">College Name</th>
+                            <th data-col="category" class="px-4 py-3 text-left">Category</th>
+                            <th data-col="local_area" class="px-4 py-3 text-left">Local Area</th>
+                            <th data-col="course" class="px-4 py-3 text-left">Course</th>
+                            <th data-col="total_seats" class="px-4 py-3 text-right">
+                                Total Seats
+                                <span class="block text-[11px] font-extrabold text-rose-500">{{ $totalSeats ?? 0 }}</span>
+                            </th>
+                            @foreach ($roundComparisonColumns as $roundColumn)
+                                <th data-col="{{ $roundColumn['gen_rank_key'] }}" class="px-4 py-3 text-right">GEN {{ $roundColumn['label'] }} Rank</th>
+                                <th data-col="{{ $roundColumn['gen_mark_key'] }}" class="px-4 py-3 text-right">GEN {{ $roundColumn['label'] }} Mark</th>
+                                <th data-col="{{ $roundColumn['fem_rank_key'] }}" class="px-4 py-3 text-right">FEM {{ $roundColumn['label'] }} Rank</th>
+                                <th data-col="{{ $roundColumn['fem_mark_key'] }}" class="px-4 py-3 text-right">FEM {{ $roundColumn['label'] }} Mark</th>
+                            @endforeach
+                            <th data-col="tuition_fee" class="px-4 py-3 text-right">Tuition Fee</th>
+                        </tr>
+                        @else
                         <tr>
                             <th data-col="state_name" class="px-4 py-3 text-left">State Name</th>
                             <th data-col="college_name" class="px-4 py-3 text-left">College Name</th>
@@ -285,8 +325,35 @@
                             <th data-col="fem_closing_mark" class="px-4 py-3 text-right">Fem Closing Mark</th>
                             <th data-col="tuition_fee" class="px-4 py-3 text-right">Tuition Fee</th>
                         </tr>
+                        @endif
                     </thead>
                     <tbody class="divide-y divide-slate-100">
+                        @if ($roundComparisonMode ?? false)
+                            @forelse ($roundComparisonRows as $row)
+                                <tr class="hover:bg-slate-50">
+                                    <td data-col="state_name" class="px-4 py-3 font-semibold text-slate-600">{{ $row['state_name'] }}</td>
+                                    <td data-col="college_name" class="px-4 py-3 font-bold text-slate-900">{{ $row['college_name'] }}</td>
+                                    <td data-col="category" class="px-4 py-3">{{ $row['category'] }}</td>
+                                    <td data-col="local_area" class="px-4 py-3">{{ $row['local_area'] }}</td>
+                                    <td data-col="course" class="px-4 py-3">{{ $row['course'] }}</td>
+                                    <td data-col="total_seats" class="px-4 py-3 text-right">{{ $row['seats'] !== null ? $row['seats'] : '-' }}</td>
+                                    @foreach ($roundComparisonColumns as $roundColumn)
+                                        @php $roundValues = $row['rounds'][$roundColumn['round_id']] ?? []; @endphp
+                                        <td data-col="{{ $roundColumn['gen_rank_key'] }}" class="px-4 py-3 text-right font-bold text-rose-600">{{ !empty($roundValues['gen_rank'] ?? null) ? (int) $roundValues['gen_rank'] : '-' }}</td>
+                                        <td data-col="{{ $roundColumn['gen_mark_key'] }}" class="px-4 py-3 text-right">{{ ($roundValues['gen_mark'] ?? null) !== null && ($roundValues['gen_mark'] ?? '') !== '' ? (int) $roundValues['gen_mark'] : '-' }}</td>
+                                        <td data-col="{{ $roundColumn['fem_rank_key'] }}" class="px-4 py-3 text-right">{{ !empty($roundValues['fem_rank'] ?? null) ? (int) $roundValues['fem_rank'] : '-' }}</td>
+                                        <td data-col="{{ $roundColumn['fem_mark_key'] }}" class="px-4 py-3 text-right">{{ ($roundValues['fem_mark'] ?? null) !== null && ($roundValues['fem_mark'] ?? '') !== '' ? (int) $roundValues['fem_mark'] : '-' }}</td>
+                                    @endforeach
+                                    <td data-col="tuition_fee" class="px-4 py-3 text-right">{{ $row['fees'] !== null ? (int) $row['fees'] : '-' }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="{{ count($columnOptions) }}" class="px-4 py-10 text-center text-sm font-semibold text-slate-500">
+                                        No records found for these filters.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        @else
                         @forelse ($records as $record)
                             @php
                                 $payload = is_array($record->raw_payload) ? $record->raw_payload : (json_decode((string) $record->raw_payload, true) ?: []);
@@ -315,13 +382,16 @@
                                 </td>
                             </tr>
                         @endforelse
+                        @endif
                     </tbody>
                 </table>
             </div>
 
+            @unless ($roundComparisonMode ?? false)
             <div class="border-t border-slate-200 px-4 py-4">
                 {{ $records->links() }}
             </div>
+            @endunless
         </section>
     </main>
 
