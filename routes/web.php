@@ -67,6 +67,7 @@ Route::middleware(['auth', 'single.device', 'paid'])->group(function () {
         ));
     })->name('dashboard');
 
+    Route::get('/neet-ug-2025-analysis', [App\Http\Controllers\NeetAnalysisController::class, 'show'])->name('neet.analysis');
     Route::get('/results/{dataset:slug}', [App\Http\Controllers\ResultController::class, 'show'])->name('results.show');
 });
 

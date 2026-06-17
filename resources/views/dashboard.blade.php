@@ -44,6 +44,9 @@
                     <a href="{{ route('profile') }}" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
                         Edit Profile
                     </a>
+                    <a href="{{ route('neet.analysis') }}" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
+                        NEET UG Analysis
+                    </a>
                 </div>
             </div>
         </section>
@@ -126,6 +129,21 @@
                         </div>
                     @endforelse
                 </div>
+            </div>
+        </section>
+
+        <section class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-6 shadow-sm">
+            <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-600">NEET UG 2025 Analysis</p>
+                    <h2 class="mt-2 text-2xl font-extrabold text-slate-950">View National Candidate, Seat, and College Analytics</h2>
+                    <p class="mt-2 text-sm text-slate-600">
+                        Includes the same content from the Karnataka PPT: candidate overview, category funnel, year-wise analysis, qualified performance, seats across India, and college type comparison.
+                    </p>
+                </div>
+                <a href="{{ route('neet.analysis') }}" class="inline-flex shrink-0 justify-center rounded-xl bg-rose-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-rose-600">
+                    Open Analysis
+                </a>
             </div>
         </section>
     </main>
