@@ -9,8 +9,14 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [App\Http\Controllers\AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [App\Http\Controllers\AuthController::class, 'login'])->name('login.store');
+    Route::get('/login/verify-mobile', [App\Http\Controllers\AuthController::class, 'showLoginOtp'])->name('login.verify');
+    Route::post('/login/verify-mobile', [App\Http\Controllers\AuthController::class, 'verifyLoginOtp'])->name('login.verify.store');
     Route::get('/register', [App\Http\Controllers\AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [App\Http\Controllers\AuthController::class, 'register'])->name('register.store');
+    Route::post('/register/send-otp', [App\Http\Controllers\AuthController::class, 'sendRegistrationOtp'])->name('register.send-otp');
+    Route::get('/register/verify-mobile', [App\Http\Controllers\AuthController::class, 'showVerifyMobile'])->name('register.verify');
+    Route::post('/register/verify-mobile', [App\Http\Controllers\AuthController::class, 'verifyRegistrationOtp'])->name('register.verify.store');
+    Route::get('/register/details', [App\Http\Controllers\AuthController::class, 'showRegisterDetails'])->name('register.details');
+    Route::post('/register/details', [App\Http\Controllers\AuthController::class, 'completeRegistration'])->name('register.details.store');
 });
 
 Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])

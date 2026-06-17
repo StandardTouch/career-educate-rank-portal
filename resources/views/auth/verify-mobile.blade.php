@@ -23,7 +23,7 @@
                 <p class="mt-2 text-sm text-slate-500">Code sent to {{ $phone }}.</p>
             </div>
 
-            <form action="{{ route('register.verify.store') }}" method="POST" class="p-6 space-y-5">
+            <form action="{{ $action ?? route('register.verify.store') }}" method="POST" class="p-6 space-y-5">
                 @csrf
 
                 @if ($errors->any())

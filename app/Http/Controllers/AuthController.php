@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -16,56 +17,88 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
+        $data = $request->validate([
+            'phone' => ['required', 'digits_between:10,12'],
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
+        $phone = $this->normalizePhone($data['phone']);
+        $user = User::where('phone', $phone)->first();
 
-            return redirect()->intended($request->user()->is_admin ? route('admin.dashboard') : route('dashboard'));
+        if (! $user) {
+            return back()
+                ->withErrors(['phone' => 'No account found for this mobile number.'])
+                ->onlyInput('phone');
         }
 
-        return back()
-            ->withErrors(['email' => 'The provided credentials do not match our records.'])
-            ->onlyInput('email');
+        if (! $user->mobile_verified_at) {
+            return back()
+                ->withErrors(['phone' => 'Please register and verify this mobile number first.'])
+                ->onlyInput('phone');
+        }
+
+        $otp = (string) random_int(100000, 999999);
+        $request->session()->put('login_phone', $phone);
+        $request->session()->put('login_otp', Hash::make($otp));
+        $request->session()->put('login_otp_expires_at', now()->addMinutes(10)->timestamp);
+
+        $message = "Dear Student, {$otp} is your Career Educate login OTP. It is valid for 10 minutes.";
+        $sent = sendSmsToPatient($phone, $message);
+
+        if (! $sent) {
+            return back()
+                ->withErrors(['phone' => 'We could not send the OTP right now. Please try again.'])
+                ->onlyInput('phone');
+        }
+
+        return redirect()->route('login.verify')
+            ->with('status', 'OTP sent to your mobile number.');
     }
 
     public function showRegister()
     {
-        return view('auth.register');
+        return view('auth.register-phone');
     }
 
-    public function register(Request $request)
+    public function showLoginOtp(Request $request)
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'phone' => ['required', 'digits_between:10,12', 'unique:users,phone'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        if (! $request->session()->has('login_phone')) {
+            return redirect()->route('login');
+        }
+
+        return view('auth.verify-mobile', [
+            'phone' => $request->session()->get('login_phone'),
+            'action' => route('login.verify.store'),
+        ]);
+    }
+
+    public function verifyLoginOtp(Request $request)
+    {
+        $request->validate([
+            'otp' => ['required', 'digits:6'],
         ]);
 
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'phone' => $this->normalizePhone($data['phone']),
-            'password' => $data['password'],
-            'mobile_verified_at' => now(), // OTP bypassed
-            'is_admin' => false,
-            'plan' => 'none',
-            'payment_status' => 'unpaid',
-        ]);
+        $hashedOtp = $request->session()->get('login_otp');
+        $expiresAt = $request->session()->get('login_otp_expires_at');
+        $phone = $request->session()->get('login_phone');
+
+        if (! $hashedOtp || ! $expiresAt || ! $phone || now()->timestamp > $expiresAt) {
+            return redirect()->route('login')
+                ->withErrors(['phone' => 'Your OTP has expired. Please request a new one.']);
+        }
+
+        if (! Hash::check($request->input('otp'), $hashedOtp)) {
+            return back()->withErrors(['otp' => 'The OTP you entered is incorrect.']);
+        }
+
+        $user = User::where('phone', $phone)->firstOrFail();
+        $request->session()->forget(['login_phone', 'login_otp', 'login_otp_expires_at']);
 
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('plans.index')
-            ->with('status', 'Registration successful! Choose a package to start using the portal.');
+        return redirect()->intended($this->postAuthRedirect($user));
     }
 
-    /* Commented out OTP verification process as requested
-    
     public function sendRegistrationOtp(Request $request)
     {
         $data = $request->validate([
@@ -100,6 +133,7 @@ class AuthController extends Controller
 
         return view('auth.verify-mobile', [
             'phone' => $request->session()->get('registration_phone'),
+            'action' => route('register.verify.store'),
         ]);
     }
 
@@ -149,16 +183,27 @@ class AuthController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'neet_rank' => ['nullable', 'integer', 'min:1'],
+            'neet_marks' => ['nullable', 'numeric', 'min:0', 'max:720'],
+            'quota' => ['nullable', 'string', 'max:255'],
+            'category' => ['nullable', 'string', 'max:255'],
+            'state' => ['nullable', 'string', 'max:255'],
         ]);
 
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'phone' => $phone,
-            'password' => $data['password'],
+            'password' => Str::random(32),
             'mobile_verified_at' => now(),
             'is_admin' => false,
+            'neet_rank' => $data['neet_rank'] ?? null,
+            'neet_marks' => $data['neet_marks'] ?? null,
+            'quota' => $data['quota'] ?? null,
+            'category' => $data['category'] ?? null,
+            'state' => $data['state'] ?? null,
+            'plan' => 'none',
+            'payment_status' => 'unpaid',
         ]);
 
         $request->session()->forget(['registration_phone', 'registration_mobile_verified']);
@@ -166,10 +211,9 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('dashboard');
+        return redirect()->route('plans.index')
+            ->with('status', 'Profile created successfully. Choose a subscription to access the portal.');
     }
-    
-    */
 
     public function logout(Request $request)
     {
@@ -186,5 +230,18 @@ class AuthController extends Controller
         $phone = preg_replace('/\D+/', '', $phone);
 
         return str_starts_with($phone, '91') ? $phone : '91' . ltrim($phone, '0');
+    }
+
+    private function postAuthRedirect(User $user): string
+    {
+        if ($user->is_admin) {
+            return route('admin.dashboard');
+        }
+
+        if ($user->payment_status !== 'paid') {
+            return route('plans.index');
+        }
+
+        return route('dashboard');
     }
 }

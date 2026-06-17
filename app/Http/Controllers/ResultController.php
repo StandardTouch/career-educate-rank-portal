@@ -92,12 +92,21 @@ class ResultController extends Controller
         }
 
         if ($request->filled('rank')) {
-            $query->where('closing_rank', '>=', (int) $request->input('rank'));
+            $rank = (int) $request->input('rank');
+
+            $query->where(function ($q) use ($rank) {
+                $q->where('closing_rank', '>=', $rank)
+                    ->orWhere('fem_closing_rank', '>=', $rank);
+            });
         }
 
-        if ($request->filled('fem_rank')) {
-            $query->where('fem_closing_rank', '>=', (int) $request->input('fem_rank'));
-        }
+        // if ($request->filled('rank')) {
+        //     $query->where('closing_rank', '>=', (int) $request->input('rank'));
+        // }
+
+        // if ($request->filled('fem_rank')) {
+        //     $query->where('fem_closing_rank', '>=', (int) $request->input('fem_rank'));
+        // }
 
         if ($request->filled('fem_mark')) {
             $query->where('fem_closing_mark', '>=', (float) $request->input('fem_mark'));

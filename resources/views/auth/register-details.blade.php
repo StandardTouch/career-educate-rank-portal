@@ -44,19 +44,39 @@
                 </div>
 
                 <div>
-                    <label for="password" class="block text-sm font-bold uppercase tracking-wide text-slate-600">Password</label>
-                    <input id="password" name="password" type="password" required
+                    <label for="neet_rank" class="block text-sm font-bold uppercase tracking-wide text-slate-600">NEET Rank</label>
+                    <input id="neet_rank" name="neet_rank" type="number" value="{{ old('neet_rank') }}"
+                        placeholder="Optional"
                         class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
                 </div>
 
                 <div>
-                    <label for="password_confirmation" class="block text-sm font-bold uppercase tracking-wide text-slate-600">Confirm password</label>
-                    <input id="password_confirmation" name="password_confirmation" type="password" required
+                    <label for="neet_marks" class="block text-sm font-bold uppercase tracking-wide text-slate-600">NEET Marks</label>
+                    <input id="neet_marks" name="neet_marks" type="number" step="0.01" value="{{ old('neet_marks') }}"
+                        placeholder="Optional"
+                        class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
+                </div>
+
+                <div>
+                    <label for="state" class="block text-sm font-bold uppercase tracking-wide text-slate-600">State</label>
+                    <input id="state" name="state" type="text" value="{{ old('state') }}" placeholder="Optional"
+                        class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
+                </div>
+
+                <div>
+                    <label for="quota" class="block text-sm font-bold uppercase tracking-wide text-slate-600">Quota</label>
+                    <input id="quota" name="quota" type="text" value="{{ old('quota') }}" placeholder="Optional"
+                        class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
+                </div>
+
+                <div>
+                    <label for="category" class="block text-sm font-bold uppercase tracking-wide text-slate-600">Category</label>
+                    <input id="category" name="category" type="text" value="{{ old('category') }}" placeholder="Optional"
                         class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
                 </div>
 
                 <button type="submit" class="w-full rounded-xl bg-rose-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-rose-500/10 transition hover:bg-rose-600 active:scale-95">
-                    Register and Open Dashboard
+                    Save Profile and Choose Subscription
                 </button>
             </form>
         </section>

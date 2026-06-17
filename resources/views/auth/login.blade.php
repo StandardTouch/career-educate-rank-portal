@@ -34,24 +34,14 @@
                 @endif
 
                 <div>
-                    <label for="email" class="block text-sm font-bold uppercase tracking-wide text-slate-600">Email</label>
-                    <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus
+                    <label for="phone" class="block text-sm font-bold uppercase tracking-wide text-slate-600">Mobile Number</label>
+                    <input id="phone" name="phone" type="tel" value="{{ old('phone') }}" required autofocus
+                        placeholder="10 digit mobile number"
                         class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
                 </div>
-
-                <div>
-                    <label for="password" class="block text-sm font-bold uppercase tracking-wide text-slate-600">Password</label>
-                    <input id="password" name="password" type="password" required
-                        class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
-                </div>
-
-                <label class="flex items-center gap-2 text-sm font-medium text-slate-600">
-                    <input type="checkbox" name="remember" value="1" class="rounded border-slate-300 text-rose-500 focus:ring-rose-500">
-                    Remember me
-                </label>
 
                 <button type="submit" class="w-full rounded-xl bg-rose-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-rose-500/10 transition hover:bg-rose-600 active:scale-95">
-                    Login
+                    Send Login OTP
                 </button>
 
                 <p class="text-center text-sm text-slate-500">
