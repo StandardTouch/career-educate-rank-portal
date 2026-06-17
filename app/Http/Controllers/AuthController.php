@@ -41,7 +41,7 @@ class AuthController extends Controller
         $request->session()->put('login_otp', Hash::make($otp));
         $request->session()->put('login_otp_expires_at', now()->addMinutes(10)->timestamp);
 
-        $message = "Dear Student, {$otp} is your Career Educate login OTP. It is valid for 10 minutes.";
+        $message = "Dear Student, {$otp} is your Career Educate mobile verification code. It is valid for 10 minutes. Shaheen Group";
         $sent = sendSmsToPatient($phone, $message);
 
         if (! $sent) {
@@ -112,7 +112,7 @@ class AuthController extends Controller
         $request->session()->put('registration_otp', Hash::make($otp));
         $request->session()->put('registration_otp_expires_at', now()->addMinutes(10)->timestamp);
 
-        $message = "Dear Student, {$otp} is your Career Educate mobile verification code. It is valid for 10 minutes.";
+        $message = "Dear Student, {$otp} is your Career Educate mobile verification code. It is valid for 10 minutes. Shaheen Group";
         $sent = sendSmsToPatient($phone, $message);
 
         if (! $sent) {
