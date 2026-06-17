@@ -700,11 +700,28 @@
                 </div>
                 <div>
                     <h4 class="text-white font-bold text-xs uppercase tracking-wider mb-4">Contact Info</h4>
-                    <p class="text-slate-500 text-xs leading-relaxed">
-                        Email: info@careereducate.org<br>
-                        Support: +91 80 4991 2993<br>
-                        Headquarters: Shaheen Group Campus, Bidar, Karnataka.
-                    </p>
+                    <div class="space-y-4 text-slate-500 text-xs leading-relaxed">
+                        <div>
+                            <div class="font-bold text-slate-300">Hyderabad Office</div>
+                            <p>
+                                Career Educate<br>
+                                8-1-347/B1/A &amp; 8-1-348/A<br>
+                                Above Ratandeep Super Market, Shaikpet Road,<br>
+                                Tolichowki, Hyderabad, Telangana - 500001<br>
+                                Contact: 8951918163
+                            </p>
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-300">Bangalore Office</div>
+                            <p>
+                                Career Educate<br>
+                                #5 GC Rich Homes, Richmond Road,<br>
+                                Bangalore - 560025<br>
+                                Contact: 7760303019<br>
+                                <a href="https://maps.app.goo.gl/rFLfaxVxjywNGYGN8" target="_blank" rel="noopener" class="text-rose-400 hover:text-rose-300">View Location</a>
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
             

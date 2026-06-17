@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureSingleDeviceSession;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -13,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('admin/*')
+            ? route('admin.login')
+            : route('login'));
+
         $middleware->alias([
             'admin' => EnsureAdmin::class,
             'paid' => \App\Http\Middleware\RequirePaidPlan::class,

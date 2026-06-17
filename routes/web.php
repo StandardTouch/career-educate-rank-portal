@@ -7,6 +7,8 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware('guest')->group(function () {
+    Route::get('/admin/login', [App\Http\Controllers\AuthController::class, 'showAdminLogin'])->name('admin.login');
+    Route::post('/admin/login', [App\Http\Controllers\AuthController::class, 'adminLogin'])->name('admin.login.store');
     Route::get('/login', [App\Http\Controllers\AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [App\Http\Controllers\AuthController::class, 'login'])->name('login.store');
     Route::get('/login/verify-mobile', [App\Http\Controllers\AuthController::class, 'showLoginOtp'])->name('login.verify');

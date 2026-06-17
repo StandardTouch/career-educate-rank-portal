@@ -16,6 +16,42 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
+    public function showAdminLogin()
+    {
+        return view('auth.admin-login');
+    }
+
+    public function adminLogin(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+        ]);
+
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            return back()
+                ->withErrors(['email' => 'The provided admin credentials are incorrect.'])
+                ->onlyInput('email');
+        }
+
+        $request->session()->regenerate();
+        $user = $request->user();
+
+        if (! $user->is_admin) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()
+                ->withErrors(['email' => 'This account does not have admin access.'])
+                ->onlyInput('email');
+        }
+
+        $this->activateSingleDeviceSession($user, $request);
+
+        return redirect()->intended(route('admin.dashboard'));
+    }
+
     public function login(Request $request)
     {
         $data = $request->validate([
