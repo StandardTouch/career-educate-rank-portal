@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -95,6 +96,7 @@ class AuthController extends Controller
 
         Auth::login($user);
         $request->session()->regenerate();
+        $this->activateSingleDeviceSession($user, $request);
 
         return redirect()->intended($this->postAuthRedirect($user));
     }
@@ -210,6 +212,7 @@ class AuthController extends Controller
 
         Auth::login($user);
         $request->session()->regenerate();
+        $this->activateSingleDeviceSession($user, $request);
 
         return redirect()->route('plans.index')
             ->with('status', 'Profile created successfully. Choose a subscription to access the portal.');
@@ -217,6 +220,12 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $user = $request->user();
+
+        if ($user && hash_equals((string) $user->current_session_id, $request->session()->getId())) {
+            $user->forceFill(['current_session_id' => null])->save();
+        }
+
         Auth::logout();
 
         $request->session()->invalidate();
@@ -243,5 +252,19 @@ class AuthController extends Controller
         }
 
         return route('dashboard');
+    }
+
+    private function activateSingleDeviceSession(User $user, Request $request): void
+    {
+        $currentSessionId = $request->session()->getId();
+        $previousSessionId = $user->current_session_id;
+
+        if ($previousSessionId && $previousSessionId !== $currentSessionId && config('session.driver') === 'database') {
+            DB::table(config('session.table', 'sessions'))
+                ->where('id', $previousSessionId)
+                ->delete();
+        }
+
+        $user->forceFill(['current_session_id' => $currentSessionId])->save();
     }
 }

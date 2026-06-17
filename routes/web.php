@@ -20,11 +20,11 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])
-    ->middleware('auth')
+    ->middleware(['auth', 'single.device'])
     ->name('logout');
 
 // Routes protected by authentication AND having a paid plan
-Route::middleware(['auth', 'paid'])->group(function () {
+Route::middleware(['auth', 'single.device', 'paid'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
@@ -33,7 +33,7 @@ Route::middleware(['auth', 'paid'])->group(function () {
 });
 
 // Routes protected by authentication only (allows profile updates and payment)
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'single.device'])->group(function () {
     // Profile
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile');
     Route::post('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
@@ -48,7 +48,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Admin routes
-Route::middleware(['auth', 'admin'])->group(function () {
+Route::middleware(['auth', 'single.device', 'admin'])->group(function () {
     Route::get('/admin/dashboard', [App\Http\Controllers\AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/import-excel', [App\Http\Controllers\ImportExcelController::class, 'create'])->name('import.excel');
     Route::post('/import-excel', [App\Http\Controllers\ImportExcelController::class, 'store'])->name('import.excel.store');

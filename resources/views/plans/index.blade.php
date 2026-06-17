@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-900">
+<html lang="en" class="h-full bg-slate-50">
 
 <head>
     <meta charset="UTF-8">
@@ -12,127 +12,100 @@
     <style>body { font-family: 'Outfit', sans-serif; }</style>
 </head>
 
-<body class="min-h-screen bg-slate-900 text-slate-100 pb-16">
+<body class="min-h-screen bg-slate-50 text-slate-950">
     @include('partials.results-header')
 
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+    <main class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         @if (session('warning'))
-            <div class="mb-8 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+            <div class="mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
                 {{ session('warning') }}
             </div>
         @endif
 
         @if (session('status'))
-            <div class="mb-8 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+            <div class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
                 {{ session('status') }}
             </div>
         @endif
 
-        <div class="text-center max-w-2xl mx-auto">
-            <p class="text-xs font-bold uppercase tracking-[0.2em] text-rose-500">Premium Packages</p>
-            <h1 class="mt-3 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-                NEET Counselling Guidance Services & Fee Structure
-            </h1>
-            <p class="mt-4 text-base text-slate-400">
-                Unlock instant access to the dynamic predictor tool and receive professional support for your college admissions.
-            </p>
-        </div>
-
-        <div class="mt-16 grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
-            <!-- Package 1: Web Access Support -->
-            <article class="relative flex flex-col justify-between rounded-3xl border border-slate-800 bg-slate-950 p-8 shadow-2xl hover:border-slate-700 transition duration-300 group">
-                <div class="absolute -top-3 right-6 rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-300 border border-slate-700">
-                    Self Service
+        <section class="rounded-2xl border border-slate-200 bg-white px-5 py-6 shadow-sm sm:px-8">
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div class="max-w-3xl">
+                    <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">Subscription Required</p>
+                    <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
+                        Choose Your NEET Counselling Plan
+                    </h1>
+                    <p class="mt-3 text-base leading-7 text-slate-600">
+                        Complete your subscription to unlock the predictor, result filters, and counselling support for your admission process.
+                    </p>
                 </div>
-                <div>
-                    <h2 class="text-xl font-bold text-white">1. Counselling Information & Web Access Support</h2>
-                    <p class="mt-2 text-sm text-slate-400">Essential digital utilities and alerts for self-managed admissions.</p>
-                    
-                    <div class="mt-6 flex items-baseline gap-2">
-                        <span class="text-4xl font-extrabold text-white">₹2,000</span>
-                        <span class="text-sm text-slate-400">registration fee</span>
+                <div class="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                    <span class="font-bold text-slate-950">Mobile verified</span>
+                    <span class="mx-2 text-slate-300">|</span>
+                    Next step: select a plan
+                </div>
+            </div>
+        </section>
+
+        <section class="mt-6 grid gap-5 lg:grid-cols-2">
+            <article class="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-slate-600">Self Service</span>
+                        <h2 class="mt-4 text-2xl font-extrabold text-slate-950">Counselling Information & Web Access Support</h2>
                     </div>
-
-                    <ul class="mt-8 space-y-4 text-sm text-slate-300 border-t border-slate-900 pt-6">
-                        <li class="flex items-start gap-3">
-                            <span class="text-rose-500 font-bold">✓</span>
-                            <span>Access to counselling information</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-rose-500 font-bold">✓</span>
-                            <span>Registration guidance</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-rose-500 font-bold">✓</span>
-                            <span>Official website navigation support</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-rose-500 font-bold">✓</span>
-                            <span>Basic counselling updates and alerts</span>
-                        </li>
-                    </ul>
+                    <div class="text-right">
+                        <div class="text-3xl font-extrabold text-slate-950">Rs. 2,000</div>
+                        <div class="text-sm font-medium text-slate-500">registration fee</div>
+                    </div>
                 </div>
 
-                <div class="mt-8 pt-6">
-                    <a href="{{ route('plans.checkout', 'basic') }}" class="block w-full text-center rounded-xl bg-slate-800 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-700 active:scale-95 group-hover:bg-rose-500">
-                        Choose Basic Plan
-                    </a>
-                </div>
+                <p class="mt-4 text-sm leading-6 text-slate-600">
+                    Essential digital utilities and alerts for students managing their own admissions.
+                </p>
+
+                <ul class="mt-6 grid gap-3 border-t border-slate-100 pt-5 text-sm font-medium text-slate-700">
+                    <li class="flex gap-3"><span class="font-bold text-rose-500">&check;</span><span>Access to counselling information</span></li>
+                    <li class="flex gap-3"><span class="font-bold text-rose-500">&check;</span><span>Registration guidance</span></li>
+                    <li class="flex gap-3"><span class="font-bold text-rose-500">&check;</span><span>Official website navigation support</span></li>
+                    <li class="flex gap-3"><span class="font-bold text-rose-500">&check;</span><span>Basic counselling updates and alerts</span></li>
+                </ul>
+
+                <a href="{{ route('plans.checkout', 'basic') }}" class="mt-7 inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-800 transition hover:border-rose-300 hover:text-rose-600 active:scale-95">
+                    Choose Basic Plan
+                </a>
             </article>
 
-            <!-- Package 2: Phone & Physical Support -->
-            <article class="relative flex flex-col justify-between rounded-3xl border border-rose-500/30 bg-slate-950 p-8 shadow-2xl hover:border-rose-500/50 transition duration-300 group">
-                <div class="absolute -top-3 right-6 rounded-full bg-rose-500/20 px-3 py-1 text-xs font-semibold text-rose-300 border border-rose-500/30">
-                    Recommended
-                </div>
-                <div>
-                    <h2 class="text-xl font-bold text-white">2. Complete Counselling Guidance (Phone & Physical Support)</h2>
-                    <p class="mt-2 text-sm text-slate-400">End-to-end guidance with dedicated mentor support throughout the process.</p>
-                    
-                    <div class="mt-6 flex items-baseline gap-2">
-                        <span class="text-4xl font-extrabold text-white">₹5,000</span>
-                        <span class="text-sm text-slate-400">service fee</span>
+            <article class="flex h-full flex-col rounded-2xl border border-rose-200 bg-white p-6 shadow-sm ring-1 ring-rose-100">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <span class="inline-flex rounded-full bg-rose-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-rose-600">Recommended</span>
+                        <h2 class="mt-4 text-2xl font-extrabold text-slate-950">Complete Counselling Guidance</h2>
                     </div>
-
-                    <ul class="mt-8 space-y-4 text-sm text-slate-300 border-t border-slate-900 pt-6">
-                        <li class="flex items-start gap-3">
-                            <span class="text-rose-500 font-bold">✓</span>
-                            <span class="font-semibold text-white">End-to-end counselling guidance</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-rose-500 font-bold">✓</span>
-                            <span>College selection assistance</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-rose-500 font-bold">✓</span>
-                            <span>Choice filling strategy</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-rose-500 font-bold">✓</span>
-                            <span>Document verification guidance</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-rose-500 font-bold">✓</span>
-                            <span>Phone support throughout counselling</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-rose-500 font-bold">✓</span>
-                            <span>In-person (physical) counselling assistance</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-rose-500 font-bold">✓</span>
-                            <span>Seat allotment and reporting guidance</span>
-                        </li>
-                    </ul>
+                    <div class="text-right">
+                        <div class="text-3xl font-extrabold text-slate-950">Rs. 5,000</div>
+                        <div class="text-sm font-medium text-slate-500">service fee</div>
+                    </div>
                 </div>
 
-                <div class="mt-8 pt-6">
-                    <a href="{{ route('plans.checkout', 'premium') }}" class="block w-full text-center rounded-xl bg-rose-500 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-rose-500/20 transition hover:bg-rose-600 active:scale-95">
-                        Choose Premium Plan
-                    </a>
-                </div>
+                <p class="mt-4 text-sm leading-6 text-slate-600">
+                    End-to-end guidance with dedicated phone and physical support throughout counselling.
+                </p>
+
+                <ul class="mt-6 grid gap-3 border-t border-slate-100 pt-5 text-sm font-medium text-slate-700 sm:grid-cols-2">
+                    <li class="flex gap-3"><span class="font-bold text-rose-500">&check;</span><span>End-to-end counselling guidance</span></li>
+                    <li class="flex gap-3"><span class="font-bold text-rose-500">&check;</span><span>College selection assistance</span></li>
+                    <li class="flex gap-3"><span class="font-bold text-rose-500">&check;</span><span>Choice filling strategy</span></li>
+                    <li class="flex gap-3"><span class="font-bold text-rose-500">&check;</span><span>Document verification guidance</span></li>
+                    <li class="flex gap-3"><span class="font-bold text-rose-500">&check;</span><span>Phone support throughout counselling</span></li>
+                    <li class="flex gap-3"><span class="font-bold text-rose-500">&check;</span><span>Seat allotment and reporting guidance</span></li>
+                </ul>
+
+                <a href="{{ route('plans.checkout', 'premium') }}" class="mt-7 inline-flex w-full items-center justify-center rounded-xl bg-rose-500 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-rose-500/20 transition hover:bg-rose-600 active:scale-95">
+                    Choose Premium Plan
+                </a>
             </article>
-        </div>
+        </section>
     </main>
 </body>
 

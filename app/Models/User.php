@@ -32,6 +32,7 @@ class User extends Authenticatable
         'state',
         'plan',
         'payment_status',
+        'current_session_id',
     ];
 
     /**
