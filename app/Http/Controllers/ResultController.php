@@ -94,6 +94,14 @@ class ResultController extends Controller
             $query->where('closing_rank', '>=', (int) $request->input('rank'));
         }
 
+        if ($request->filled('fem_rank')) {
+            $query->where('fem_closing_rank', '>=', (int) $request->input('fem_rank'));
+        }
+
+        if ($request->filled('fem_mark')) {
+            $query->where('fem_closing_mark', '>=', (float) $request->input('fem_mark'));
+        }
+
         if ($request->filled('fee_max')) {
             $query->where(function ($feeQuery) use ($request) {
                 $feeQuery

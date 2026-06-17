@@ -38,6 +38,8 @@
             'total_seats' => 'Total Seats',
             'gen_closing_rank' => 'Gen Closing Rank',
             'gen_closing_mark' => 'Gen Closing Mark',
+            'fem_closing_rank' => 'Fem Closing Rank',
+            'fem_closing_mark' => 'Fem Closing Mark',
             'tuition_fee' => 'Tuition Fee',
         ];
     @endphp
@@ -202,6 +204,20 @@
                         class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
                 </div>
 
+                {{--
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Fem Rank</label>
+                    <input type="number" name="fem_rank" value="{{ request('fem_rank') }}" placeholder="Show fem rank >= this"
+                        class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Fem Mark</label>
+                    <input type="number" name="fem_mark" value="{{ request('fem_mark') }}" placeholder="Show fem mark >= this"
+                        class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
+                </div>
+                --}}
+
                 <!-- Fee Range Slider -->
                 <div class="lg:col-span-2">
                     <div class="flex items-center justify-between gap-4">
@@ -265,6 +281,8 @@
                             </th>
                             <th data-col="gen_closing_rank" class="px-4 py-3 text-right">Gen Closing Rank</th>
                             <th data-col="gen_closing_mark" class="px-4 py-3 text-right">Gen Closing Mark</th>
+                            <th data-col="fem_closing_rank" class="px-4 py-3 text-right">Fem Closing Rank</th>
+                            <th data-col="fem_closing_mark" class="px-4 py-3 text-right">Fem Closing Mark</th>
                             <th data-col="tuition_fee" class="px-4 py-3 text-right">Tuition Fee</th>
                         </tr>
                     </thead>
@@ -274,6 +292,8 @@
                                 $payload = is_array($record->raw_payload) ? $record->raw_payload : (json_decode((string) $record->raw_payload, true) ?: []);
                                 $stateName = $payload['state_name'] ?? '-';
                                 $roundName = $record->round?->name ?? ($selectedSheet?->sheet_name ?? 'Overall');
+                                $femClosingRank = $record->fem_closing_rank ?? $payload['female_closing_rank'] ?? null;
+                                $femClosingMark = $record->fem_closing_mark ?? $payload['female_marks'] ?? null;
                             @endphp
                             <tr class="hover:bg-slate-50">
                                 <td data-col="state_name" class="px-4 py-3 font-semibold text-slate-600">{{ $stateName }}</td>
@@ -284,11 +304,13 @@
                                 <td data-col="total_seats" class="px-4 py-3 text-right">{{ $record->seats !== null ? $record->seats : '-' }}</td>
                                 <td data-col="gen_closing_rank" class="px-4 py-3 text-right font-bold text-rose-600">{{ $record->closing_rank !== null ? $record->closing_rank : '-' }}</td>
                                 <td data-col="gen_closing_mark" class="px-4 py-3 text-right">{{ $record->marks !== null ? number_format((float) $record->marks, 2) : '-' }}</td>
+                                <td data-col="fem_closing_rank" class="px-4 py-3 text-right">{{ $femClosingRank !== null && $femClosingRank !== '' ? (int) $femClosingRank : '-' }}</td>
+                                <td data-col="fem_closing_mark" class="px-4 py-3 text-right">{{ $femClosingMark !== null && $femClosingMark !== '' ? number_format((float) $femClosingMark, 2) : '-' }}</td>
                                 <td data-col="tuition_fee" class="px-4 py-3 text-right">{{ $record->fees !== null ? (int) $record->fees : '-' }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="px-4 py-10 text-center text-sm font-semibold text-slate-500">
+                                <td colspan="11" class="px-4 py-10 text-center text-sm font-semibold text-slate-500">
                                     No records found for these filters.
                                 </td>
                             </tr>

@@ -21,6 +21,8 @@ class RankRecord extends Model
         'opening_rank',
         'closing_rank',
         'marks',
+        'fem_closing_rank',
+        'fem_closing_mark',
         'fees',
         'raw_payload',
     ];
@@ -31,6 +33,7 @@ class RankRecord extends Model
             'raw_payload' => 'array',
             'fees' => 'decimal:2',
             'marks' => 'decimal:2',
+            'fem_closing_mark' => 'decimal:2',
         ];
     }
 

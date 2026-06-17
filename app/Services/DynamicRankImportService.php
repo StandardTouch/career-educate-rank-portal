@@ -201,6 +201,8 @@ class DynamicRankImportService
                 'opening_rank' => $this->cleanInteger($payload['opening_rank'] ?? null),
                 'closing_rank' => $this->cleanInteger($payload['closing_rank'] ?? $payload['gen_closing_rank'] ?? $payload['rank'] ?? null),
                 'marks' => $this->cleanMarks($payload['marks'] ?? $payload['gen_closing_mark'] ?? null),
+                'fem_closing_rank' => $this->cleanInteger($payload['female_closing_rank'] ?? null),
+                'fem_closing_mark' => $this->cleanMarks($payload['female_marks'] ?? null),
                 'fees' => $this->cleanDecimal($payload['fees'] ?? $payload['tuition_fee'] ?? $payload['total_fee'] ?? null),
                 'raw_payload' => json_encode($payload),
                 'created_at' => $now,
