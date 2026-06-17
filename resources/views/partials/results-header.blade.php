@@ -78,6 +78,12 @@
                     <a href="{{ route('admin.dashboard') }}" class="{{ $routeName === 'admin.dashboard' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
                         Admin
                     </a>
+                    <a href="{{ route('admin.users') }}" class="{{ $routeName === 'admin.users' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
+                        Users
+                    </a>
+                    <a href="{{ route('admin.payments') }}" class="{{ $routeName === 'admin.payments' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
+                        Payments
+                    </a>
                     <a href="{{ route('import.excel') }}" class="{{ $routeName === 'import.excel' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
                         Import
                     </a>

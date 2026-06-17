@@ -12,6 +12,7 @@ class Payment extends Model
         'plan',
         'amount',
         'transaction_id',
+        'order_id',
         'status',
     ];
 
