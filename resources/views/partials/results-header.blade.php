@@ -94,6 +94,9 @@
                     <a href="{{ route('neet.analysis') }}" class="{{ $routeName === 'neet.analysis' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
                         NEET Analysis 2025
                     </a>
+                    <a href="{{ asset('MCC-counselling-flow.pdf') }}" target="_blank" rel="noopener" class="hover:text-rose-500 transition-colors px-3 py-2 rounded-lg">
+                        MCC Counselling Flow
+                    </a>
                     <a href="{{ route('profile') }}" class="{{ $routeName === 'profile' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
                         Profile
                     </a>
