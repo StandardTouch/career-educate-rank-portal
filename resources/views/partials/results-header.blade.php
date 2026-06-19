@@ -100,6 +100,7 @@
                     <a href="{{ route('profile') }}" class="{{ $routeName === 'profile' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
                         Profile
                     </a>
+                    <a href="#">MBBS Study Abroad</a>
                 @endif
             @endauth
 
@@ -151,6 +152,9 @@
                     </div>
                 </div>
             @endforeach
+           <a href="tel:9686601088" class="text-rose-500 font-semibold transition-colors px-3 py-2 rounded-lg animate-pulse">
+                Call Us 9686601088
+            </a>
         </nav>
 
         <div class="flex items-center gap-3">
