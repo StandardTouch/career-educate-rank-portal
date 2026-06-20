@@ -1517,6 +1517,7 @@
             }
         </style>
     @endif
+    @include('partials.anti-copy')
 </head>
 
 <body

@@ -197,6 +197,7 @@
             background-color: #f8fafc;
         }
     </style>
+    @include('partials.anti-copy')
 </head>
 
 <body class="min-h-screen text-slate-800 flex flex-col">
