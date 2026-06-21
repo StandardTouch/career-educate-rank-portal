@@ -74,17 +74,6 @@
                 Home
             </a>
 
-            <!-- Standalone Booklet Tabs -->
-            <a href="{{ asset('Shaheen-Kyrgyzstan-Booklet.pdf') }}" target="_blank" rel="noopener" class="hover:text-rose-500 transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
-                Shaheen Kyrgyzstan Booklet
-            </a>
-            <a href="{{ asset('Shaheen-MSIT-Tajikistan-Booklet.pdf') }}" target="_blank" rel="noopener" class="hover:text-rose-500 transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
-                Shaheen MSIT Tajikistan Booklet
-            </a>
-            <a href="{{ asset('MCC-counselling-flow.pdf') }}" target="_blank" rel="noopener" class="hover:text-rose-500 transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
-                MCC Counselling Flow
-            </a>
-
             @auth
                 @if (auth()->user()->is_admin)
                     <a href="{{ route('admin.dashboard') }}" class="{{ $routeName === 'admin.dashboard' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
@@ -106,14 +95,37 @@
                     <a href="{{ route('neet.analysis') }}" class="{{ $routeName === 'neet.analysis' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                         NEET Analysis 2025
                     </a>
-                    <a href="#" class="hover:text-rose-500 transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
-                        MBBS Study Abroad
-                    </a>
                     <a href="{{ route('profile') }}" class="{{ $routeName === 'profile' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                         Profile
                     </a>
                 @endif
             @endauth
+
+            <!-- MBBS Study Abroad Dropdown -->
+            <div class="relative group results-year-menu">
+                <button
+                    type="button"
+                    class="results-year-trigger px-3 py-2 rounded-lg border border-slate-200 text-slate-700 hover:border-rose-300 hover:text-rose-600 transition-colors inline-flex items-center gap-2 whitespace-nowrap"
+                    aria-expanded="false"
+                >
+                    <span>MBBS Study Abroad</span>
+                    <span class="results-year-caret text-[10px] leading-none transition-transform">v</span>
+                </button>
+                <div
+                    class="results-year-panel hidden fixed z-50 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl p-2"
+                    style="width: min(20rem, calc(100vw - 2rem)); max-height: min(32rem, calc(100vh - 7rem));"
+                >
+                    <div class="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Booklets</div>
+                    <div class="grid gap-1 px-2 pb-2">
+                        <a href="{{ asset('Shaheen-Kyrgyzstan-Booklet.pdf') }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
+                            Kyrgyzstan Booklet
+                        </a>
+                        <a href="{{ asset('Shaheen-MSIT-Tajikistan-Booklet.pdf') }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
+                            MSIT Tajikistan Booklet
+                        </a>
+                    </div>
+                </div>
+            </div>
 
             <!-- Notifications Dropdown -->
             <div class="relative group results-year-menu">
@@ -131,6 +143,9 @@
                 >
                     <div class="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Updates</div>
                     <div class="grid gap-1 px-2 pb-2">
+                        <a href="{{ asset('MCC-counselling-flow.pdf') }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
+                            MCC Counselling Flow
+                        </a>
                         <a href="{{ asset('notifications.pdf') }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
                             View Notifications PDF
                         </a>
@@ -187,9 +202,12 @@
                 </div>
             @endforeach
 
-            <a href="tel:9686601088" class="text-rose-500 font-semibold transition-colors px-3 py-2 rounded-lg animate-pulse whitespace-nowrap border border-rose-200 bg-rose-50/50 hover:bg-rose-100">
-                MBBS STUDY ABROAD CONTACT NUMBER 9686601088
-            </a>
+            <div class="flex items-center gap-2 border-l border-slate-200 pl-3 ml-2">
+                <a href="tel:9686601088" class="text-rose-500 font-semibold transition-colors px-3 py-2 rounded-lg animate-pulse whitespace-nowrap border border-rose-200 bg-rose-50/50 hover:bg-rose-100 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                    Contact: 9686601088
+                </a>
+            </div>
         </nav>
 
         <div class="flex items-center gap-3">
