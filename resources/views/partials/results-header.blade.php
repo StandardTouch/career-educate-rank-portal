@@ -37,7 +37,10 @@
     foreach ($rawYearMenus as $yearGroup => $items) {
         preg_match('/\d{4}/', $yearGroup, $matches);
         $yearNumber = $matches[0] ?? $yearGroup;
-        $displayYear = preg_match('/^\s*neet\s+/i', $yearGroup) ? $yearGroup : 'NEET ' . $yearNumber;
+        <!-- $displayYear = preg_match('/^\s*neet\s+/i', $yearGroup) ? $yearGroup : 'NEET ' . $yearNumber; -->
+         $displayYear = ((string) $yearNumber === '2026')
+    ? 'NEET 2026 LIVE RANK PREDICTOR'
+    : (preg_match('/^\s*neet\s+/i', $yearGroup) ? $yearGroup : 'NEET ' . $yearNumber);
 
         $yearMenus[$yearGroup] = [
             'label' => $displayYear,
