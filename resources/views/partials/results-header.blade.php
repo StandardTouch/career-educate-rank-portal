@@ -70,45 +70,56 @@
         </div>
 
         <nav class="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-600">
-            <a href="{{ route('home') }}" class="{{ $routeName === 'home' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
+            <a href="{{ route('home') }}" class="{{ $routeName === 'home' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                 Home
+            </a>
+
+            <!-- Standalone Booklet Tabs -->
+            <a href="{{ asset('Shaheen-Kyrgyzstan-Booklet.pdf') }}" target="_blank" rel="noopener" class="hover:text-rose-500 transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
+                Shaheen Kyrgyzstan Booklet
+            </a>
+            <a href="{{ asset('Shaheen-MSIT-Tajikistan-Booklet.pdf') }}" target="_blank" rel="noopener" class="hover:text-rose-500 transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
+                Shaheen MSIT Tajikistan Booklet
+            </a>
+            <a href="{{ asset('MCC-counselling-flow.pdf') }}" target="_blank" rel="noopener" class="hover:text-rose-500 transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
+                MCC Counselling Flow
             </a>
 
             @auth
                 @if (auth()->user()->is_admin)
-                    <a href="{{ route('admin.dashboard') }}" class="{{ $routeName === 'admin.dashboard' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
+                    <a href="{{ route('admin.dashboard') }}" class="{{ $routeName === 'admin.dashboard' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                         Admin
                     </a>
-                    <a href="{{ route('admin.users') }}" class="{{ $routeName === 'admin.users' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
+                    <a href="{{ route('admin.users') }}" class="{{ $routeName === 'admin.users' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                         Users
                     </a>
-                    <a href="{{ route('admin.payments') }}" class="{{ $routeName === 'admin.payments' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
+                    <a href="{{ route('admin.payments') }}" class="{{ $routeName === 'admin.payments' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                         Payments
                     </a>
-                    <a href="{{ route('import.excel') }}" class="{{ $routeName === 'import.excel' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
+                    <a href="{{ route('import.excel') }}" class="{{ $routeName === 'import.excel' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                         Import
                     </a>
                 @else
-                    <a href="{{ route('dashboard') }}" class="{{ $routeName === 'dashboard' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
+                    <a href="{{ route('dashboard') }}" class="{{ $routeName === 'dashboard' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                         Dashboard
                     </a>
-                    <a href="{{ route('neet.analysis') }}" class="{{ $routeName === 'neet.analysis' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
+                    <a href="{{ route('neet.analysis') }}" class="{{ $routeName === 'neet.analysis' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                         NEET Analysis 2025
                     </a>
-                    <a href="#" class="hover:text-rose-500 transition-colors px-3 py-2 rounded-lg">
+                    <a href="#" class="hover:text-rose-500 transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                         MBBS Study Abroad
                     </a>
-                    <a href="{{ route('profile') }}" class="{{ $routeName === 'profile' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg">
+                    <a href="{{ route('profile') }}" class="{{ $routeName === 'profile' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                         Profile
                     </a>
                 @endif
             @endauth
 
-            <!-- Notifications Dropdown (Visible to everyone) -->
+            <!-- Notifications Dropdown -->
             <div class="relative group results-year-menu">
                 <button
                     type="button"
-                    class="results-year-trigger px-3 py-2 rounded-lg border border-slate-200 text-slate-700 hover:border-rose-300 hover:text-rose-600 transition-colors inline-flex items-center gap-2"
+                    class="results-year-trigger px-3 py-2 rounded-lg border border-slate-200 text-slate-700 hover:border-rose-300 hover:text-rose-600 transition-colors inline-flex items-center gap-2 whitespace-nowrap"
                     aria-expanded="false"
                 >
                     <span>Notifications</span>
@@ -116,21 +127,12 @@
                 </button>
                 <div
                     class="results-year-panel hidden fixed z-50 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl p-2"
-                    style="width: min(24rem, calc(100vw - 2rem)); max-height: min(32rem, calc(100vh - 7rem));"
+                    style="width: min(20rem, calc(100vw - 2rem)); max-height: min(32rem, calc(100vh - 7rem));"
                 >
-                    <div class="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Latest Updates</div>
+                    <div class="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Updates</div>
                     <div class="grid gap-1 px-2 pb-2">
-                        <a href="{{ asset('Shaheen-Kyrgyzstan-Booklet.pdf') }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
-                            Shaheen Kyrgyzstan Booklet
-                        </a>
-                        <a href="{{ asset('Shaheen-MSIT-Tajikistan-Booklet.pdf') }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
-                            Shaheen MSIT Tajikistan Booklet
-                        </a>
-                        <a href="{{ asset('MCC-counselling-flow.pdf') }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
-                            MCC Counselling Flow
-                        </a>
                         <a href="{{ asset('notifications.pdf') }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
-                            Other Notifications
+                            View Notifications PDF
                         </a>
                     </div>
                 </div>
