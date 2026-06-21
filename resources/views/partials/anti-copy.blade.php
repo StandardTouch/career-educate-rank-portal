@@ -95,7 +95,9 @@
 
         // 4. Blur Page on Focus Loss (Helps deter screen recording tools)
         window.addEventListener('blur', function() {
-            document.body.classList.add('blurred-content');
+            if (!window.disableAutoBlur) {
+                document.body.classList.add('blurred-content');
+            }
         });
 
         window.addEventListener('focus', function() {
