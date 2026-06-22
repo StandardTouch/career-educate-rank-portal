@@ -61,6 +61,10 @@
         
         $displayYear = preg_match('/^\s*neet\s+/i', $yearGroup) ? $yearGroup : 'NEET ' . $yearNumber;
 
+        if (str_contains($yearGroup, 'Analysis')) {
+            $displayYear = 'NEET ' . $yearNumber . ' Predicted Rank';
+        }
+
         $yearMenus[$yearGroup] = [
             'label' => $displayYear,
             'ug' => [
