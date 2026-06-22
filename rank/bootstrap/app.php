@@ -7,7 +7,7 @@ use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureSingleDeviceSession;
 use Illuminate\Http\Request;
 
-return Application::configure(basePath: dirname(__DIR__))
+$app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
@@ -27,3 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
+
+$app->usePublicPath(dirname(__DIR__, 2));
+
+return $app;
