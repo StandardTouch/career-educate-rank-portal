@@ -1,3 +1,4 @@
+@if (!auth()->check() || !auth()->user()->is_admin)
 <style>
     /* Anti-Copy and Anti-Screenshot Measures */
     body {
@@ -115,3 +116,4 @@
         console.log('%c', devtools);
     });
 </script>
+@endif
