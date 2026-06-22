@@ -153,13 +153,12 @@
                             MSIT Tajikistan Booklet
                         </a>
                     </div>
-<div class="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Contact</div>
-<div class="grid gap-1 px-2 pb-2">
-    <a href="tel:9686601088" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-        Contact: 9686601088
-    </a>
-</div>
+                    <div class="flex items-center gap-2 border-l border-slate-200 pl-3 ml-2">
+                        <a href="tel:9686601088" class="text-rose-500 font-semibold transition-colors px-3 py-2 rounded-lg animate-pulse whitespace-nowrap border border-rose-200 bg-rose-50/50 hover:bg-rose-100 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.20l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                            Contact: 9686601088
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -238,12 +237,7 @@
                 </div>
             @endforeach
         </nav>
-<div class="flex items-center gap-2 border-l border-slate-200 pl-3 ml-2">
-    <a href="tel:9686601088" class="text-rose-500 font-semibold transition-colors px-3 py-2 rounded-lg animate-pulse whitespace-nowrap border border-rose-200 bg-rose-50/50 hover:bg-rose-100 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.20l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-        Contact: 9686601088
-    </a>
-</div>
+
         <div class="flex items-center gap-3">
             @if ($routeName === 'home')
                 <a href="{{ auth()->check() ? route('dashboard') : route('register') }}" class="bg-rose-500 hover:bg-rose-600 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-all shadow-md shadow-rose-500/10 active:scale-95">
