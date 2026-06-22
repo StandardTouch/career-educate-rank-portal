@@ -38,7 +38,14 @@ class AnalysisResultController extends Controller
             ->where('analysis_dataset_id', $dataset->id)
             ->with('analysisRound');
 
-        $hasFilters = count($request->except(['page'])) > 0;
+        $activeFilters = collect($request->except(['page']))->filter(function ($value) {
+            if (is_array($value)) {
+                $filtered = array_filter($value, fn($v) => $v !== 'any' && $v !== 'overall');
+                return count($filtered) > 0;
+            }
+            return $value !== null && $value !== '';
+        });
+        $hasFilters = $activeFilters->count() > 0;
         $estimatedRank = null;
 
         $selectedRounds = $this->selectedValues($request, 'round_id', ['overall']);
@@ -72,6 +79,7 @@ class AnalysisResultController extends Controller
 
         foreach (['college_name', 'local_area'] as $field) {
             $selected = $this->selectedValues($request, $field);
+            $selected = array_values(array_filter($selected, fn ($val) => $val !== 'any'));
 
             if ($selected !== []) {
                 $query->whereIn($field, $selected);
@@ -79,6 +87,7 @@ class AnalysisResultController extends Controller
         }
 
         $quotaInput = $this->selectedValues($request, 'quota');
+        $quotaInput = array_values(array_filter($quotaInput, fn ($val) => $val !== 'any'));
         if ($quotaInput !== []) {
             $allQuotas = $this->distinctValues($dataset, 'quota')->toArray();
             $allCategories = $this->distinctValues($dataset, 'category')->toArray();
@@ -97,16 +106,10 @@ class AnalysisResultController extends Controller
         if ($request->filled('marks')) {
             $marks = (float) $request->input('marks');
 
-            $estimatedRank = AnalysisRecord::where('analysis_dataset_id', $dataset->id)
-                ->where('marks', '=', $marks)
-                ->min('closing_rank');
-
-            if ($estimatedRank !== null) {
-                $query->where(function ($q) use ($estimatedRank) {
-                    $q->where('closing_rank', '>=', $estimatedRank)
-                        ->orWhere('fem_closing_rank', '>=', $estimatedRank);
-                });
-            }
+            $query->where(function ($q) use ($marks) {
+                $q->where('marks', '<=', $marks)
+                    ->orWhere('fem_closing_mark', '<=', $marks);
+            });
         }
 
         if ($request->filled('fem_mark')) {
@@ -132,6 +135,21 @@ class AnalysisResultController extends Controller
         $roundComparisonRows = $roundComparisonMode
             ? $this->roundComparisonRows((clone $query)->get(), $roundComparisonColumns)
             : collect();
+
+        if ($request->filled('marks')) {
+            $bestRecord = (clone $query)
+                ->orderByRaw('closing_rank is null')
+                ->orderBy('closing_rank', 'asc')
+                ->first();
+
+            if ($bestRecord) {
+                $estimatedRank = $bestRecord->closing_rank;
+                $query->where('id', $bestRecord->id);
+            } else {
+                $estimatedRank = null;
+                $query->whereRaw('1 = 0');
+            }
+        }
 
         $records = $query
             ->orderByRaw('closing_rank is null')
