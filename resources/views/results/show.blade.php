@@ -133,7 +133,7 @@
                 @endphp
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">College</label>
-                    <div class="searchable-select relative mt-2" data-empty-label="Any">
+                    <div class="searchable-select relative mt-2" data-empty-label="Any" data-exclusive-value="any">
                         <button type="button" class="searchable-select-trigger flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
                             <span class="searchable-select-label">{{ $collegeLabel }}</span>
                             <span class="text-slate-400">v</span>
@@ -141,6 +141,10 @@
                         <div class="searchable-select-panel hidden absolute left-0 right-0 top-full z-40 mt-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
                             <input type="search" class="searchable-select-search w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20" placeholder="Search college...">
                             <div class="mt-2 max-h-64 overflow-y-auto">
+                                <label class="searchable-select-option flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-slate-50">
+                                    <input type="checkbox" name="college_name[]" value="any" class="searchable-select-checkbox rounded border-slate-300 text-rose-500 focus:ring-rose-500" @checked(count($collegeSelected) === 0 || in_array('any', $collegeSelected, true))>
+                                    <span>Any</span>
+                                </label>
                                 @foreach ($filterValues['college_name'] as $value)
                                     <label class="searchable-select-option flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-slate-50">
                                         <input type="checkbox" name="college_name[]" value="{{ $value }}" class="searchable-select-checkbox rounded border-slate-300 text-rose-500 focus:ring-rose-500" @checked(in_array((string) $value, $collegeSelected, true))>
@@ -155,7 +159,7 @@
                 <!-- Quota / Category Dropdown -->
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Quota / Category</label>
-                    <div class="searchable-select relative mt-2" data-empty-label="Any">
+                    <div class="searchable-select relative mt-2" data-empty-label="Any" data-exclusive-value="any">
                         <button type="button" class="searchable-select-trigger flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
                             <span class="searchable-select-label">{{ $quotaLabel }}</span>
                             <span class="text-slate-400">v</span>
@@ -163,6 +167,10 @@
                         <div class="searchable-select-panel hidden absolute left-0 right-0 top-full z-40 mt-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
                             <input type="search" class="searchable-select-search w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20" placeholder="Search quota or category...">
                             <div class="mt-2 max-h-64 overflow-y-auto space-y-3">
+                                <label class="searchable-select-option flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-slate-50">
+                                    <input type="checkbox" name="quota[]" value="any" class="searchable-select-checkbox rounded border-slate-300 text-rose-500 focus:ring-rose-500" @checked(count($quotaSelected) === 0 || in_array('any', $quotaSelected, true))>
+                                    <span>Any</span>
+                                </label>
                                 <div>
                                     <div class="px-3 py-1 text-[10px] font-bold text-rose-500 uppercase tracking-wider bg-rose-50/50 rounded-md">Quotas</div>
                                     <div class="mt-1 space-y-0.5">
@@ -199,7 +207,7 @@
                 @endphp
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Local Area</label>
-                    <div class="searchable-select relative mt-2" data-empty-label="Any">
+                    <div class="searchable-select relative mt-2" data-empty-label="Any" data-exclusive-value="any">
                         <button type="button" class="searchable-select-trigger flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
                             <span class="searchable-select-label">{{ $localAreaLabel }}</span>
                             <span class="text-slate-400">v</span>
@@ -207,6 +215,10 @@
                         <div class="searchable-select-panel hidden absolute left-0 right-0 top-full z-40 mt-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
                             <input type="search" class="searchable-select-search w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20" placeholder="Search local area...">
                             <div class="mt-2 max-h-64 overflow-y-auto">
+                                <label class="searchable-select-option flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-slate-50">
+                                    <input type="checkbox" name="local_area[]" value="any" class="searchable-select-checkbox rounded border-slate-300 text-rose-500 focus:ring-rose-500" @checked(count($localAreaSelected) === 0 || in_array('any', $localAreaSelected, true))>
+                                    <span>Any</span>
+                                </label>
                                 @foreach ($filterValues['local_area'] as $value)
                                     <label class="searchable-select-option flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-slate-50">
                                         <input type="checkbox" name="local_area[]" value="{{ $value }}" class="searchable-select-checkbox rounded border-slate-300 text-rose-500 focus:ring-rose-500" @checked(in_array((string) $value, $localAreaSelected, true))>

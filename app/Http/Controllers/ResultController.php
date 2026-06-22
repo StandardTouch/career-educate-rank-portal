@@ -68,6 +68,7 @@ class ResultController extends Controller
         // Handle College Name and Local Area filters normally (if passed in request)
         foreach (['college_name', 'local_area'] as $field) {
             $selected = $this->selectedValues($request, $field);
+            $selected = array_values(array_filter($selected, fn ($val) => $val !== 'any'));
 
             if ($selected !== []) {
                 $query->whereIn($field, $selected);
@@ -76,6 +77,8 @@ class ResultController extends Controller
 
         // Handle merged Quota and Category selection
         $quotaInput = $this->selectedValues($request, 'quota');
+        $quotaInput = array_values(array_filter($quotaInput, fn ($val) => $val !== 'any'));
+        
         if ($quotaInput !== []) {
             $allQuotas = $this->distinctValues($dataset, 'quota')->toArray();
             $allCategories = $this->distinctValues($dataset, 'category')->toArray();
