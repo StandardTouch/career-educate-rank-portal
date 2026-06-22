@@ -38,6 +38,9 @@ class AnalysisResultController extends Controller
             ->where('analysis_dataset_id', $dataset->id)
             ->with('analysisRound');
 
+        $hasFilters = count($request->except(['page'])) > 0;
+        $estimatedRank = null;
+
         $selectedRounds = $this->selectedValues($request, 'round_id', ['overall']);
         if (in_array('overall', $selectedRounds, true) && count($selectedRounds) > 1) {
             $selectedRounds = array_values(array_filter($selectedRounds, fn ($round) => $round !== 'overall'));
@@ -91,13 +94,19 @@ class AnalysisResultController extends Controller
             }
         }
 
-        if ($request->filled('rank')) {
-            $rank = (int) $request->input('rank');
+        if ($request->filled('marks')) {
+            $marks = (float) $request->input('marks');
 
-            $query->where(function ($q) use ($rank) {
-                $q->where('closing_rank', '>=', $rank)
-                    ->orWhere('fem_closing_rank', '>=', $rank);
-            });
+            $estimatedRank = AnalysisRecord::where('analysis_dataset_id', $dataset->id)
+                ->where('marks', '<=', $marks)
+                ->min('closing_rank');
+
+            if ($estimatedRank !== null) {
+                $query->where(function ($q) use ($estimatedRank) {
+                    $q->where('closing_rank', '>=', $estimatedRank)
+                        ->orWhere('fem_closing_rank', '>=', $estimatedRank);
+                });
+            }
         }
 
         if ($request->filled('fem_mark')) {
@@ -126,7 +135,7 @@ class AnalysisResultController extends Controller
 
         $records = $query
             ->orderByRaw('closing_rank is null')
-            ->orderByDesc('closing_rank')
+            ->orderBy('closing_rank', 'asc')
             ->paginate(25)
             ->withQueryString();
 
@@ -165,7 +174,9 @@ class AnalysisResultController extends Controller
             'roundComparisonMode',
             'roundComparisonColumns',
             'roundComparisonRows',
-            'resultCount'
+            'resultCount',
+            'hasFilters',
+            'estimatedRank'
         ));
     }
 

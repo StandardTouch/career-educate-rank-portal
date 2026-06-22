@@ -218,10 +218,10 @@
                     </div>
                 </div>
 
-                <!-- Your Rank Input -->
+                <!-- Your Marks Input -->
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Your Rank</label>
-                    <input type="number" name="rank" value="{{ request('rank') }}" placeholder="Show closing rank >= this"
+                    <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Your Marks</label>
+                    <input type="number" step="0.01" name="marks" value="{{ request('marks') }}" placeholder="Enter your marks"
                         class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
                 </div>
 
@@ -266,7 +266,16 @@
             </form>
         </section>
 
+        @if ($hasFilters)
         <section class="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            @if(isset($estimatedRank) && $estimatedRank !== null)
+            <div class="bg-rose-50 border-b border-rose-100 px-4 py-3 sm:px-6">
+                <p class="text-sm font-bold text-rose-800">
+                    Based on your marks, your estimated best achievable rank is: <span class="text-rose-900 text-lg">{{ number_format($estimatedRank) }}</span>
+                </p>
+                <p class="text-xs text-rose-600 mt-1">Showing colleges with a closing rank of {{ number_format($estimatedRank) }} or lower.</p>
+            </div>
+            @endif
             <div class="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <p class="text-sm font-bold text-slate-900">Results</p>
@@ -394,6 +403,15 @@
             </div>
             @endunless
         </section>
+        @else
+        <div class="mt-8 rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 class="mt-4 text-lg font-bold text-slate-900">No results to display yet</h3>
+            <p class="mt-2 text-sm text-slate-500">Please enter your marks or apply filters above to view the analysis.</p>
+        </div>
+        @endif
     </main>
 
     <style>
