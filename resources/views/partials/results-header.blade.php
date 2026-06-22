@@ -26,6 +26,27 @@
                 ];
             }
         }
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('analysis_datasets')) {
+            $analysisDatasets = \App\Models\AnalysisDataset::query()
+                ->where('is_active', true)
+                ->orderByDesc('year')
+                ->orderByRaw('sort_order is null')
+                ->orderBy('sort_order')
+                ->orderBy('title')
+                ->get();
+
+            foreach ($analysisDatasets as $dataset) {
+                $group = 'Analysis ' . ($dataset->year ?? 'Dynamic');
+                $rawYearMenus[$group] = $rawYearMenus[$group] ?? [];
+                $rawYearMenus[$group][] = [
+                    'label' => $dataset->title,
+                    'route' => 'analysis.show',
+                    'params' => ['analysis_dataset' => $dataset->slug],
+                    'dataset_slug' => $dataset->slug,
+                ];
+            }
+        }
     } catch (\Throwable $exception) {
         $rawYearMenus = config('menus');
     }
@@ -38,9 +59,7 @@
         preg_match('/\d{4}/', $yearGroup, $matches);
         $yearNumber = $matches[0] ?? $yearGroup;
         
-         $displayYear = ((string) $yearNumber === '2026')
-    ? 'NEET 2026 LIVE RANK PREDICTOR'
-    : (preg_match('/^\s*neet\s+/i', $yearGroup) ? $yearGroup : 'NEET ' . $yearNumber);
+        $displayYear = preg_match('/^\s*neet\s+/i', $yearGroup) ? $yearGroup : 'NEET ' . $yearNumber;
 
         $yearMenus[$yearGroup] = [
             'label' => $displayYear,
@@ -90,6 +109,9 @@
                     </a>
                     <a href="{{ route('import.excel') }}" class="{{ $routeName === 'import.excel' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                         Import
+                    </a>
+                    <a href="{{ route('import.analysis') }}" class="{{ $routeName === 'import.analysis' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
+                        Import Analysis
                     </a>
                 @else
                     <a href="{{ route('dashboard') }}" class="{{ $routeName === 'dashboard' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">

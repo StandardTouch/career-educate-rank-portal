@@ -93,4 +93,16 @@ Route::middleware(['auth', 'single.device', 'admin'])->group(function () {
     Route::get('/admin/payments', [App\Http\Controllers\AdminDashboardController::class, 'payments'])->name('admin.payments');
     Route::get('/import-excel', [App\Http\Controllers\ImportExcelController::class, 'create'])->name('import.excel');
     Route::post('/import-excel', [App\Http\Controllers\ImportExcelController::class, 'store'])->name('import.excel.store');
+    Route::get('/admin/import-analysis', [App\Http\Controllers\ImportAnalysisController::class, 'create'])->name('import.analysis');
+    Route::post('/admin/import-analysis', [App\Http\Controllers\ImportAnalysisController::class, 'store'])->name('import.analysis.store');
+});
+
+// Analysis Routes (OTP based or regular Auth)
+Route::get('/analysis/login', [App\Http\Controllers\AnalysisAuthController::class, 'showPhoneForm'])->name('analysis.login');
+Route::post('/analysis/send-otp', [App\Http\Controllers\AnalysisAuthController::class, 'sendOtp'])->name('analysis.send-otp');
+Route::get('/analysis/verify', [App\Http\Controllers\AnalysisAuthController::class, 'showVerifyForm'])->name('analysis.verify');
+Route::post('/analysis/verify', [App\Http\Controllers\AnalysisAuthController::class, 'verifyOtp'])->name('analysis.verify.store');
+
+Route::middleware([\App\Http\Middleware\AnalysisAccess::class])->group(function () {
+    Route::get('/analysis/{analysis_dataset:slug}', [App\Http\Controllers\AnalysisResultController::class, 'show'])->name('analysis.show');
 });
