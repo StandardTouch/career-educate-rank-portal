@@ -98,7 +98,7 @@ class AnalysisResultController extends Controller
             $marks = (float) $request->input('marks');
 
             $estimatedRank = AnalysisRecord::where('analysis_dataset_id', $dataset->id)
-                ->where('marks', '<=', $marks)
+                ->where('marks', '=', $marks)
                 ->min('closing_rank');
 
             if ($estimatedRank !== null) {
