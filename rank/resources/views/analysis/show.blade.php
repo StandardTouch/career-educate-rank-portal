@@ -313,15 +313,15 @@
                     <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                         @if ($roundComparisonMode ?? false)
                         <tr>
-                            <th data-col="state_name" class="px-4 py-3 text-left">State Name</th>
-                            <th data-col="college_name" class="px-4 py-3 text-left">College Name</th>
-                            <th data-col="category" class="px-4 py-3 text-left">Category</th>
-                            <th data-col="local_area" class="px-4 py-3 text-left">Local Area</th>
-                            <th data-col="course" class="px-4 py-3 text-left">Course</th>
-                            <th data-col="total_seats" class="px-4 py-3 text-right">
+                            {{-- <th data-col="state_name" class="px-4 py-3 text-left">State Name</th> --}}
+                            {{-- <th data-col="college_name" class="px-4 py-3 text-left">College Name</th> --}}
+                            {{-- <th data-col="category" class="px-4 py-3 text-left">Category</th> --}}
+                            {{-- <th data-col="local_area" class="px-4 py-3 text-left">Local Area</th> --}}
+                            {{-- <th data-col="course" class="px-4 py-3 text-left">Course</th> --}}
+                            {{-- <th data-col="total_seats" class="px-4 py-3 text-right">
                                 Total Seats
                                 <span class="block text-[11px] font-extrabold text-rose-500">{{ $totalSeats ?? 0 }}</span>
-                            </th>
+                            </th> --}}
                             @foreach ($roundComparisonColumns as $roundColumn)
                                 <th data-col="{{ $roundColumn['gen_rank_key'] }}" class="px-4 py-3 text-right">GEN {{ $roundColumn['label'] }} Rank</th>
                                 {{-- <th data-col="{{ $roundColumn['gen_mark_key'] }}" class="px-4 py-3 text-right">GEN {{ $roundColumn['label'] }} Mark</th> --}}
@@ -332,15 +332,15 @@
                         </tr>
                         @else
                         <tr>
-                            <th data-col="state_name" class="px-4 py-3 text-left">State Name</th>
-                            <th data-col="college_name" class="px-4 py-3 text-left">College Name</th>
-                            <th data-col="category" class="px-4 py-3 text-left">Category</th>
-                            <th data-col="round_name" class="px-4 py-3 text-left">Round Name</th>
-                            <th data-col="local_area" class="px-4 py-3 text-left">Local Area</th>
-                            <th data-col="total_seats" class="px-4 py-3 text-right">
+                            {{-- <th data-col="state_name" class="px-4 py-3 text-left">State Name</th> --}}
+                            {{-- <th data-col="college_name" class="px-4 py-3 text-left">College Name</th> --}}
+                            {{-- <th data-col="category" class="px-4 py-3 text-left">Category</th> --}}
+                            {{-- <th data-col="round_name" class="px-4 py-3 text-left">Round Name</th> --}}
+                            {{-- <th data-col="local_area" class="px-4 py-3 text-left">Local Area</th> --}}
+                            {{-- <th data-col="total_seats" class="px-4 py-3 text-right">
                                 Total Seats
                                 <span class="block text-[11px] font-extrabold text-rose-500">{{ $totalSeats ?? 0 }}</span>
-                            </th>
+                            </th> --}}
                             <th data-col="gen_closing_rank" class="px-4 py-3 text-right">Gen Closing Rank</th>
                             {{-- <th data-col="gen_closing_mark" class="px-4 py-3 text-right">Gen Closing Mark</th> --}}
                             <th data-col="fem_closing_rank" class="px-4 py-3 text-right">Fem Closing Rank</th>
@@ -353,12 +353,12 @@
                         @if ($roundComparisonMode ?? false)
                             @forelse ($roundComparisonRows as $row)
                                 <tr class="hover:bg-slate-50">
-                                    <td data-col="state_name" class="px-4 py-3 font-semibold text-slate-600">{{ $row['state_name'] }}</td>
-                                    <td data-col="college_name" class="px-4 py-3 font-bold text-slate-900">{{ $row['college_name'] }}</td>
-                                    <td data-col="category" class="px-4 py-3">{{ $row['category'] }}</td>
-                                    <td data-col="local_area" class="px-4 py-3">{{ $row['local_area'] }}</td>
-                                    <td data-col="course" class="px-4 py-3">{{ $row['course'] }}</td>
-                                    <td data-col="total_seats" class="px-4 py-3 text-right">{{ $row['seats'] !== null ? $row['seats'] : '-' }}</td>
+                                    {{-- <td data-col="state_name" class="px-4 py-3 font-semibold text-slate-600">{{ $row['state_name'] }}</td> --}}
+                                    {{-- <td data-col="college_name" class="px-4 py-3 font-bold text-slate-900">{{ $row['college_name'] }}</td> --}}
+                                    {{-- <td data-col="category" class="px-4 py-3">{{ $row['category'] }}</td> --}}
+                                    {{-- <td data-col="local_area" class="px-4 py-3">{{ $row['local_area'] }}</td> --}}
+                                    {{-- <td data-col="course" class="px-4 py-3">{{ $row['course'] }}</td> --}}
+                                    {{-- <td data-col="total_seats" class="px-4 py-3 text-right">{{ $row['seats'] !== null ? $row['seats'] : '-' }}</td> --}}
                                     @foreach ($roundComparisonColumns as $roundColumn)
                                         @php $roundValues = $row['rounds'][$roundColumn['round_id']] ?? []; @endphp
                                         <td data-col="{{ $roundColumn['gen_rank_key'] }}" class="px-4 py-3 text-right font-bold text-rose-600">{{ !empty($roundValues['gen_rank'] ?? null) ? (int) $roundValues['gen_rank'] : '-' }}</td>
@@ -385,12 +385,12 @@
                                 $femClosingMark = $record->fem_closing_mark ?? $payload['female_marks'] ?? null;
                             @endphp
                             <tr class="hover:bg-slate-50">
-                                <td data-col="state_name" class="px-4 py-3 font-semibold text-slate-600">{{ $stateName }}</td>
-                                <td data-col="college_name" class="px-4 py-3 font-bold text-slate-900">{{ $record->college_name ?? '-' }}</td>
-                                <td data-col="category" class="px-4 py-3">{{ $record->category ?? '-' }}</td>
-                                <td data-col="round_name" class="px-4 py-3">{{ $roundName }}</td>
-                                <td data-col="local_area" class="px-4 py-3">{{ $record->local_area ?? '-' }}</td>
-                                <td data-col="total_seats" class="px-4 py-3 text-right">{{ $record->seats !== null ? $record->seats : '-' }}</td>
+                                {{-- <td data-col="state_name" class="px-4 py-3 font-semibold text-slate-600">{{ $stateName }}</td> --}}
+                                {{-- <td data-col="college_name" class="px-4 py-3 font-bold text-slate-900">{{ $record->college_name ?? '-' }}</td> --}}
+                                {{-- <td data-col="category" class="px-4 py-3">{{ $record->category ?? '-' }}</td> --}}
+                                {{-- <td data-col="round_name" class="px-4 py-3">{{ $roundName }}</td> --}}
+                                {{-- <td data-col="local_area" class="px-4 py-3">{{ $record->local_area ?? '-' }}</td> --}}
+                                {{-- <td data-col="total_seats" class="px-4 py-3 text-right">{{ $record->seats !== null ? $record->seats : '-' }}</td> --}}
                                 <td data-col="gen_closing_rank" class="px-4 py-3 text-right font-bold text-rose-600">{{ $record->closing_rank !== null ? $record->closing_rank : '-' }}</td>
                                 {{-- <td data-col="gen_closing_mark" class="px-4 py-3 text-right">{{ $record->marks !== null ? (int) $record->marks : '-' }}</td> --}}
                                 <td data-col="fem_closing_rank" class="px-4 py-3 text-right">{{ $femClosingRank !== null && $femClosingRank !== '' ? (int) $femClosingRank : '-' }}</td>
@@ -399,7 +399,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-4 py-10 text-center text-sm font-semibold text-slate-500">
+                                <td colspan="2" class="px-4 py-10 text-center text-sm font-semibold text-slate-500">
                                     No records found for these filters.
                                 </td>
                             </tr>
