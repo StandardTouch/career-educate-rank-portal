@@ -313,7 +313,7 @@
                     <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                         @if ($roundComparisonMode ?? false)
                         <tr>
-                            <th data-col="state_name" class="px-4 py-3 text-left">State Name</th>
+                            <!-- <th data-col="state_name" class="px-4 py-3 text-left">State Name</th>
                             <th data-col="college_name" class="px-4 py-3 text-left">College Name</th>
                             <th data-col="category" class="px-4 py-3 text-left">Category</th>
                             <th data-col="local_area" class="px-4 py-3 text-left">Local Area</th>
@@ -340,12 +340,12 @@
                             <th data-col="total_seats" class="px-4 py-3 text-right">
                                 Total Seats
                                 <span class="block text-[11px] font-extrabold text-rose-500">{{ $totalSeats ?? 0 }}</span>
-                            </th>
+                            </th> -->
                             <th data-col="gen_closing_rank" class="px-4 py-3 text-right">Gen Closing Rank</th>
-                            <th data-col="gen_closing_mark" class="px-4 py-3 text-right">Gen Closing Mark</th>
+                            <!-- <th data-col="gen_closing_mark" class="px-4 py-3 text-right">Gen Closing Mark</th> -->
                             <th data-col="fem_closing_rank" class="px-4 py-3 text-right">Fem Closing Rank</th>
-                            <th data-col="fem_closing_mark" class="px-4 py-3 text-right">Fem Closing Mark</th>
-                            <th data-col="tuition_fee" class="px-4 py-3 text-right">Tuition Fee</th>
+                            <!-- <th data-col="fem_closing_mark" class="px-4 py-3 text-right">Fem Closing Mark</th> -->
+                            <!-- <th data-col="tuition_fee" class="px-4 py-3 text-right">Tuition Fee</th> -->
                         </tr>
                         @endif
                     </thead>
