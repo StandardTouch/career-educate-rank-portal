@@ -91,6 +91,7 @@
 
             <form method="GET" action="{{ route('analysis.show', $dataset) }}" class="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <!-- Round Dropdown -->
+                {{-- 
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Round</label>
                     <div class="searchable-select relative mt-2" data-empty-label="Overall" data-exclusive-value="overall">
@@ -123,8 +124,10 @@
                         </div>
                     </div>
                 </div>
+                --}}
 
                 <!-- College Dropdown -->
+                {{-- 
                 @php
                     $collegeSelected = array_map('strval', $selectedFilters['college_name'] ?? []);
                     $collegeLabel = count($collegeSelected) === 0
@@ -155,8 +158,10 @@
                         </div>
                     </div>
                 </div>
+                --}}
 
                 <!-- Quota / Category Dropdown -->
+                {{-- 
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Quota / Category</label>
                     <div class="searchable-select relative mt-2" data-empty-label="Any" data-exclusive-value="any">
@@ -197,8 +202,10 @@
                         </div>
                     </div>
                 </div>
+                --}}
 
                 <!-- Local Area Dropdown -->
+                {{-- 
                 @php
                     $localAreaSelected = array_map('strval', $selectedFilters['local_area'] ?? []);
                     $localAreaLabel = count($localAreaSelected) === 0
@@ -229,11 +236,12 @@
                         </div>
                     </div>
                 </div>
+                --}}
 
                 <!-- Your Marks Input -->
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Your Marks</label>
-                    <input type="number" step="0.01" name="marks" value="{{ request('marks') }}" placeholder="Enter your marks"
+                    <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Rank</label>
+                    <input type="number" step="0.01" max="720" name="marks" value="{{ request('marks') }}" placeholder="Enter your rank"
                         class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
                 </div>
 
@@ -252,6 +260,7 @@
                 --}}
 
                 <!-- Fee Range Slider -->
+                {{-- 
                 <div class="lg:col-span-2">
                     <div class="flex items-center justify-between gap-4">
                         <label class="block text-xs font-bold uppercase tracking-wide text-slate-700">Fee Range (₹):</label>
@@ -265,6 +274,7 @@
                         <span>Max: ₹{{ number_format($feeMax) }}</span>
                     </div>
                 </div>
+                --}}
 
                 <!-- Action Buttons -->
                 <div class="lg:col-span-4 flex items-center justify-end gap-2 pt-4 border-t border-slate-100 mt-2">
