@@ -73,9 +73,9 @@
                         {{ $dataset->course ?? 'NEET' }} {{ $dataset->year }}
                     </p>
                     <h1 class="mt-2 text-3xl font-extrabold text-slate-950">{{ $dataset->title }}</h1>
-                    <p class="mt-2 text-sm text-slate-500">
+                    <!-- <p class="mt-2 text-sm text-slate-500">
                         Dynamic DB-driven analysis page. Overall records use no round; round sheets appear below by sheet name.
-                    </p>
+                    </p> -->
                 </div>
                 <div class="text-sm font-semibold text-slate-500">
                     {{ number_format($resultCount ?? $records->total()) }} matching records
@@ -240,8 +240,8 @@
 
                 <!-- Your Marks Input -->
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Rank</label>
-                    <input type="number" step="0.01" max="720" name="marks" value="{{ request('marks') }}" placeholder="Enter your rank"
+                    <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Marka</label>
+                    <input type="number" step="0.01" max="720" name="marks" value="{{ request('marks') }}" placeholder="Enter your marks"
                         class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
                 </div>
 
