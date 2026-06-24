@@ -728,7 +728,7 @@
             
             <div class="pt-8 border-t border-slate-900 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div>
-                    version 2.2.9 | &copy; 2026 Shaheen Group. All rights reserved.
+                    version 2.2.9 | &copy; 2026 Career Educate. All rights reserved.
                 </div>
                 <div class="flex gap-4">
                     <a href="#" class="hover:text-white transition-colors">Terms and Conditions</a>
