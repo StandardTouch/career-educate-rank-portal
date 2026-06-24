@@ -240,7 +240,7 @@
 
                 <!-- Your Marks Input -->
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Marka</label>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Marks</label>
                     <input type="number" step="0.01" max="720" name="marks" value="{{ request('marks') }}" placeholder="Enter your marks"
                         class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
                 </div>
