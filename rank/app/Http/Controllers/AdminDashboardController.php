@@ -7,9 +7,11 @@ use App\Models\Import;
 use App\Models\Payment;
 use App\Models\RankRecord;
 use App\Models\User;
+use App\Services\ExotelService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 class AdminDashboardController extends Controller
 {
@@ -244,5 +246,58 @@ class AdminDashboardController extends Controller
         $totalRevenue = Payment::whereIn('status', ['completed', 'captured'])->sum('amount');
 
         return view('admin.payments', compact('payments', 'search', 'status', 'totalRevenue'));
+    }
+
+    public function callDetails(Request $request, ExotelService $exotel)
+    {
+        $search = trim((string) $request->query('search', ''));
+        $selectedUserId = $request->integer('user');
+        $callPage = max(0, $request->integer('call_page', 0));
+        $calls = [];
+        $metadata = [];
+        $rawResponse = null;
+        $apiError = null;
+
+        $students = User::query()
+            ->where('is_admin', false)
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($nested) use ($search) {
+                    $nested->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%");
+                });
+            })
+            ->latest('id')
+            ->paginate(20)
+            ->withQueryString();
+
+        $selectedUser = $selectedUserId
+            ? User::query()->where('is_admin', false)->find($selectedUserId)
+            : null;
+
+        if ($selectedUser && filled($selectedUser->phone)) {
+            try {
+                $callResponse = $exotel->callsForPhone((string) $selectedUser->phone, $callPage);
+                $calls = $callResponse['calls'];
+                $metadata = $callResponse['metadata'];
+                $rawResponse = $callResponse['raw'];
+            } catch (Throwable $exception) {
+                $apiError = $exception->getMessage();
+            }
+        } elseif ($selectedUser) {
+            $apiError = 'This student does not have a phone number saved.';
+        }
+
+        return view('admin.call-details', compact(
+            'students',
+            'search',
+            'selectedUser',
+            'selectedUserId',
+            'callPage',
+            'calls',
+            'metadata',
+            'rawResponse',
+            'apiError'
+        ));
     }
 }

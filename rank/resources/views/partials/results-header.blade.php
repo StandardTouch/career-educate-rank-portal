@@ -111,6 +111,9 @@
                     <a href="{{ route('admin.payments') }}" class="{{ $routeName === 'admin.payments' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                         Payments
                     </a>
+                    <a href="{{ route('admin.call-details') }}" class="{{ $routeName === 'admin.call-details' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
+                        Call Details
+                    </a>
                     <a href="{{ route('import.excel') }}" class="{{ $routeName === 'import.excel' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                         Import
                     </a>

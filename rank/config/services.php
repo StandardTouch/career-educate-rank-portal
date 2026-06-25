@@ -40,4 +40,11 @@ return [
         'secret' => env('RAZORPAY_SECRET', 'dummy_secret'),
     ],
 
+    'exotel' => [
+        'account_sid' => env('EXOTEL_ACCOUNT_SID', 'retailcenter1'),
+        'api_key' => env('EXOTEL_API_KEY'),
+        'api_token' => env('EXOTEL_API_TOKEN'),
+        'base_url' => env('EXOTEL_BASE_URL', 'https://api.exotel.com'),
+    ],
+
 ];
