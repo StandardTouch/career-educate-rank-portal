@@ -86,9 +86,10 @@ class ExotelService
         $apiKey = (string) config('services.exotel.api_key');
         $apiToken = (string) config('services.exotel.api_token');
         $url = (string) config('services.exotel.voice_analyze_url');
-        $format = (string) config('services.exotel.voice_analyze_format', 'form');
+        $format = (string) config('services.exotel.voice_analyze_format', 'json');
         $method = strtoupper((string) config('services.exotel.voice_analyze_method', 'POST'));
         $callbackUrl = (string) config('services.exotel.voice_analyze_callback_url');
+        $tasks = $this->voiceAnalyzeTasks();
         $extraParams = $this->voiceAnalyzeExtraParams();
 
         if ($apiKey === '' || $apiToken === '') {
@@ -100,80 +101,27 @@ class ExotelService
         }
 
         $callSid = $call['call_sid'] ?? null;
-        $recordingUrl = $call['recording_url'] ?? null;
 
-        $payload = array_filter([
-            'CallSid' => $callSid,
-            'callSid' => $callSid,
-            'call_sid' => $callSid,
-            'callsid' => $callSid,
-            'Sid' => $callSid,
-            'sid' => $callSid,
-            'CallUUID' => $callSid,
-            'call_uuid' => $callSid,
-            'RecordingUrl' => $recordingUrl,
-            'RecordingURL' => $recordingUrl,
-            'recordingUrl' => $recordingUrl,
-            'recordingURL' => $recordingUrl,
-            'recording_url' => $recordingUrl,
-            'recordingurl' => $recordingUrl,
-            'Recording' => $recordingUrl,
-            'recording' => $recordingUrl,
-            'AudioUrl' => $recordingUrl,
-            'AudioURL' => $recordingUrl,
-            'audioUrl' => $recordingUrl,
-            'audioURL' => $recordingUrl,
-            'audio_url' => $recordingUrl,
-            'audio' => $recordingUrl,
-            'FileUrl' => $recordingUrl,
-            'file_url' => $recordingUrl,
-            'MediaUrl' => $recordingUrl,
-            'media_url' => $recordingUrl,
-            'Url' => $recordingUrl,
-            'URL' => $recordingUrl,
-            'url' => $recordingUrl,
-            'From' => $call['from'] ?? null,
-            'from' => $call['from'] ?? null,
-            'To' => $call['to'] ?? null,
-            'to' => $call['to'] ?? null,
-            'Direction' => $call['direction'] ?? null,
-            'direction' => $call['direction'] ?? null,
-            'Status' => $call['status'] ?? null,
-            'status' => $call['status'] ?? null,
-            'Duration' => $call['duration'] ?? null,
-            'duration' => $call['duration'] ?? null,
-            'StartTime' => $call['start_time'] ?? null,
-            'start_time' => $call['start_time'] ?? null,
-            'EndTime' => $call['end_time'] ?? null,
-            'end_time' => $call['end_time'] ?? null,
-            'CallbackUrl' => $callbackUrl,
-            'CallbackURL' => $callbackUrl,
-            'callbackUrl' => $callbackUrl,
-            'callback_url' => $callbackUrl,
-            'StatusCallback' => $callbackUrl,
-            'status_callback' => $callbackUrl,
-            'WebhookUrl' => $callbackUrl,
-            'webhook_url' => $callbackUrl,
-        ], fn ($value) => filled($value));
-
-        $payload = array_merge($payload, $extraParams);
-
-        if (empty($payload['CallSid']) && empty($payload['RecordingUrl'])) {
-            throw new RuntimeException('Call SID or recording URL is required for transcript analysis.');
+        if (!filled($callSid)) {
+            throw new RuntimeException('Call SID is required for transcript analysis.');
         }
 
+        if (!filled($callbackUrl)) {
+            throw new RuntimeException('Exotel Voice Analyze callback URL is not configured. Set EXOTEL_VOICE_ANALYZE_CALLBACK_URL.');
+        }
+
+        $payload = array_merge([
+            'callback_url' => $callbackUrl,
+            'insight_tasks' => $tasks,
+            'task_id' => $this->voiceAnalyzeTaskId((string) $callSid),
+        ], $extraParams);
+
         $url = strtr($url, [
-            '{CallSid}' => rawurlencode((string) ($payload['CallSid'] ?? '')),
-            '{callSid}' => rawurlencode((string) ($payload['CallSid'] ?? '')),
-            '{call_sid}' => rawurlencode((string) ($payload['CallSid'] ?? '')),
-            '{Sid}' => rawurlencode((string) ($payload['CallSid'] ?? '')),
-            '{sid}' => rawurlencode((string) ($payload['CallSid'] ?? '')),
-            '{RecordingUrl}' => rawurlencode((string) ($payload['RecordingUrl'] ?? '')),
-            '{recordingUrl}' => rawurlencode((string) ($payload['RecordingUrl'] ?? '')),
-            '{recording_url}' => rawurlencode((string) ($payload['RecordingUrl'] ?? '')),
-            '{CallbackUrl}' => rawurlencode((string) ($payload['CallbackUrl'] ?? '')),
-            '{callbackUrl}' => rawurlencode((string) ($payload['CallbackUrl'] ?? '')),
-            '{callback_url}' => rawurlencode((string) ($payload['CallbackUrl'] ?? '')),
+            '{CallSid}' => rawurlencode((string) $callSid),
+            '{callSid}' => rawurlencode((string) $callSid),
+            '{call_sid}' => rawurlencode((string) $callSid),
+            '{Sid}' => rawurlencode((string) $callSid),
+            '{sid}' => rawurlencode((string) $callSid),
         ]);
 
         if (preg_match('#/Calls(?:\.json)?/?$#', parse_url($url, PHP_URL_PATH) ?: '') === 1) {
@@ -267,5 +215,31 @@ class ExotelService
             })
             ->filter(fn ($value) => filled($value))
             ->all();
+    }
+
+    private function voiceAnalyzeTasks(): array
+    {
+        $raw = config('services.exotel.voice_analyze_tasks', 'transcript');
+
+        if (is_array($raw)) {
+            return array_values(array_filter($raw, fn ($task) => filled($task)));
+        }
+
+        $decoded = is_string($raw) ? json_decode($raw, true) : null;
+
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return array_values(array_filter($decoded, fn ($task) => filled($task)));
+        }
+
+        return collect(explode(',', (string) $raw))
+            ->map(fn ($task) => trim($task))
+            ->filter()
+            ->values()
+            ->all() ?: ['transcript'];
+    }
+
+    private function voiceAnalyzeTaskId(string $callSid): string
+    {
+        return 'transcript_' . Str::slug($callSid, '_') . '_' . now()->format('YmdHis');
     }
 }
