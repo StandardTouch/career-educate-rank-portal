@@ -79,4 +79,52 @@ class ExotelService
             throw new RuntimeException($message, previous: $exception);
         }
     }
+
+    public function analyzeCall(array $call): array
+    {
+        $accountSid = (string) config('services.exotel.account_sid', 'retailcenter1');
+        $apiKey = (string) config('services.exotel.api_key');
+        $apiToken = (string) config('services.exotel.api_token');
+        $baseUrl = rtrim((string) config('services.exotel.base_url', 'https://api.exotel.com'), '/');
+        $url = (string) (config('services.exotel.voice_analyze_url') ?: "{$baseUrl}/v1/Accounts/{$accountSid}/ExoVoiceAnalyze.json");
+        $format = (string) config('services.exotel.voice_analyze_format', 'form');
+
+        if ($apiKey === '' || $apiToken === '') {
+            throw new RuntimeException('Exotel API credentials are not configured.');
+        }
+
+        $payload = array_filter([
+            'CallSid' => $call['call_sid'] ?? null,
+            'RecordingUrl' => $call['recording_url'] ?? null,
+            'From' => $call['from'] ?? null,
+            'To' => $call['to'] ?? null,
+            'Direction' => $call['direction'] ?? null,
+            'Status' => $call['status'] ?? null,
+            'Duration' => $call['duration'] ?? null,
+            'StartTime' => $call['start_time'] ?? null,
+            'EndTime' => $call['end_time'] ?? null,
+        ], fn ($value) => filled($value));
+
+        if (empty($payload['CallSid']) && empty($payload['RecordingUrl'])) {
+            throw new RuntimeException('Call SID or recording URL is required for transcript analysis.');
+        }
+
+        try {
+            $request = Http::withBasicAuth($apiKey, $apiToken)
+                ->acceptJson()
+                ->timeout(60);
+
+            $response = ($format === 'json' ? $request->asJson() : $request->asForm())
+                ->post($url, $payload)
+                ->throw();
+        } catch (RequestException $exception) {
+            $message = $exception->response?->json('RestException.Message')
+                ?? $exception->response?->json('message')
+                ?? $exception->getMessage();
+
+            throw new RuntimeException($message, previous: $exception);
+        }
+
+        return $response->json() ?? ['raw' => $response->body()];
+    }
 }

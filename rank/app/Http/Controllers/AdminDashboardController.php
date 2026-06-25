@@ -320,4 +320,27 @@ class AdminDashboardController extends Controller
             'Cache-Control' => 'private, max-age=300',
         ]);
     }
+
+    public function callTranscript(Request $request, ExotelService $exotel)
+    {
+        $payload = $request->validate([
+            'call_sid' => ['nullable', 'string'],
+            'recording_url' => ['nullable', 'url'],
+            'from' => ['nullable', 'string'],
+            'to' => ['nullable', 'string'],
+            'direction' => ['nullable', 'string'],
+            'status' => ['nullable', 'string'],
+            'duration' => ['nullable', 'string'],
+            'start_time' => ['nullable', 'string'],
+            'end_time' => ['nullable', 'string'],
+        ]);
+
+        try {
+            return response()->json($exotel->analyzeCall($payload));
+        } catch (Throwable $exception) {
+            return response()->json([
+                'message' => $exception->getMessage(),
+            ], 502);
+        }
+    }
 }

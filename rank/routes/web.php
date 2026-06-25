@@ -93,6 +93,7 @@ Route::middleware(['auth', 'single.device', 'admin'])->group(function () {
     Route::get('/admin/payments', [App\Http\Controllers\AdminDashboardController::class, 'payments'])->name('admin.payments');
     Route::get('/admin/call-details', [App\Http\Controllers\AdminDashboardController::class, 'callDetails'])->name('admin.call-details');
     Route::get('/admin/call-recording', [App\Http\Controllers\AdminDashboardController::class, 'callRecording'])->name('admin.call-recording');
+    Route::post('/admin/call-transcript', [App\Http\Controllers\AdminDashboardController::class, 'callTranscript'])->name('admin.call-transcript');
     Route::get('/import-excel', [App\Http\Controllers\ImportExcelController::class, 'create'])->name('import.excel');
     Route::post('/import-excel', [App\Http\Controllers\ImportExcelController::class, 'store'])->name('import.excel.store');
     Route::get('/admin/import-analysis', [App\Http\Controllers\ImportAnalysisController::class, 'create'])->name('import.analysis');

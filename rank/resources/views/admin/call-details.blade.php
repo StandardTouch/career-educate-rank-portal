@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Call Details - Career Educate Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -164,7 +165,24 @@
                                                     <source src="{{ $recordingProxyUrl }}">
                                                     Your browser does not support the audio element.
                                                 </audio>
-                                                <a href="{{ $recordingProxyUrl }}" target="_blank" rel="noopener" class="mt-2 block text-xs font-bold text-rose-500 hover:text-rose-600">Open recording</a>
+                                                <div class="mt-2 flex flex-wrap items-center gap-3">
+                                                    <a href="{{ $recordingProxyUrl }}" target="_blank" rel="noopener" class="text-xs font-bold text-rose-500 hover:text-rose-600">Open recording</a>
+                                                    <button
+                                                        type="button"
+                                                        class="transcript-button rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:border-rose-300 hover:text-rose-600"
+                                                        data-call-sid="{{ $call['Sid'] ?? $call['CallSid'] ?? '' }}"
+                                                        data-recording-url="{{ $recordingUrl }}"
+                                                        data-from="{{ $call['From'] ?? '' }}"
+                                                        data-to="{{ $call['To'] ?? '' }}"
+                                                        data-direction="{{ $call['Direction'] ?? '' }}"
+                                                        data-status="{{ $call['Status'] ?? '' }}"
+                                                        data-duration="{{ $call['Duration'] ?? '' }}"
+                                                        data-start-time="{{ $call['StartTime'] ?? $call['DateCreated'] ?? '' }}"
+                                                        data-end-time="{{ $call['EndTime'] ?? '' }}"
+                                                    >
+                                                        See Transcript
+                                                    </button>
+                                                </div>
                                             @else
                                                 <span class="text-xs font-semibold text-slate-400">No recording</span>
                                             @endif
@@ -209,6 +227,137 @@
             </section>
         @endif
     </main>
+
+    <div id="transcript-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 px-4 py-6">
+        <div class="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                <div>
+                    <h2 class="text-base font-bold text-slate-950">Call Transcript</h2>
+                    <p id="transcript-subtitle" class="mt-1 text-xs text-slate-400">ExoVoiceAnalyze</p>
+                </div>
+                <button type="button" id="transcript-close" class="rounded-full border border-slate-200 px-3 py-1 text-sm font-bold text-slate-600 hover:border-rose-300 hover:text-rose-600">Close</button>
+            </div>
+            <div class="max-h-[70vh] overflow-auto p-5">
+                <div id="transcript-loading" class="rounded-xl bg-slate-50 px-4 py-6 text-center text-sm font-semibold text-slate-500">Loading transcript...</div>
+                <div id="transcript-error" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700"></div>
+                <div id="transcript-result" class="hidden">
+                    <div id="transcript-text" class="whitespace-pre-wrap rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-800"></div>
+                    <details class="mt-4">
+                        <summary class="cursor-pointer text-xs font-bold uppercase tracking-wide text-slate-500">Raw response</summary>
+                        <pre id="transcript-raw" class="mt-3 max-h-72 overflow-auto rounded-xl bg-slate-950 p-4 text-xs text-slate-100"></pre>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (() => {
+            const modal = document.getElementById('transcript-modal');
+            const closeButton = document.getElementById('transcript-close');
+            const loading = document.getElementById('transcript-loading');
+            const errorBox = document.getElementById('transcript-error');
+            const resultBox = document.getElementById('transcript-result');
+            const transcriptText = document.getElementById('transcript-text');
+            const transcriptRaw = document.getElementById('transcript-raw');
+            const subtitle = document.getElementById('transcript-subtitle');
+            const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+            const endpoint = @json(route('admin.call-transcript'));
+
+            const findTranscript = (value) => {
+                if (!value || typeof value !== 'object') {
+                    return null;
+                }
+
+                const keys = ['transcript', 'Transcript', 'transcription', 'Transcription', 'text', 'Text', 'summary', 'Summary'];
+
+                for (const key of keys) {
+                    if (typeof value[key] === 'string' && value[key].trim() !== '') {
+                        return value[key];
+                    }
+                }
+
+                for (const item of Object.values(value)) {
+                    const nested = Array.isArray(item)
+                        ? item.map(findTranscript).filter(Boolean).join("\n\n")
+                        : findTranscript(item);
+
+                    if (nested) {
+                        return nested;
+                    }
+                }
+
+                return null;
+            };
+
+            const openModal = () => {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                loading.classList.remove('hidden');
+                errorBox.classList.add('hidden');
+                resultBox.classList.add('hidden');
+                transcriptText.textContent = '';
+                transcriptRaw.textContent = '';
+            };
+
+            const closeModal = () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            };
+
+            closeButton.addEventListener('click', closeModal);
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+
+            document.querySelectorAll('.transcript-button').forEach((button) => {
+                button.addEventListener('click', async () => {
+                    openModal();
+                    subtitle.textContent = button.dataset.callSid ? `Call: ${button.dataset.callSid}` : 'ExoVoiceAnalyze';
+
+                    try {
+                        const response = await fetch(endpoint, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': csrf,
+                            },
+                            body: JSON.stringify({
+                                call_sid: button.dataset.callSid,
+                                recording_url: button.dataset.recordingUrl,
+                                from: button.dataset.from,
+                                to: button.dataset.to,
+                                direction: button.dataset.direction,
+                                status: button.dataset.status,
+                                duration: button.dataset.duration,
+                                start_time: button.dataset.startTime,
+                                end_time: button.dataset.endTime,
+                            }),
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            throw new Error(data.message || 'Unable to fetch transcript.');
+                        }
+
+                        const transcript = findTranscript(data) || 'Transcript was not found in the ExoVoiceAnalyze response.';
+                        loading.classList.add('hidden');
+                        resultBox.classList.remove('hidden');
+                        transcriptText.textContent = transcript;
+                        transcriptRaw.textContent = JSON.stringify(data, null, 2);
+                    } catch (error) {
+                        loading.classList.add('hidden');
+                        errorBox.classList.remove('hidden');
+                        errorBox.textContent = error.message || 'Unable to fetch transcript.';
+                    }
+                });
+            });
+        })();
+    </script>
 </body>
 
 </html>
