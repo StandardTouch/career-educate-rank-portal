@@ -88,6 +88,7 @@ class ExotelService
         $url = (string) config('services.exotel.voice_analyze_url');
         $format = (string) config('services.exotel.voice_analyze_format', 'form');
         $method = strtoupper((string) config('services.exotel.voice_analyze_method', 'POST'));
+        $extraParams = $this->voiceAnalyzeExtraParams();
 
         if ($apiKey === '' || $apiToken === '') {
             throw new RuntimeException('Exotel API credentials are not configured.');
@@ -102,22 +103,51 @@ class ExotelService
 
         $payload = array_filter([
             'CallSid' => $callSid,
+            'callSid' => $callSid,
+            'call_sid' => $callSid,
+            'callsid' => $callSid,
             'Sid' => $callSid,
+            'sid' => $callSid,
+            'CallUUID' => $callSid,
+            'call_uuid' => $callSid,
             'RecordingUrl' => $recordingUrl,
             'RecordingURL' => $recordingUrl,
+            'recordingUrl' => $recordingUrl,
+            'recordingURL' => $recordingUrl,
+            'recording_url' => $recordingUrl,
+            'recordingurl' => $recordingUrl,
             'Recording' => $recordingUrl,
+            'recording' => $recordingUrl,
             'AudioUrl' => $recordingUrl,
             'AudioURL' => $recordingUrl,
+            'audioUrl' => $recordingUrl,
+            'audioURL' => $recordingUrl,
+            'audio_url' => $recordingUrl,
+            'audio' => $recordingUrl,
+            'FileUrl' => $recordingUrl,
+            'file_url' => $recordingUrl,
+            'MediaUrl' => $recordingUrl,
+            'media_url' => $recordingUrl,
             'Url' => $recordingUrl,
             'URL' => $recordingUrl,
+            'url' => $recordingUrl,
             'From' => $call['from'] ?? null,
+            'from' => $call['from'] ?? null,
             'To' => $call['to'] ?? null,
+            'to' => $call['to'] ?? null,
             'Direction' => $call['direction'] ?? null,
+            'direction' => $call['direction'] ?? null,
             'Status' => $call['status'] ?? null,
+            'status' => $call['status'] ?? null,
             'Duration' => $call['duration'] ?? null,
+            'duration' => $call['duration'] ?? null,
             'StartTime' => $call['start_time'] ?? null,
+            'start_time' => $call['start_time'] ?? null,
             'EndTime' => $call['end_time'] ?? null,
+            'end_time' => $call['end_time'] ?? null,
         ], fn ($value) => filled($value));
+
+        $payload = array_merge($payload, $extraParams);
 
         if (empty($payload['CallSid']) && empty($payload['RecordingUrl'])) {
             throw new RuntimeException('Call SID or recording URL is required for transcript analysis.');
@@ -125,7 +155,13 @@ class ExotelService
 
         $url = strtr($url, [
             '{CallSid}' => rawurlencode((string) ($payload['CallSid'] ?? '')),
+            '{callSid}' => rawurlencode((string) ($payload['CallSid'] ?? '')),
+            '{call_sid}' => rawurlencode((string) ($payload['CallSid'] ?? '')),
+            '{Sid}' => rawurlencode((string) ($payload['CallSid'] ?? '')),
+            '{sid}' => rawurlencode((string) ($payload['CallSid'] ?? '')),
             '{RecordingUrl}' => rawurlencode((string) ($payload['RecordingUrl'] ?? '')),
+            '{recordingUrl}' => rawurlencode((string) ($payload['RecordingUrl'] ?? '')),
+            '{recording_url}' => rawurlencode((string) ($payload['RecordingUrl'] ?? '')),
         ]);
 
         if (preg_match('#/Calls(?:\.json)?/?$#', parse_url($url, PHP_URL_PATH) ?: '') === 1) {
@@ -195,5 +231,29 @@ class ExotelService
         }
 
         return $exception->getMessage();
+    }
+
+    private function voiceAnalyzeExtraParams(): array
+    {
+        $raw = config('services.exotel.voice_analyze_extra_params');
+
+        if (!is_string($raw) || trim($raw) === '') {
+            return [];
+        }
+
+        $decoded = json_decode($raw, true);
+
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return array_filter($decoded, fn ($value) => filled($value));
+        }
+
+        return collect(explode(',', $raw))
+            ->mapWithKeys(function (string $pair) {
+                [$key, $value] = array_pad(explode('=', $pair, 2), 2, null);
+
+                return trim((string) $key) !== '' ? [trim((string) $key) => trim((string) $value)] : [];
+            })
+            ->filter(fn ($value) => filled($value))
+            ->all();
     }
 }
