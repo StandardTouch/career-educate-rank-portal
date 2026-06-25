@@ -6,6 +6,7 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -82,15 +83,17 @@ class ExotelService
 
     public function analyzeCall(array $call): array
     {
-        $accountSid = (string) config('services.exotel.account_sid', 'retailcenter1');
         $apiKey = (string) config('services.exotel.api_key');
         $apiToken = (string) config('services.exotel.api_token');
-        $baseUrl = rtrim((string) config('services.exotel.base_url', 'https://api.exotel.com'), '/');
-        $url = (string) (config('services.exotel.voice_analyze_url') ?: "{$baseUrl}/v1/Accounts/{$accountSid}/ExoVoiceAnalyze.json");
+        $url = (string) config('services.exotel.voice_analyze_url');
         $format = (string) config('services.exotel.voice_analyze_format', 'form');
 
         if ($apiKey === '' || $apiToken === '') {
             throw new RuntimeException('Exotel API credentials are not configured.');
+        }
+
+        if ($url === '') {
+            throw new RuntimeException('Exotel Voice Analyze URL is not configured. Set EXOTEL_VOICE_ANALYZE_URL to the endpoint provided by Exotel.');
         }
 
         $payload = array_filter([
@@ -112,19 +115,48 @@ class ExotelService
         try {
             $request = Http::withBasicAuth($apiKey, $apiToken)
                 ->acceptJson()
+                ->retry(2, 1000)
                 ->timeout(60);
 
             $response = ($format === 'json' ? $request->asJson() : $request->asForm())
                 ->post($url, $payload)
                 ->throw();
         } catch (RequestException $exception) {
-            $message = $exception->response?->json('RestException.Message')
-                ?? $exception->response?->json('message')
-                ?? $exception->getMessage();
+            $message = $this->errorMessage($exception);
 
             throw new RuntimeException($message, previous: $exception);
         }
 
         return $response->json() ?? ['raw' => $response->body()];
+    }
+
+    private function errorMessage(RequestException $exception): string
+    {
+        $response = $exception->response;
+        $json = $response?->json();
+
+        if (is_array($json)) {
+            if (!empty($json['cloudflare_error'])) {
+                $retryAfter = $json['retry_after'] ?? null;
+                $retryText = $retryAfter ? " Retry after {$retryAfter} seconds." : '';
+
+                return 'Exotel Voice Analyze is temporarily unavailable or the endpoint is incorrect.' . $retryText;
+            }
+
+            return $json['RestException']['Message']
+                ?? $json['RestException.Message']
+                ?? $json['message']
+                ?? $json['detail']
+                ?? $json['title']
+                ?? $exception->getMessage();
+        }
+
+        $body = (string) $response?->body();
+
+        if (Str::contains($body, 'cloudflare', true) || Str::contains($body, 'Bad gateway', true)) {
+            return 'Exotel Voice Analyze is temporarily unavailable or the endpoint is incorrect. Please retry after a minute.';
+        }
+
+        return $exception->getMessage();
     }
 }

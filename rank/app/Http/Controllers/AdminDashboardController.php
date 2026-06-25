@@ -340,7 +340,7 @@ class AdminDashboardController extends Controller
         } catch (Throwable $exception) {
             return response()->json([
                 'message' => $exception->getMessage(),
-            ], 502);
+            ], 503);
         }
     }
 }

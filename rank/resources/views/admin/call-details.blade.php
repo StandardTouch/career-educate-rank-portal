@@ -341,7 +341,7 @@
                         const data = await response.json();
 
                         if (!response.ok) {
-                            throw new Error(data.message || 'Unable to fetch transcript.');
+                            throw new Error(data.message || 'Unable to fetch transcript. Please retry after a minute.');
                         }
 
                         const transcript = findTranscript(data) || 'Transcript was not found in the ExoVoiceAnalyze response.';
