@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use InvalidArgumentException;
 use RuntimeException;
 
 class ExotelService
@@ -48,5 +50,33 @@ class ExotelService
             'metadata' => $payload['Metadata'] ?? [],
             'raw' => $payload,
         ];
+    }
+
+    public function recording(string $recordingUrl): Response
+    {
+        $apiKey = (string) config('services.exotel.api_key');
+        $apiToken = (string) config('services.exotel.api_token');
+        $host = parse_url($recordingUrl, PHP_URL_HOST);
+
+        if ($apiKey === '' || $apiToken === '') {
+            throw new RuntimeException('Exotel API credentials are not configured.');
+        }
+
+        if (!in_array($host, ['recordings.exotel.com', 'api.exotel.com'], true)) {
+            throw new InvalidArgumentException('Invalid Exotel recording URL.');
+        }
+
+        try {
+            return Http::withBasicAuth($apiKey, $apiToken)
+                ->timeout(30)
+                ->get($recordingUrl)
+                ->throw();
+        } catch (RequestException $exception) {
+            $message = $exception->response?->json('RestException.Message')
+                ?? $exception->response?->json('message')
+                ?? $exception->getMessage();
+
+            throw new RuntimeException($message, previous: $exception);
+        }
     }
 }

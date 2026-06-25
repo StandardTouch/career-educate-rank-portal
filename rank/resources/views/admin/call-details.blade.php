@@ -80,6 +80,8 @@
                                 <td class="px-5 py-4 text-right">
                                     @if ($student->phone)
                                         <a href="{{ route('admin.call-details', ['search' => $search, 'user' => $student->id]) }}"
+                                            target="_blank"
+                                            rel="noopener"
                                             class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-rose-600">
                                             View Calls
                                         </a>
@@ -135,6 +137,7 @@
                                 @forelse ($calls as $call)
                                     @php
                                         $recordingUrl = $call['RecordingUrl'] ?? $call['RecordingURL'] ?? $call['recording_url'] ?? null;
+                                        $recordingProxyUrl = $recordingUrl ? route('admin.call-recording', ['url' => $recordingUrl]) : null;
                                     @endphp
                                     <tr class="align-top">
                                         <td class="px-5 py-4">
@@ -158,10 +161,10 @@
                                         <td class="px-5 py-4">
                                             @if ($recordingUrl)
                                                 <audio controls preload="none" class="w-64 max-w-full">
-                                                    <source src="{{ $recordingUrl }}">
+                                                    <source src="{{ $recordingProxyUrl }}">
                                                     Your browser does not support the audio element.
                                                 </audio>
-                                                <a href="{{ $recordingUrl }}" target="_blank" rel="noopener" class="mt-2 block text-xs font-bold text-rose-500 hover:text-rose-600">Open recording</a>
+                                                <a href="{{ $recordingProxyUrl }}" target="_blank" rel="noopener" class="mt-2 block text-xs font-bold text-rose-500 hover:text-rose-600">Open recording</a>
                                             @else
                                                 <span class="text-xs font-semibold text-slate-400">No recording</span>
                                             @endif

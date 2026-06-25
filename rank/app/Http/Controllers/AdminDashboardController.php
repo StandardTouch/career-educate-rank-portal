@@ -300,4 +300,24 @@ class AdminDashboardController extends Controller
             'apiError'
         ));
     }
+
+    public function callRecording(Request $request, ExotelService $exotel)
+    {
+        $recordingUrl = (string) $request->query('url', '');
+
+        abort_if($recordingUrl === '', 404);
+
+        try {
+            $recording = $exotel->recording($recordingUrl);
+        } catch (Throwable $exception) {
+            abort(502, $exception->getMessage());
+        }
+
+        return response($recording->body(), 200, [
+            'Content-Type' => $recording->header('Content-Type') ?: 'audio/mpeg',
+            'Content-Length' => $recording->header('Content-Length') ?: strlen($recording->body()),
+            'Accept-Ranges' => 'bytes',
+            'Cache-Control' => 'private, max-age=300',
+        ]);
+    }
 }
