@@ -47,6 +47,7 @@ return [
         'base_url' => env('EXOTEL_BASE_URL', 'https://api.exotel.com'),
         'voice_analyze_url' => env('EXOTEL_VOICE_ANALYZE_URL'),
         'voice_analyze_format' => env('EXOTEL_VOICE_ANALYZE_FORMAT', 'form'),
+        'voice_analyze_method' => env('EXOTEL_VOICE_ANALYZE_METHOD', 'POST'),
     ],
 
 ];

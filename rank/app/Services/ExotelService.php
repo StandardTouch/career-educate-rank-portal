@@ -87,6 +87,7 @@ class ExotelService
         $apiToken = (string) config('services.exotel.api_token');
         $url = (string) config('services.exotel.voice_analyze_url');
         $format = (string) config('services.exotel.voice_analyze_format', 'form');
+        $method = strtoupper((string) config('services.exotel.voice_analyze_method', 'POST'));
 
         if ($apiKey === '' || $apiToken === '') {
             throw new RuntimeException('Exotel API credentials are not configured.');
@@ -96,9 +97,19 @@ class ExotelService
             throw new RuntimeException('Exotel Voice Analyze URL is not configured. Set EXOTEL_VOICE_ANALYZE_URL to the endpoint provided by Exotel.');
         }
 
+        $callSid = $call['call_sid'] ?? null;
+        $recordingUrl = $call['recording_url'] ?? null;
+
         $payload = array_filter([
-            'CallSid' => $call['call_sid'] ?? null,
-            'RecordingUrl' => $call['recording_url'] ?? null,
+            'CallSid' => $callSid,
+            'Sid' => $callSid,
+            'RecordingUrl' => $recordingUrl,
+            'RecordingURL' => $recordingUrl,
+            'Recording' => $recordingUrl,
+            'AudioUrl' => $recordingUrl,
+            'AudioURL' => $recordingUrl,
+            'Url' => $recordingUrl,
+            'URL' => $recordingUrl,
             'From' => $call['from'] ?? null,
             'To' => $call['to'] ?? null,
             'Direction' => $call['direction'] ?? null,
@@ -112,17 +123,31 @@ class ExotelService
             throw new RuntimeException('Call SID or recording URL is required for transcript analysis.');
         }
 
+        $url = strtr($url, [
+            '{CallSid}' => rawurlencode((string) ($payload['CallSid'] ?? '')),
+            '{RecordingUrl}' => rawurlencode((string) ($payload['RecordingUrl'] ?? '')),
+        ]);
+
+        if (preg_match('#/Calls(?:\.json)?/?$#', parse_url($url, PHP_URL_PATH) ?: '') === 1) {
+            throw new RuntimeException('EXOTEL_VOICE_ANALYZE_URL points to the regular Calls endpoint, which does not accept transcript requests. Use the ExoVoiceAnalyze endpoint provided by Exotel, not /Calls.');
+        }
+
         try {
             $request = Http::withBasicAuth($apiKey, $apiToken)
                 ->acceptJson()
                 ->retry(2, 1000)
                 ->timeout(60);
 
-            $response = ($format === 'json' ? $request->asJson() : $request->asForm())
-                ->post($url, $payload)
-                ->throw();
+            $request = $format === 'json' ? $request->asJson() : $request->asForm();
+            $response = match ($method) {
+                'GET' => $request->get($url, $payload),
+                'PUT' => $request->put($url, $payload),
+                default => $request->post($url, $payload),
+            };
+
+            $response->throw();
         } catch (RequestException $exception) {
-            $message = $this->errorMessage($exception);
+            $message = $this->errorMessage($exception, array_keys($payload));
 
             throw new RuntimeException($message, previous: $exception);
         }
@@ -130,7 +155,7 @@ class ExotelService
         return $response->json() ?? ['raw' => $response->body()];
     }
 
-    private function errorMessage(RequestException $exception): string
+    private function errorMessage(RequestException $exception, array $payloadKeys = []): string
     {
         $response = $exception->response;
         $json = $response?->json();
@@ -143,15 +168,27 @@ class ExotelService
                 return 'Exotel Voice Analyze is temporarily unavailable or the endpoint is incorrect.' . $retryText;
             }
 
-            return $json['RestException']['Message']
+            $message = $json['RestException']['Message']
                 ?? $json['RestException.Message']
                 ?? $json['message']
                 ?? $json['detail']
                 ?? $json['title']
                 ?? $exception->getMessage();
+
+            if (Str::contains($message, 'Mandatory Parameter missing', true)) {
+                $keys = implode(', ', $payloadKeys);
+
+                return "Exotel says a mandatory parameter is missing. Sent parameter keys: {$keys}. Confirm the exact required parameter name with Exotel for this ExoVoiceAnalyze endpoint.";
+            }
+
+            return $message;
         }
 
         $body = (string) $response?->body();
+
+        if (Str::contains($body, 'Method not allowed', true) || Str::contains($body, 'Method not al', true)) {
+            return 'Exotel rejected the transcript request method. Check EXOTEL_VOICE_ANALYZE_URL and EXOTEL_VOICE_ANALYZE_METHOD; the regular /Calls endpoint is not the ExoVoiceAnalyze transcript endpoint.';
+        }
 
         if (Str::contains($body, 'cloudflare', true) || Str::contains($body, 'Bad gateway', true)) {
             return 'Exotel Voice Analyze is temporarily unavailable or the endpoint is incorrect. Please retry after a minute.';
