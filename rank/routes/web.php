@@ -25,6 +25,9 @@ Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])
     ->middleware(['auth', 'single.device'])
     ->name('logout');
 
+Route::match(['get', 'post'], '/exotel/voice-analyze-webhook', [App\Http\Controllers\AdminDashboardController::class, 'exotelVoiceAnalyzeWebhook'])
+    ->name('exotel.voice-analyze-webhook');
+
 // Routes protected by authentication AND having a paid plan
 Route::middleware(['auth', 'single.device', 'paid'])->group(function () {
     Route::get('/dashboard', function () {

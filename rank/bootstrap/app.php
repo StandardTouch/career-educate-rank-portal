@@ -18,6 +18,10 @@ $app = Application::configure(basePath: dirname(__DIR__))
             ? route('admin.login')
             : route('login'));
 
+        $middleware->validateCsrfTokens(except: [
+            'exotel/voice-analyze-webhook',
+        ]);
+
         $middleware->alias([
             'admin' => EnsureAdmin::class,
             'paid' => \App\Http\Middleware\RequirePaidPlan::class,

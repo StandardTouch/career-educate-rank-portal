@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\ExotelService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Throwable;
 
@@ -342,5 +343,15 @@ class AdminDashboardController extends Controller
                 'message' => $exception->getMessage(),
             ], 503);
         }
+    }
+
+    public function exotelVoiceAnalyzeWebhook(Request $request)
+    {
+        Log::info('Exotel Voice Analyze webhook received', [
+            'payload' => $request->all(),
+            'raw' => $request->getContent(),
+        ]);
+
+        return response()->json(['ok' => true]);
     }
 }

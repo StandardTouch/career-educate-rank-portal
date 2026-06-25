@@ -48,6 +48,7 @@ return [
         'voice_analyze_url' => env('EXOTEL_VOICE_ANALYZE_URL'),
         'voice_analyze_format' => env('EXOTEL_VOICE_ANALYZE_FORMAT', 'form'),
         'voice_analyze_method' => env('EXOTEL_VOICE_ANALYZE_METHOD', 'POST'),
+        'voice_analyze_callback_url' => env('EXOTEL_VOICE_ANALYZE_CALLBACK_URL'),
         'voice_analyze_extra_params' => env('EXOTEL_VOICE_ANALYZE_EXTRA_PARAMS'),
     ],
 

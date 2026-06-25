@@ -88,6 +88,7 @@ class ExotelService
         $url = (string) config('services.exotel.voice_analyze_url');
         $format = (string) config('services.exotel.voice_analyze_format', 'form');
         $method = strtoupper((string) config('services.exotel.voice_analyze_method', 'POST'));
+        $callbackUrl = (string) config('services.exotel.voice_analyze_callback_url');
         $extraParams = $this->voiceAnalyzeExtraParams();
 
         if ($apiKey === '' || $apiToken === '') {
@@ -145,6 +146,14 @@ class ExotelService
             'start_time' => $call['start_time'] ?? null,
             'EndTime' => $call['end_time'] ?? null,
             'end_time' => $call['end_time'] ?? null,
+            'CallbackUrl' => $callbackUrl,
+            'CallbackURL' => $callbackUrl,
+            'callbackUrl' => $callbackUrl,
+            'callback_url' => $callbackUrl,
+            'StatusCallback' => $callbackUrl,
+            'status_callback' => $callbackUrl,
+            'WebhookUrl' => $callbackUrl,
+            'webhook_url' => $callbackUrl,
         ], fn ($value) => filled($value));
 
         $payload = array_merge($payload, $extraParams);
@@ -162,6 +171,9 @@ class ExotelService
             '{RecordingUrl}' => rawurlencode((string) ($payload['RecordingUrl'] ?? '')),
             '{recordingUrl}' => rawurlencode((string) ($payload['RecordingUrl'] ?? '')),
             '{recording_url}' => rawurlencode((string) ($payload['RecordingUrl'] ?? '')),
+            '{CallbackUrl}' => rawurlencode((string) ($payload['CallbackUrl'] ?? '')),
+            '{callbackUrl}' => rawurlencode((string) ($payload['CallbackUrl'] ?? '')),
+            '{callback_url}' => rawurlencode((string) ($payload['CallbackUrl'] ?? '')),
         ]);
 
         if (preg_match('#/Calls(?:\.json)?/?$#', parse_url($url, PHP_URL_PATH) ?: '') === 1) {
