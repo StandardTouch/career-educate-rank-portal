@@ -95,6 +95,7 @@ Route::middleware(['auth', 'single.device', 'admin'])->group(function () {
     Route::get('/admin/users', [App\Http\Controllers\AdminDashboardController::class, 'users'])->name('admin.users');
     Route::get('/admin/payments', [App\Http\Controllers\AdminDashboardController::class, 'payments'])->name('admin.payments');
     Route::get('/admin/call-details', [App\Http\Controllers\AdminDashboardController::class, 'callDetails'])->name('admin.call-details');
+    Route::get('/admin/call-details/{user}', [App\Http\Controllers\AdminDashboardController::class, 'callHistory'])->name('admin.call-history');
     Route::get('/admin/call-recording', [App\Http\Controllers\AdminDashboardController::class, 'callRecording'])->name('admin.call-recording');
     Route::post('/admin/call-transcript', [App\Http\Controllers\AdminDashboardController::class, 'callTranscript'])->name('admin.call-transcript');
     Route::get('/import-excel', [App\Http\Controllers\ImportExcelController::class, 'create'])->name('import.excel');

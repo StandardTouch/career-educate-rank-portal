@@ -249,15 +249,9 @@ class AdminDashboardController extends Controller
         return view('admin.payments', compact('payments', 'search', 'status', 'totalRevenue'));
     }
 
-    public function callDetails(Request $request, ExotelService $exotel)
+    public function callDetails(Request $request)
     {
         $search = trim((string) $request->query('search', ''));
-        $selectedUserId = $request->integer('user');
-        $callPage = max(0, $request->integer('call_page', 0));
-        $calls = [];
-        $metadata = [];
-        $rawResponse = null;
-        $apiError = null;
 
         $students = User::query()
             ->where('is_admin', false)
@@ -272,28 +266,34 @@ class AdminDashboardController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $selectedUser = $selectedUserId
-            ? User::query()->where('is_admin', false)->find($selectedUserId)
-            : null;
+        return view('admin.call-details', compact('students', 'search'));
+    }
 
-        if ($selectedUser && filled($selectedUser->phone)) {
+    public function callHistory(Request $request, User $user, ExotelService $exotel)
+    {
+        abort_if($user->is_admin, 404);
+
+        $callPage = max(0, $request->integer('call_page', 0));
+        $calls = [];
+        $metadata = [];
+        $rawResponse = null;
+        $apiError = null;
+
+        if (filled($user->phone)) {
             try {
-                $callResponse = $exotel->callsForPhone((string) $selectedUser->phone, $callPage);
+                $callResponse = $exotel->callsForPhone((string) $user->phone, $callPage);
                 $calls = $callResponse['calls'];
                 $metadata = $callResponse['metadata'];
                 $rawResponse = $callResponse['raw'];
             } catch (Throwable $exception) {
                 $apiError = $exception->getMessage();
             }
-        } elseif ($selectedUser) {
+        } else {
             $apiError = 'This student does not have a phone number saved.';
         }
 
-        return view('admin.call-details', compact(
-            'students',
-            'search',
-            'selectedUser',
-            'selectedUserId',
+        return view('admin.call-history', compact(
+            'user',
             'callPage',
             'calls',
             'metadata',
