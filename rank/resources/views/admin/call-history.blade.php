@@ -154,12 +154,6 @@
                     </div>
                 </div>
 
-                @if ($rawResponse)
-                    <details class="border-t border-slate-100 px-5 py-4">
-                        <summary class="cursor-pointer text-sm font-bold text-slate-700">Raw Exotel response</summary>
-                        <pre class="mt-3 max-h-96 overflow-auto rounded-xl bg-slate-950 p-4 text-xs text-slate-100">{{ json_encode($rawResponse, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
-                    </details>
-                @endif
             @endif
         </section>
     </main>
