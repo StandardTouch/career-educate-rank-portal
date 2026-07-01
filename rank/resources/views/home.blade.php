@@ -41,13 +41,13 @@
                     
                     <!-- Left Column: Text & CTA -->
                     <div class="lg:col-span-6 space-y-6 text-left max-w-2xl mx-auto lg:mx-0">
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-100 text-xs font-semibold text-rose-600">
+                        <!-- <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-100 text-xs font-semibold text-rose-600">
                             <span class="flex h-2 w-2 relative">
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                                 <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
                             </span>
                             NEET 2025 Counselling Live Predictor
-                        </div>
+                        </div> -->
                         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-tight">
                             Predict Your Best College for <span class="text-rose-500">NEET Guidance</span>
                         </h1>
