@@ -118,7 +118,7 @@
                         Import
                     </a>
                     <a href="{{ route('import.analysis') }}" class="{{ $routeName === 'import.analysis' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
-                        Import Analysis
+                        Import Predicted Rank
                     </a>
                 @else
                     <a href="{{ route('dashboard') }}" class="{{ $routeName === 'dashboard' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
