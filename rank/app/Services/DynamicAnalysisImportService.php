@@ -17,6 +17,10 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class DynamicAnalysisImportService
 {
+    public function __construct(protected CourseDetectionService $courseDetection)
+    {
+    }
+
     public function importUploadedFile(UploadedFile $file, ?int $userId = null): AnalysisDataset
     {
         $originalName = $file->getClientOriginalName();
@@ -27,9 +31,18 @@ class DynamicAnalysisImportService
         return $this->importFile($absolutePath, $originalName, $storedPath, $userId);
     }
 
-    public function importFile(string $absolutePath, string $originalName, string $storedPath, ?int $userId = null): AnalysisDataset
+    public function previewUploadedFile(UploadedFile $file): array
     {
-        $meta = $this->metadataFromFilename($originalName);
+        $sheetNames = $this->sheetNamesFromPath($file->getRealPath());
+        $meta = $this->metadataFromFilename($file->getClientOriginalName(), null, $sheetNames);
+        $meta['sheet_names'] = $sheetNames;
+
+        return $meta;
+    }
+
+    public function importFile(string $absolutePath, string $originalName, string $storedPath, ?int $userId = null, ?string $courseOverride = null): AnalysisDataset
+    {
+        $meta = $this->metadataFromFilename($originalName, $courseOverride);
 
         $dataset = AnalysisDataset::updateOrCreate(
             ['slug' => $meta['slug']],
@@ -240,7 +253,7 @@ class DynamicAnalysisImportService
         ]);
     }
 
-    protected function metadataFromFilename(string $filename): array
+    protected function metadataFromFilename(string $filename, ?string $courseOverride = null, array $extraCourseText = []): array
     {
         try {
             $parts = ScaffoldHelper::parseFileName($filename);
@@ -251,7 +264,7 @@ class DynamicAnalysisImportService
         $title = $this->titleFromFilename($filename);
         preg_match('/\b(20\d{2})\b/', $filename, $yearMatch);
         $year = isset($yearMatch[1]) ? (int) $yearMatch[1] : ($parts['year'] ? (int) $parts['year'] : null);
-        $course = $this->courseFromFilename($filename);
+        $course = $this->courseFromFilename($filename, $courseOverride, $extraCourseText);
         $state = $this->stateFromParts($parts['state'] ?? null, $course);
         $descriptor = $parts['descriptor'] ?? null;
         $quota = $this->quotaFromText($filename);
@@ -292,17 +305,26 @@ class DynamicAnalysisImportService
         return $state !== '' ? $state : null;
     }
 
-    protected function courseFromFilename(string $filename): ?string
+    protected function courseFromFilename(string $filename, ?string $courseOverride = null, array $extraCourseText = []): ?string
     {
-        if (preg_match('/\bmbbs\b/i', $filename)) {
-            return 'MBBS';
+        if ($courseOverride !== null && trim($courseOverride) !== '') {
+            return $this->courseDetection->normalizeCourse($courseOverride);
         }
 
-        if (preg_match('/\bbds\b|\bdental\b/i', $filename)) {
-            return 'BDS';
+        return $this->courseDetection->detectFromText($filename, ...$extraCourseText);
+    }
+
+    protected function sheetNamesFromPath(string|false $path): array
+    {
+        if (! is_string($path) || $path === '') {
+            return [];
         }
 
-        return null;
+        try {
+            return IOFactory::load($path)->getSheetNames();
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     protected function quotaFromText(string $text): ?string

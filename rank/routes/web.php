@@ -100,8 +100,12 @@ Route::middleware(['auth', 'single.device', 'admin'])->group(function () {
     Route::post('/admin/call-transcript', [App\Http\Controllers\AdminDashboardController::class, 'callTranscript'])->name('admin.call-transcript');
     Route::get('/import-excel', [App\Http\Controllers\ImportExcelController::class, 'create'])->name('import.excel');
     Route::post('/import-excel', [App\Http\Controllers\ImportExcelController::class, 'store'])->name('import.excel.store');
+    Route::get('/import-excel/confirm-course', [App\Http\Controllers\ImportExcelController::class, 'confirm'])->name('import.excel.confirm');
+    Route::post('/import-excel/confirm-course', [App\Http\Controllers\ImportExcelController::class, 'confirmStore'])->name('import.excel.confirm.store');
     Route::get('/admin/import-analysis', [App\Http\Controllers\ImportAnalysisController::class, 'create'])->name('import.analysis');
     Route::post('/admin/import-analysis', [App\Http\Controllers\ImportAnalysisController::class, 'store'])->name('import.analysis.store');
+    Route::get('/admin/import-analysis/confirm-course', [App\Http\Controllers\ImportAnalysisController::class, 'confirm'])->name('import.analysis.confirm');
+    Route::post('/admin/import-analysis/confirm-course', [App\Http\Controllers\ImportAnalysisController::class, 'confirmStore'])->name('import.analysis.confirm.store');
 });
 
 // Analysis Routes (OTP based or regular Auth)

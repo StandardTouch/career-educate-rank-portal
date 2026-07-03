@@ -3,7 +3,9 @@
 
     $rawYearMenus = config('menus');
     $currentDataset = request()->route('dataset');
+    $currentAnalysisDataset = request()->route('analysis_dataset');
     $currentDatasetSlug = is_object($currentDataset) ? ($currentDataset->slug ?? null) : $currentDataset;
+    $currentDatasetSlug = $currentDatasetSlug ?: (is_object($currentAnalysisDataset) ? ($currentAnalysisDataset->slug ?? null) : $currentAnalysisDataset);
 
     try {
         if (\Illuminate\Support\Facades\Schema::hasTable('datasets')) {
@@ -23,6 +25,7 @@
                     'route' => 'results.show',
                     'params' => ['dataset' => $dataset->slug],
                     'dataset_slug' => $dataset->slug,
+                    'course' => $dataset->course,
                 ];
             }
         }
@@ -44,6 +47,7 @@
                     'route' => 'analysis.show',
                     'params' => ['analysis_dataset' => $dataset->slug],
                     'dataset_slug' => $dataset->slug,
+                    'course' => $dataset->course,
                 ];
             }
         }
@@ -67,17 +71,35 @@
 
         $yearMenus[$yearGroup] = [
             'label' => $displayYear,
-            'ug' => [
-                'MBBS' => [],
-                'BDS' => [],
-            ],
+            'ug' => [],
         ];
 
         foreach ($items as $item) {
-            $courseText = strtolower(($item['label'] ?? '') . ' ' . ($item['route'] ?? ''));
-            $course = (str_contains($courseText, 'bds') || str_contains($courseText, 'dental')) ? 'BDS' : 'MBBS';
+            $course = strtoupper(trim((string) ($item['course'] ?? '')));
+
+            if ($course === '') {
+                $courseText = strtolower(($item['label'] ?? '') . ' ' . ($item['route'] ?? ''));
+                $course = (str_contains($courseText, 'bds') || str_contains($courseText, 'dental')) ? 'BDS' : 'MBBS';
+            }
+
+            $yearMenus[$yearGroup]['ug'][$course] = $yearMenus[$yearGroup]['ug'][$course] ?? [];
             $yearMenus[$yearGroup]['ug'][$course][] = $item;
         }
+
+        $orderedCourses = [];
+        foreach (['MBBS', 'BDS'] as $knownCourse) {
+            if (array_key_exists($knownCourse, $yearMenus[$yearGroup]['ug'])) {
+                $orderedCourses[$knownCourse] = $yearMenus[$yearGroup]['ug'][$knownCourse];
+            }
+        }
+
+        foreach ($yearMenus[$yearGroup]['ug'] as $course => $courseItems) {
+            if (! array_key_exists($course, $orderedCourses)) {
+                $orderedCourses[$course] = $courseItems;
+            }
+        }
+
+        $yearMenus[$yearGroup]['ug'] = $orderedCourses;
 
         if ($routeName && str_contains($routeName, $yearNumber)) {
             $activeYear = $yearGroup;
