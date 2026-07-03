@@ -23,35 +23,19 @@ class ImportAnalysisController extends Controller
         $file = $validated['excel_file'];
         $meta = $dynamicImporter->previewUploadedFile($file);
 
-        if (($meta['course'] ?? null) === null) {
-            $storedPath = $file->storeAs(
-                'pending-analysis-imports',
-                now()->format('YmdHis') . '-' . $this->safeFilename($file->getClientOriginalName())
-            );
+        $storedPath = $file->storeAs(
+            'pending-analysis-imports',
+            now()->format('YmdHis') . '-' . $this->safeFilename($file->getClientOriginalName())
+        );
 
-            $request->session()->put('pending_analysis_import', [
-                'stored_path' => $storedPath,
-                'original_name' => $file->getClientOriginalName(),
-                'sheet_names' => $meta['sheet_names'] ?? [],
-            ]);
+        $request->session()->put('pending_analysis_import', [
+            'stored_path' => $storedPath,
+            'original_name' => $file->getClientOriginalName(),
+            'detected_course' => $meta['course'] ?? null,
+            'sheet_names' => $meta['sheet_names'] ?? [],
+        ]);
 
-            return redirect()->route('import.analysis.confirm');
-        }
-
-        try {
-            $dataset = $dynamicImporter->importUploadedFile($file, $request->user()?->id);
-        } catch (\Throwable $exception) {
-            return redirect()
-                ->route('import.analysis')
-                ->withErrors(['excel_file' => 'Import failed: ' . $exception->getMessage()]);
-        }
-
-        return redirect()
-            ->route('import.analysis')
-            ->with('status', 'Imported ' . $file->getClientOriginalName() . ' successfully.')
-            ->with('import_output', 'DB analysis import completed.')
-            ->with('page_route', route('analysis.show', $dataset, false))
-            ->with('page_url', route('analysis.show', $dataset));
+        return redirect()->route('import.analysis.confirm');
     }
 
     public function confirm(Request $request, CourseDetectionService $courseDetection)
@@ -65,18 +49,22 @@ class ImportAnalysisController extends Controller
 
         $originalName = (string) ($pending['original_name'] ?? 'Uploaded file.xlsx');
         $sheetNames = is_array($pending['sheet_names'] ?? null) ? $pending['sheet_names'] : [];
-        $suggestedCourse = $courseDetection->suggestFromText($originalName, ...$sheetNames);
+        $detectedCourse = $pending['detected_course'] ?? null;
+        $suggestedCourse = $detectedCourse ?: $courseDetection->suggestFromText($originalName, ...$sheetNames);
 
         return view('admin.import-course-confirm', [
-            'title' => 'Choose Predicted Rank Course Tab',
-            'eyebrow' => 'Unknown Predicted Rank Course',
-            'description' => 'This file does not contain a known MBBS/BDS course tag. Choose whether it should create a new course tab or live under an existing tab.',
+            'title' => 'Confirm Predicted Rank Course Tab',
+            'eyebrow' => $detectedCourse ? 'Detected Predicted Rank Course' : 'Unknown Predicted Rank Course',
+            'description' => $detectedCourse
+                ? 'Review the course tab detected for this file. You can keep it, choose an existing tab, or type a new tab before importing.'
+                : 'This file does not contain a known course tag. Choose whether it should create a new course tab or live under an existing tab.',
             'action' => route('import.analysis.confirm.store'),
             'cancelRoute' => route('import.analysis'),
             'originalName' => $originalName,
             'meta' => ['title' => pathinfo($originalName, PATHINFO_FILENAME), 'sheet_names' => $sheetNames],
             'courses' => $courseDetection->courses(),
             'suggestedCourse' => $suggestedCourse,
+            'detectedCourse' => $detectedCourse,
         ]);
     }
 

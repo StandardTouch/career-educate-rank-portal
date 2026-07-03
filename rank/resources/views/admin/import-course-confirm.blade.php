@@ -36,6 +36,23 @@
                 <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
                     <p class="text-xs font-bold uppercase tracking-wide text-slate-400">Pending File</p>
                     <p class="mt-1 text-sm font-bold text-slate-950">{{ $originalName }}</p>
+                    @if (!empty($suggestedCourse))
+                        <div class="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                            <p class="text-xs font-bold uppercase tracking-wide text-emerald-600">
+                                {{ !empty($detectedCourse) ? 'Detected Course Tab' : 'Suggested Course Tab' }}
+                            </p>
+                            <p class="mt-1 text-sm font-bold text-emerald-800">
+                                This file will be imported under {{ $suggestedCourse }}.
+                            </p>
+                        </div>
+                    @else
+                        <div class="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                            <p class="text-xs font-bold uppercase tracking-wide text-amber-700">Course Tab Needed</p>
+                            <p class="mt-1 text-sm font-semibold text-amber-800">
+                                Choose an existing tab or enter a new one before importing this file.
+                            </p>
+                        </div>
+                    @endif
                     @if (!empty($meta['year']) || !empty($meta['state']) || !empty($meta['descriptor']))
                         <p class="mt-2 text-xs font-semibold text-slate-500">
                             {{ collect([$meta['state'] ?? null, $meta['year'] ?? null, $meta['descriptor'] ?? null])->filter()->implode(' | ') }}
@@ -72,7 +89,7 @@
                             @endforeach
                         </datalist>
                         <p class="mt-2 text-xs text-slate-500">
-                            Type a new tab name like BHMS, or choose an existing one like MBBS/BDS to keep this file under that tab.
+                            Keep the detected tab, choose an existing one like MBBS/BDS, or type a new tab name like BHMS.
                         </p>
                     </div>
 
