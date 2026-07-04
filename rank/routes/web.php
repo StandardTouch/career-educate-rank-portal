@@ -92,6 +92,9 @@ Route::middleware(['auth', 'single.device'])->group(function () {
 // Admin routes
 Route::middleware(['auth', 'single.device', 'admin'])->group(function () {
     Route::get('/admin/dashboard', [App\Http\Controllers\AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/imports', [App\Http\Controllers\AdminImportController::class, 'index'])->name('admin.imports');
+    Route::delete('/admin/imports/results/{import}', [App\Http\Controllers\AdminImportController::class, 'destroyResult'])->name('admin.imports.results.destroy');
+    Route::delete('/admin/imports/predicted-rank/{analysisImport}', [App\Http\Controllers\AdminImportController::class, 'destroyPredictedRank'])->name('admin.imports.predicted-rank.destroy');
     Route::get('/admin/users', [App\Http\Controllers\AdminDashboardController::class, 'users'])->name('admin.users');
     Route::get('/admin/payments', [App\Http\Controllers\AdminDashboardController::class, 'payments'])->name('admin.payments');
     Route::get('/admin/call-details', [App\Http\Controllers\AdminDashboardController::class, 'callDetails'])->name('admin.call-details');
