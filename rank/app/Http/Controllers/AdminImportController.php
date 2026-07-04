@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AnalysisImport;
 use App\Models\Import;
+use App\Models\NotificationDocument;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -56,7 +57,19 @@ class AdminImportController extends Controller
             ->paginate(15, ['*'], 'predicted_page')
             ->withQueryString();
 
-        return view('admin.imports.index', compact('resultImports', 'predictedRankImports', 'search'));
+        $notificationDocuments = NotificationDocument::query()
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($nested) use ($search): void {
+                    $nested->where('title', 'like', "%{$search}%")
+                        ->orWhere('original_filename', 'like', "%{$search}%")
+                        ->orWhereDate('created_at', $search);
+                });
+            })
+            ->latest('id')
+            ->paginate(15, ['*'], 'notification_page')
+            ->withQueryString();
+
+        return view('admin.imports.index', compact('resultImports', 'predictedRankImports', 'notificationDocuments', 'search'));
     }
 
     public function destroyResult(Import $import): RedirectResponse
@@ -117,6 +130,19 @@ class AdminImportController extends Controller
         return redirect()
             ->route('admin.imports')
             ->with('status', 'Deleted predicted rank import "' . $name . '" and removed it from the portal.');
+    }
+
+    public function destroyNotification(NotificationDocument $notificationDocument): RedirectResponse
+    {
+        $name = $notificationDocument->title;
+        $path = $notificationDocument->stored_path;
+
+        $notificationDocument->delete();
+        Storage::disk('public')->delete($path);
+
+        return redirect()
+            ->route('admin.imports')
+            ->with('status', 'Deleted notification PDF "' . $name . '" and removed it from the Notifications dropdown.');
     }
 
     protected function deleteStoredFiles(array $paths): void

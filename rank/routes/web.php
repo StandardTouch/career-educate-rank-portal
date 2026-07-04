@@ -74,6 +74,9 @@ Route::middleware(['auth', 'single.device', 'paid'])->group(function () {
     Route::get('/results/{dataset:slug}', [App\Http\Controllers\ResultController::class, 'show'])->name('results.show');
 });
 
+Route::get('/notifications/{notificationDocument}/view', [App\Http\Controllers\NotificationDocumentController::class, 'show'])
+    ->name('notifications.view');
+
 // Routes protected by authentication only (allows profile updates and payment)
 Route::middleware(['auth', 'single.device'])->group(function () {
     // Profile
@@ -95,6 +98,7 @@ Route::middleware(['auth', 'single.device', 'admin'])->group(function () {
     Route::get('/admin/imports', [App\Http\Controllers\AdminImportController::class, 'index'])->name('admin.imports');
     Route::delete('/admin/imports/results/{import}', [App\Http\Controllers\AdminImportController::class, 'destroyResult'])->name('admin.imports.results.destroy');
     Route::delete('/admin/imports/predicted-rank/{analysisImport}', [App\Http\Controllers\AdminImportController::class, 'destroyPredictedRank'])->name('admin.imports.predicted-rank.destroy');
+    Route::delete('/admin/imports/notifications/{notificationDocument}', [App\Http\Controllers\AdminImportController::class, 'destroyNotification'])->name('admin.imports.notifications.destroy');
     Route::get('/admin/users', [App\Http\Controllers\AdminDashboardController::class, 'users'])->name('admin.users');
     Route::get('/admin/payments', [App\Http\Controllers\AdminDashboardController::class, 'payments'])->name('admin.payments');
     Route::get('/admin/call-details', [App\Http\Controllers\AdminDashboardController::class, 'callDetails'])->name('admin.call-details');
@@ -109,6 +113,10 @@ Route::middleware(['auth', 'single.device', 'admin'])->group(function () {
     Route::post('/admin/import-analysis', [App\Http\Controllers\ImportAnalysisController::class, 'store'])->name('import.analysis.store');
     Route::get('/admin/import-analysis/confirm-course', [App\Http\Controllers\ImportAnalysisController::class, 'confirm'])->name('import.analysis.confirm');
     Route::post('/admin/import-analysis/confirm-course', [App\Http\Controllers\ImportAnalysisController::class, 'confirmStore'])->name('import.analysis.confirm.store');
+    Route::get('/admin/import-notification', [App\Http\Controllers\NotificationDocumentController::class, 'create'])->name('notifications.import');
+    Route::post('/admin/import-notification', [App\Http\Controllers\NotificationDocumentController::class, 'store'])->name('notifications.import.store');
+    Route::get('/admin/import-notification/confirm-title', [App\Http\Controllers\NotificationDocumentController::class, 'confirm'])->name('notifications.import.confirm');
+    Route::post('/admin/import-notification/confirm-title', [App\Http\Controllers\NotificationDocumentController::class, 'confirmStore'])->name('notifications.import.confirm.store');
 });
 
 // Analysis Routes (OTP based or regular Auth)

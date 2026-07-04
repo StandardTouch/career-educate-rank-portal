@@ -24,7 +24,7 @@
                 <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">Import Management</p>
                 <h1 class="mt-2 text-3xl font-extrabold text-slate-950">All Imports</h1>
                 <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-                    Review uploaded result and predicted rank files. Deleting an import removes its imported page, records, rounds, sheets, stored upload, and navigation entry.
+                    Review uploaded result, predicted rank, and notification files. Deleting an item removes its imported page or dropdown entry from the portal.
                 </p>
             </div>
             <div class="flex flex-wrap gap-3">
@@ -33,6 +33,9 @@
                 </a>
                 <a href="{{ route('import.analysis') }}" class="inline-flex justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
                     Import Predicted Rank
+                </a>
+                <a href="{{ route('notifications.import') }}" class="inline-flex justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
+                    Import Notification
                 </a>
             </div>
         </section>
@@ -52,7 +55,7 @@
                         name="search"
                         type="search"
                         value="{{ $search }}"
-                        placeholder="Search by file, dataset, course, status, year, state, quota, or YYYY-MM-DD"
+                        placeholder="Search by file, title, dataset, course, status, year, state, quota, or YYYY-MM-DD"
                         class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
                     >
                 </div>
@@ -195,6 +198,65 @@
             @if ($predictedRankImports->hasPages())
                 <div class="border-t border-slate-100 px-6 py-4">
                     {{ $predictedRankImports->links() }}
+                </div>
+            @endif
+        </section>
+
+        <section class="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-100 px-6 py-5">
+                <h2 class="text-lg font-bold text-slate-950">Notification PDFs</h2>
+                <p class="mt-1 text-xs text-slate-500">PDFs shown in the Notifications dropdown. Showing {{ number_format($notificationDocuments->total()) }} notification PDFs.</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-100 text-sm">
+                    <thead class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                        <tr>
+                            <th class="px-6 py-3">Title</th>
+                            <th class="px-6 py-3">File</th>
+                            <th class="px-6 py-3">Status</th>
+                            <th class="px-6 py-3">Uploaded</th>
+                            <th class="px-6 py-3 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse ($notificationDocuments as $document)
+                            <tr>
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-slate-900">{{ $document->title }}</div>
+                                    <a href="{{ route('notifications.view', $document) }}" target="_blank" rel="noopener" class="mt-1 inline-flex text-xs font-bold text-rose-500 hover:text-rose-600">Open PDF</a>
+                                </td>
+                                <td class="max-w-xs px-6 py-4">
+                                    <div class="truncate font-semibold text-slate-700" title="{{ $document->original_filename }}">{{ $document->original_filename }}</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-bold {{ $document->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
+                                        {{ $document->is_active ? 'Active' : 'Hidden' }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 font-semibold text-slate-500">{{ optional($document->created_at)->format('d M Y, h:i A') }}</td>
+                                <td class="px-6 py-4 text-right">
+                                    <form action="{{ route('admin.imports.notifications.destroy', $document) }}" method="POST" onsubmit="return confirm('Delete this notification PDF and remove it from the Notifications dropdown?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-100">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-10 text-center text-sm font-semibold text-slate-400">No notification PDFs found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            @if ($notificationDocuments->hasPages())
+                <div class="border-t border-slate-100 px-6 py-4">
+                    {{ $notificationDocuments->links() }}
                 </div>
             @endif
         </section>

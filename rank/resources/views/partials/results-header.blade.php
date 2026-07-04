@@ -6,6 +6,7 @@
     $currentAnalysisDataset = request()->route('analysis_dataset');
     $currentDatasetSlug = is_object($currentDataset) ? ($currentDataset->slug ?? null) : $currentDataset;
     $currentDatasetSlug = $currentDatasetSlug ?: (is_object($currentAnalysisDataset) ? ($currentAnalysisDataset->slug ?? null) : $currentAnalysisDataset);
+    $notificationDocuments = collect();
 
     try {
         if (\Illuminate\Support\Facades\Schema::hasTable('datasets')) {
@@ -51,8 +52,18 @@
                 ];
             }
         }
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('notification_documents')) {
+            $notificationDocuments = \App\Models\NotificationDocument::query()
+                ->where('is_active', true)
+                ->orderByRaw('sort_order is null')
+                ->orderBy('sort_order')
+                ->latest('id')
+                ->get();
+        }
     } catch (\Throwable $exception) {
         $rawYearMenus = config('menus');
+        $notificationDocuments = collect();
     }
 
     $yearMenus = [];
@@ -136,15 +147,36 @@
                     <a href="{{ route('admin.call-details') }}" class="{{ $routeName === 'admin.call-details' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                         Call Details
                     </a>
-                    <a href="{{ route('import.excel') }}" class="{{ $routeName === 'import.excel' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
-                        Import
-                    </a>
-                    <a href="{{ route('admin.imports') }}" class="{{ $routeName === 'admin.imports' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
-                        Manage Imports
-                    </a>
-                    <a href="{{ route('import.analysis') }}" class="{{ $routeName === 'import.analysis' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
-                        Import Predicted Rank
-                    </a>
+                    <div class="relative group results-year-menu">
+                        <button
+                            type="button"
+                            class="results-year-trigger px-3 py-2 rounded-lg border {{ in_array($routeName, ['import.excel', 'import.excel.confirm', 'admin.imports', 'import.analysis', 'import.analysis.confirm', 'notifications.import', 'notifications.import.confirm'], true) ? 'border-rose-300 text-rose-600 bg-rose-50' : 'border-slate-200 text-slate-700 hover:border-rose-300 hover:text-rose-600' }} transition-colors inline-flex items-center gap-2 whitespace-nowrap"
+                            aria-expanded="false"
+                        >
+                            <span>View Imports</span>
+                            <span class="results-year-caret text-[10px] leading-none transition-transform">v</span>
+                        </button>
+                        <div
+                            class="results-year-panel hidden fixed z-50 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl p-2"
+                            style="width: min(18rem, calc(100vw - 2rem)); max-height: min(32rem, calc(100vh - 7rem));"
+                        >
+                            <div class="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Import Tools</div>
+                            <div class="grid gap-1 px-2 pb-2">
+                                <a href="{{ route('admin.imports') }}" class="results-menu-link {{ $routeName === 'admin.imports' ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-rose-50 hover:text-rose-700' }} rounded-xl px-3 py-2 text-sm transition-colors block">
+                                    Manage All Imports
+                                </a>
+                                <a href="{{ route('import.excel') }}" class="results-menu-link {{ $routeName === 'import.excel' ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-rose-50 hover:text-rose-700' }} rounded-xl px-3 py-2 text-sm transition-colors block">
+                                    Import Results
+                                </a>
+                                <a href="{{ route('import.analysis') }}" class="results-menu-link {{ $routeName === 'import.analysis' ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-rose-50 hover:text-rose-700' }} rounded-xl px-3 py-2 text-sm transition-colors block">
+                                    Import Predicted Rank
+                                </a>
+                                <a href="{{ route('notifications.import') }}" class="results-menu-link {{ $routeName === 'notifications.import' ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-rose-50 hover:text-rose-700' }} rounded-xl px-3 py-2 text-sm transition-colors block">
+                                    Import Notification
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 @else
                     <a href="{{ route('dashboard') }}" class="{{ $routeName === 'dashboard' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                         Dashboard
@@ -206,13 +238,15 @@
                 >
                     <div class="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Updates</div>
                     <div class="grid gap-1 px-2 pb-2">
-                        <a href="{{ asset('MCC-counselling-flow.pdf') }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
-                            MCC Counselling Flow
-                        </a>
-                        <p>testing</p>
-                        <a href="{{ asset('notifications.pdf') }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
-                            View Notifications PDF
-                        </a>
+                        @forelse ($notificationDocuments as $document)
+                            <a href="{{ route('notifications.view', $document) }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
+                                {{ \Illuminate\Support\Str::upper($document->title) }}
+                            </a>
+                        @empty
+                            <div class="rounded-xl px-3 py-2 text-sm font-semibold text-slate-400">
+                                No notifications uploaded yet.
+                            </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -254,7 +288,7 @@
                                                     <a href="#"
                                                 @endif
                                                     class="results-menu-link {{ $isActiveItem ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-slate-50' }} rounded-xl px-3 py-2 text-sm transition-colors">
-                                                    {{ $item['label'] ?? '#' }}
+                                                    {{ \Illuminate\Support\Str::upper($item['label'] ?? '#') }}
                                                 </a>
                                             @endforeach
                                         </div>
