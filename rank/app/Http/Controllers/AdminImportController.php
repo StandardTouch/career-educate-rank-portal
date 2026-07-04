@@ -5,23 +5,58 @@ namespace App\Http\Controllers;
 use App\Models\AnalysisImport;
 use App\Models\Import;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class AdminImportController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $search = trim((string) $request->query('search', ''));
+
         $resultImports = Import::with('dataset')
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($nested) use ($search): void {
+                    $nested->where('original_filename', 'like', "%{$search}%")
+                        ->orWhere('status', 'like', "%{$search}%")
+                        ->orWhere('total_rows', 'like', "%{$search}%")
+                        ->orWhereDate('created_at', $search)
+                        ->orWhereHas('dataset', function ($datasetQuery) use ($search): void {
+                            $datasetQuery->where('title', 'like', "%{$search}%")
+                                ->orWhere('course', 'like', "%{$search}%")
+                                ->orWhere('year', 'like', "%{$search}%")
+                                ->orWhere('state', 'like', "%{$search}%")
+                                ->orWhere('quota', 'like', "%{$search}%");
+                        });
+                });
+            })
             ->latest('id')
-            ->paginate(15, ['*'], 'result_page');
+            ->paginate(15, ['*'], 'result_page')
+            ->withQueryString();
 
         $predictedRankImports = AnalysisImport::with('analysisDataset')
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($nested) use ($search): void {
+                    $nested->where('original_filename', 'like', "%{$search}%")
+                        ->orWhere('status', 'like', "%{$search}%")
+                        ->orWhere('total_rows', 'like', "%{$search}%")
+                        ->orWhereDate('created_at', $search)
+                        ->orWhereHas('analysisDataset', function ($datasetQuery) use ($search): void {
+                            $datasetQuery->where('title', 'like', "%{$search}%")
+                                ->orWhere('course', 'like', "%{$search}%")
+                                ->orWhere('year', 'like', "%{$search}%")
+                                ->orWhere('state', 'like', "%{$search}%")
+                                ->orWhere('quota', 'like', "%{$search}%");
+                        });
+                });
+            })
             ->latest('id')
-            ->paginate(15, ['*'], 'predicted_page');
+            ->paginate(15, ['*'], 'predicted_page')
+            ->withQueryString();
 
-        return view('admin.imports.index', compact('resultImports', 'predictedRankImports'));
+        return view('admin.imports.index', compact('resultImports', 'predictedRankImports', 'search'));
     }
 
     public function destroyResult(Import $import): RedirectResponse

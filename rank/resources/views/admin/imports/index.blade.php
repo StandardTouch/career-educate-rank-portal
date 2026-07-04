@@ -43,10 +43,36 @@
             </div>
         @endif
 
+        <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <form method="GET" action="{{ route('admin.imports') }}" class="flex flex-col gap-3 md:flex-row md:items-end">
+                <div class="flex-1">
+                    <label for="search" class="block text-xs font-bold uppercase tracking-wide text-slate-500">Search Imports</label>
+                    <input
+                        id="search"
+                        name="search"
+                        type="search"
+                        value="{{ $search }}"
+                        placeholder="Search by file, dataset, course, status, year, state, quota, or YYYY-MM-DD"
+                        class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                    >
+                </div>
+                <div class="flex gap-3">
+                    <button type="submit" class="inline-flex justify-center rounded-xl bg-rose-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-rose-600">
+                        Search
+                    </button>
+                    @if ($search !== '')
+                        <a href="{{ route('admin.imports') }}" class="inline-flex justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
+                            Clear
+                        </a>
+                    @endif
+                </div>
+            </form>
+        </section>
+
         <section class="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div class="border-b border-slate-100 px-6 py-5">
                 <h2 class="text-lg font-bold text-slate-950">Result Imports</h2>
-                <p class="mt-1 text-xs text-slate-500">Files imported through the result sheet import flow.</p>
+                <p class="mt-1 text-xs text-slate-500">Files imported through the result sheet import flow. Showing {{ number_format($resultImports->total()) }} result imports.</p>
             </div>
 
             <div class="overflow-x-auto">
@@ -111,7 +137,7 @@
         <section class="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div class="border-b border-slate-100 px-6 py-5">
                 <h2 class="text-lg font-bold text-slate-950">Predicted Rank Imports</h2>
-                <p class="mt-1 text-xs text-slate-500">Files imported through the predicted rank import flow.</p>
+                <p class="mt-1 text-xs text-slate-500">Files imported through the predicted rank import flow. Showing {{ number_format($predictedRankImports->total()) }} predicted rank imports.</p>
             </div>
 
             <div class="overflow-x-auto">

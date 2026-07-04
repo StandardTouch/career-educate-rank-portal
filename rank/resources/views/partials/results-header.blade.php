@@ -140,7 +140,7 @@
                         Import
                     </a>
                     <a href="{{ route('admin.imports') }}" class="{{ $routeName === 'admin.imports' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
-                        Imports
+                        Manage Imports
                     </a>
                     <a href="{{ route('import.analysis') }}" class="{{ $routeName === 'import.analysis' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                         Import Predicted Rank
