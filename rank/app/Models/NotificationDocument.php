@@ -11,6 +11,7 @@ class NotificationDocument extends Model
         'title',
         'original_filename',
         'stored_path',
+        'dropdown_name',
         'is_active',
         'sort_order',
         'uploaded_by',

@@ -24,7 +24,7 @@
                 <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">Notification Title</p>
                 <h1 class="mt-2 text-3xl font-bold text-slate-950">Confirm Notification Title</h1>
                 <p class="mt-2 text-slate-500 max-w-2xl">
-                    We suggested a title from the PDF filename. Keep it as-is or edit it before publishing to the Notifications dropdown.
+                    We suggested a title from the PDF filename. Keep it as-is or edit it, then choose which header dropdown should show this PDF.
                 </p>
             </div>
 
@@ -55,9 +55,31 @@
                     >
                 </div>
 
+                <div>
+                    <label for="dropdown_name" class="block text-sm font-bold uppercase tracking-wide text-slate-600">Header Dropdown</label>
+                    <input
+                        id="dropdown_name"
+                        name="dropdown_name"
+                        list="dropdown-options"
+                        type="text"
+                        value="{{ old('dropdown_name', 'Notifications') }}"
+                        required
+                        maxlength="80"
+                        class="mt-3 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                    >
+                    <datalist id="dropdown-options">
+                        @foreach ($dropdownOptions as $dropdownOption)
+                            <option value="{{ $dropdownOption }}"></option>
+                        @endforeach
+                    </datalist>
+                    <p class="mt-2 text-xs text-slate-500">
+                        Choose an existing dropdown or type a new dropdown name.
+                    </p>
+                </div>
+
                 <div class="flex flex-col sm:flex-row sm:items-center gap-3">
                     <button type="submit" class="inline-flex justify-center rounded-xl bg-rose-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-rose-500/10 transition hover:bg-rose-600 active:scale-95">
-                        Publish Notification
+                        Publish PDF
                     </button>
                     <a href="{{ route('notifications.import') }}" class="inline-flex justify-center rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
                         Upload Another PDF

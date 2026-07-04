@@ -52,6 +52,7 @@ class NotificationDocumentController extends Controller
         return view('admin.import-notification-confirm', [
             'originalName' => (string) ($pending['original_name'] ?? 'Notification.pdf'),
             'suggestedTitle' => (string) ($pending['suggested_title'] ?? 'Notification'),
+            'dropdownOptions' => $this->dropdownOptions(),
         ]);
     }
 
@@ -66,12 +67,14 @@ class NotificationDocumentController extends Controller
 
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:160'],
+            'dropdown_name' => ['required', 'string', 'max:80'],
         ]);
 
         NotificationDocument::create([
             'title' => trim($validated['title']),
             'original_filename' => (string) ($pending['original_name'] ?? 'Notification.pdf'),
             'stored_path' => (string) $pending['stored_path'],
+            'dropdown_name' => $this->normalizeDropdownName($validated['dropdown_name']),
             'is_active' => true,
             'uploaded_by' => $request->user()?->id,
         ]);
@@ -111,5 +114,30 @@ class NotificationDocumentController extends Controller
         $name = preg_replace('/\s+/', ' ', str_replace(['_', '-'], ' ', $name));
 
         return trim(Str::title(strtolower((string) $name))) ?: 'Notification';
+    }
+
+    protected function dropdownOptions(): array
+    {
+        $defaults = ['Notifications', 'MBBS Study Abroad'];
+
+        $existing = NotificationDocument::query()
+            ->whereNotNull('dropdown_name')
+            ->pluck('dropdown_name')
+            ->filter()
+            ->all();
+
+        return collect([...$defaults, ...$existing])
+            ->map(fn ($name) => $this->normalizeDropdownName((string) $name))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    protected function normalizeDropdownName(string $name): string
+    {
+        $name = preg_replace('/\s+/', ' ', trim($name));
+
+        return Str::title(strtolower((string) $name));
     }
 }

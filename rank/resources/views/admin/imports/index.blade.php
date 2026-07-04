@@ -55,7 +55,7 @@
                         name="search"
                         type="search"
                         value="{{ $search }}"
-                        placeholder="Search by file, title, dataset, course, status, year, state, quota, or YYYY-MM-DD"
+                        placeholder="Search by file, title, dropdown, dataset, course, status, year, state, quota, or YYYY-MM-DD"
                         class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
                     >
                 </div>
@@ -213,6 +213,7 @@
                     <thead class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
                         <tr>
                             <th class="px-6 py-3">Title</th>
+                            <th class="px-6 py-3">Dropdown</th>
                             <th class="px-6 py-3">File</th>
                             <th class="px-6 py-3">Status</th>
                             <th class="px-6 py-3">Uploaded</th>
@@ -226,6 +227,7 @@
                                     <div class="font-bold text-slate-900">{{ $document->title }}</div>
                                     <a href="{{ route('notifications.view', $document) }}" target="_blank" rel="noopener" class="mt-1 inline-flex text-xs font-bold text-rose-500 hover:text-rose-600">Open PDF</a>
                                 </td>
+                                <td class="px-6 py-4 font-semibold text-slate-600">{{ $document->dropdown_name }}</td>
                                 <td class="max-w-xs px-6 py-4">
                                     <div class="truncate font-semibold text-slate-700" title="{{ $document->original_filename }}">{{ $document->original_filename }}</div>
                                 </td>
@@ -247,7 +249,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-10 text-center text-sm font-semibold text-slate-400">No notification PDFs found.</td>
+                                <td colspan="6" class="px-6 py-10 text-center text-sm font-semibold text-slate-400">No notification PDFs found.</td>
                             </tr>
                         @endforelse
                     </tbody>

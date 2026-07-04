@@ -61,6 +61,7 @@ class AdminImportController extends Controller
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($nested) use ($search): void {
                     $nested->where('title', 'like', "%{$search}%")
+                        ->orWhere('dropdown_name', 'like', "%{$search}%")
                         ->orWhere('original_filename', 'like', "%{$search}%")
                         ->orWhereDate('created_at', $search);
                 });

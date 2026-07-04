@@ -7,6 +7,10 @@
     $currentDatasetSlug = is_object($currentDataset) ? ($currentDataset->slug ?? null) : $currentDataset;
     $currentDatasetSlug = $currentDatasetSlug ?: (is_object($currentAnalysisDataset) ? ($currentAnalysisDataset->slug ?? null) : $currentAnalysisDataset);
     $notificationDocuments = collect();
+    $documentDropdowns = collect([
+        'Notifications' => collect(),
+        'MBBS Study Abroad' => collect(),
+    ]);
 
     try {
         if (\Illuminate\Support\Facades\Schema::hasTable('datasets')) {
@@ -60,10 +64,18 @@
                 ->orderBy('sort_order')
                 ->latest('id')
                 ->get();
+
+            $documentDropdowns = $notificationDocuments
+                ->groupBy(fn ($document) => trim((string) ($document->dropdown_name ?: 'Notifications')))
+                ->union($documentDropdowns);
         }
     } catch (\Throwable $exception) {
         $rawYearMenus = config('menus');
         $notificationDocuments = collect();
+        $documentDropdowns = collect([
+            'Notifications' => collect(),
+            'MBBS Study Abroad' => collect(),
+        ]);
     }
 
     $yearMenus = [];
@@ -212,6 +224,11 @@
                         <a href="{{ asset('Shaheen-MSIT-Tajikistan-Booklet.pdf') }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
                             MSIT Tajikistan Booklet
                         </a>
+                        @foreach ($documentDropdowns->get('MBBS Study Abroad', collect()) as $document)
+                            <a href="{{ route('notifications.view', $document) }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
+                                {{ \Illuminate\Support\Str::upper($document->title) }}
+                            </a>
+                        @endforeach
                     </div>
                     <div class="flex items-center gap-2 border-l border-slate-200 pl-3 ml-2">
                         <a href="tel:9686601088" class="text-rose-500 font-semibold transition-colors px-3 py-2 rounded-lg animate-pulse whitespace-nowrap border border-rose-200 bg-rose-50/50 hover:bg-rose-100 flex items-center gap-2">
@@ -238,7 +255,7 @@
                 >
                     <div class="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Updates</div>
                     <div class="grid gap-1 px-2 pb-2">
-                        @forelse ($notificationDocuments as $document)
+                        @forelse ($documentDropdowns->get('Notifications', collect()) as $document)
                             <a href="{{ route('notifications.view', $document) }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
                                 {{ \Illuminate\Support\Str::upper($document->title) }}
                             </a>
@@ -250,6 +267,33 @@
                     </div>
                 </div>
             </div>
+
+            @foreach ($documentDropdowns as $dropdownName => $documents)
+                @continue(in_array($dropdownName, ['Notifications', 'MBBS Study Abroad'], true) || $documents->isEmpty())
+                <div class="relative group results-year-menu">
+                    <button
+                        type="button"
+                        class="results-year-trigger px-3 py-2 rounded-lg border border-slate-200 text-slate-700 hover:border-rose-300 hover:text-rose-600 transition-colors inline-flex items-center gap-2 whitespace-nowrap"
+                        aria-expanded="false"
+                    >
+                        <span>{{ $dropdownName }}</span>
+                        <span class="results-year-caret text-[10px] leading-none transition-transform">v</span>
+                    </button>
+                    <div
+                        class="results-year-panel hidden fixed z-50 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl p-2"
+                        style="width: min(20rem, calc(100vw - 2rem)); max-height: min(32rem, calc(100vh - 7rem));"
+                    >
+                        <div class="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">{{ $dropdownName }}</div>
+                        <div class="grid gap-1 px-2 pb-2">
+                            @foreach ($documents as $document)
+                                <a href="{{ route('notifications.view', $document) }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
+                                    {{ \Illuminate\Support\Str::upper($document->title) }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @endforeach
 
             @foreach ($yearMenus as $year => $menu)
                 <div class="relative group results-year-menu">
