@@ -134,6 +134,7 @@ class ResultController extends Controller
         $roundComparisonRows = $roundComparisonMode
             ? $this->roundComparisonRows((clone $query)->get(), $roundComparisonColumns)
             : collect();
+        $showCourseColumn = $this->selectedSheetsHaveCourseColumn($dataset, $sheetOptions, $selectedRounds);
 
         $records = $query
             ->orderByRaw('closing_rank is null')
@@ -175,7 +176,8 @@ class ResultController extends Controller
             'roundComparisonMode',
             'roundComparisonColumns',
             'roundComparisonRows',
-            'resultCount'
+            'resultCount',
+            'showCourseColumn'
         ));
     }
 
@@ -286,6 +288,46 @@ class ResultController extends Controller
                 return $firstRound ? (int) ($row['rounds'][$firstRound]['gen_rank'] ?? 0) : 0;
             })
             ->values();
+    }
+
+    protected function selectedSheetsHaveCourseColumn(Dataset $dataset, $sheetOptions, array $selectedRounds): bool
+    {
+        $selected = array_map('strval', $selectedRounds);
+        $recordQuery = RankRecord::where('dataset_id', $dataset->id);
+
+        $sheetIds = $sheetOptions
+            ->filter(function ($sheet) use ($selectedRounds, $selected) {
+                if (in_array('overall', $selectedRounds, true)) {
+                    return $sheet->sheet_type === 'overall';
+                }
+
+                return $sheet->sheet_type !== 'overall'
+                    && in_array((string) $sheet->round_id, $selected, true);
+            })
+            ->pluck('id')
+            ->filter()
+            ->values();
+
+        if ($sheetIds->isNotEmpty()) {
+            $recordQuery->whereIn('import_sheet_id', $sheetIds);
+        } elseif (in_array('overall', $selectedRounds, true)) {
+            $recordQuery->whereNull('round_id');
+        } elseif ($selected !== []) {
+            $recordQuery->whereIn('round_id', array_map('intval', $selected));
+        } else {
+            return false;
+        }
+
+        return $recordQuery
+            ->where('raw_payload', 'like', '%"course"%')
+            ->select('raw_payload')
+            ->cursor()
+            ->contains(function (RankRecord $record) {
+                $payload = $this->recordPayload($record);
+                $course = $payload['course'] ?? null;
+
+                return $course !== null && trim((string) $course) !== '';
+            });
     }
 
     protected function recordPayload(RankRecord $record): array

@@ -20,6 +20,7 @@
         $selectedFee = request('fee_max');
         $feeMax = max(0, (int) ($maxFee ?? 0));
         $feeSliderValue = $selectedFee !== null && $selectedFee !== '' ? (int) $selectedFee : $feeMax;
+        $showCourseColumn = $showCourseColumn ?? false;
         $selectedRounds = $selectedRounds ?? ['overall'];
         $selectedFilters = $selectedFilters ?? [];
         $selectedSheet = $sheetOptions->first(function ($sheet) use ($selectedRounds) {
@@ -36,9 +37,11 @@
                 'college_name' => 'College Name',
                 'category' => 'Category',
                 'local_area' => 'Local Area',
-                'course' => 'Course',
-                'total_seats' => 'Total Seats',
             ];
+            if ($showCourseColumn) {
+                $columnOptions['course'] = 'Course';
+            }
+            $columnOptions['total_seats'] = 'Total Seats';
 
             foreach ($roundComparisonColumns as $roundColumn) {
                 $columnOptions[$roundColumn['gen_rank_key']] = 'GEN ' . $roundColumn['label'] . ' Rank';
@@ -55,6 +58,11 @@
                 'category' => 'Category',
                 'round_name' => 'Round Name',
                 'local_area' => 'Local Area',
+            ];
+            if ($showCourseColumn) {
+                $columnOptions['course'] = 'Course';
+            }
+            $columnOptions += [
                 'total_seats' => 'Total Seats',
                 'gen_closing_rank' => 'Gen Closing Rank',
                 'gen_closing_mark' => 'Gen Closing Mark',
@@ -308,7 +316,9 @@
                             <th data-col="college_name" class="px-4 py-3 text-left">College Name</th>
                             <th data-col="category" class="px-4 py-3 text-left">Category</th>
                             <th data-col="local_area" class="px-4 py-3 text-left">Local Area</th>
-                            <th data-col="course" class="px-4 py-3 text-left">Course</th>
+                            @if ($showCourseColumn)
+                                <th data-col="course" class="px-4 py-3 text-left">Course</th>
+                            @endif
                             <th data-col="total_seats" class="px-4 py-3 text-right">
                                 Total Seats
                                 <span class="block text-[11px] font-extrabold text-rose-500">{{ $totalSeats ?? 0 }}</span>
@@ -328,6 +338,9 @@
                             <th data-col="category" class="px-4 py-3 text-left">Category</th>
                             <th data-col="round_name" class="px-4 py-3 text-left">Round Name</th>
                             <th data-col="local_area" class="px-4 py-3 text-left">Local Area</th>
+                            @if ($showCourseColumn)
+                                <th data-col="course" class="px-4 py-3 text-left">Course</th>
+                            @endif
                             <th data-col="total_seats" class="px-4 py-3 text-right">
                                 Total Seats
                                 <span class="block text-[11px] font-extrabold text-rose-500">{{ $totalSeats ?? 0 }}</span>
@@ -348,7 +361,9 @@
                                     <td data-col="college_name" class="px-4 py-3 font-bold text-slate-900">{{ $row['college_name'] }}</td>
                                     <td data-col="category" class="px-4 py-3">{{ $row['category'] }}</td>
                                     <td data-col="local_area" class="px-4 py-3">{{ $row['local_area'] }}</td>
-                                    <td data-col="course" class="px-4 py-3">{{ $row['course'] }}</td>
+                                    @if ($showCourseColumn)
+                                        <td data-col="course" class="px-4 py-3">{{ $row['course'] }}</td>
+                                    @endif
                                     <td data-col="total_seats" class="px-4 py-3 text-right">{{ $row['seats'] !== null ? $row['seats'] : '-' }}</td>
                                     @foreach ($roundComparisonColumns as $roundColumn)
                                         @php $roundValues = $row['rounds'][$roundColumn['round_id']] ?? []; @endphp
@@ -381,6 +396,9 @@
                                 <td data-col="category" class="px-4 py-3">{{ $record->category ?? '-' }}</td>
                                 <td data-col="round_name" class="px-4 py-3">{{ $roundName }}</td>
                                 <td data-col="local_area" class="px-4 py-3">{{ $record->local_area ?? '-' }}</td>
+                                @if ($showCourseColumn)
+                                    <td data-col="course" class="px-4 py-3">{{ $record->course ?? '-' }}</td>
+                                @endif
                                 <td data-col="total_seats" class="px-4 py-3 text-right">{{ $record->seats !== null ? $record->seats : '-' }}</td>
                                 <td data-col="gen_closing_rank" class="px-4 py-3 text-right font-bold text-rose-600">{{ $record->closing_rank !== null ? $record->closing_rank : '-' }}</td>
                                 <td data-col="gen_closing_mark" class="px-4 py-3 text-right">{{ $record->marks !== null ? (int) $record->marks : '-' }}</td>
@@ -390,7 +408,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="11" class="px-4 py-10 text-center text-sm font-semibold text-slate-500">
+                                <td colspan="{{ count($columnOptions) }}" class="px-4 py-10 text-center text-sm font-semibold text-slate-500">
                                     No records found for these filters.
                                 </td>
                             </tr>
