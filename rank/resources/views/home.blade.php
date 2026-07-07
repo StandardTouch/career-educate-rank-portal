@@ -709,7 +709,7 @@
                                 8-1-347/B1/A &amp; 8-1-348/A<br>
                                 Above Ratandeep Super Market, Shaikpet Road,<br>
                                 Tolichowki, Hyderabad, Telangana - 500001<br>
-                                Contact: 8951918163
+                                Contact: <a href="tel:08047285479">080-472-85479</a>
                             </p>
                         </div>
                         <div>
@@ -718,7 +718,7 @@
                                 Career Educate<br>
                                 #5 GC Rich Homes, Richmond Road,<br>
                                 Bangalore - 560025<br>
-                                Contact: 7760303019<br>
+                                Contact: <a href="tel:08047285479">080-472-85479</a><br>
                                 <a href="https://maps.app.goo.gl/rFLfaxVxjywNGYGN8" target="_blank" rel="noopener" class="text-rose-400 hover:text-rose-300">View Location</a>
                             </p>
                         </div>
