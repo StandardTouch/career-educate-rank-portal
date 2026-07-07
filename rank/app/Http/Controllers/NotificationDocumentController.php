@@ -72,7 +72,7 @@ class NotificationDocumentController extends Controller
 
         if (! is_array($pending) || empty($pending['stored_path']) || ! Storage::disk('public')->exists($pending['stored_path'])) {
             return redirect()->route('notifications.import')
-                ->withErrors(['pdf_file' => 'No pending notification PDF was found. Please upload the file again.']);
+                ->withErrors(['pdf_file' => 'No pending PDF was found. Please upload the file again.']);
         }
 
         return view('admin.import-notification-confirm', [
@@ -90,7 +90,7 @@ class NotificationDocumentController extends Controller
 
         if (! is_array($pending) || empty($pending['stored_path']) || ! Storage::disk('public')->exists($pending['stored_path'])) {
             return redirect()->route('notifications.import')
-                ->withErrors(['pdf_file' => 'No pending notification PDF was found. Please upload the file again.']);
+                ->withErrors(['pdf_file' => 'No pending PDF was found. Please upload the file again.']);
         }
 
         $validated = $request->validate([
@@ -116,7 +116,7 @@ class NotificationDocumentController extends Controller
 
         return redirect()
             ->route('notifications.import')
-            ->with('status', 'Notification PDF uploaded successfully.');
+            ->with('status', 'PDF uploaded successfully.');
     }
 
     public function show(NotificationDocument $notificationDocument): StreamedResponse

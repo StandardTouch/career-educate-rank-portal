@@ -93,7 +93,7 @@ Route::middleware(['auth', 'single.device'])->group(function () {
 });
 
 // Admin routes
-Route::middleware(['auth', 'single.device', 'admin'])->group(function () {
+Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/dashboard', [App\Http\Controllers\AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/imports', [App\Http\Controllers\AdminImportController::class, 'index'])->name('admin.imports');
     Route::patch('/admin/imports/results/{import}', [App\Http\Controllers\AdminImportController::class, 'updateResult'])->name('admin.imports.results.update');
@@ -116,11 +116,11 @@ Route::middleware(['auth', 'single.device', 'admin'])->group(function () {
     Route::post('/admin/import-analysis', [App\Http\Controllers\ImportAnalysisController::class, 'store'])->name('import.analysis.store');
     Route::get('/admin/import-analysis/confirm-course', [App\Http\Controllers\ImportAnalysisController::class, 'confirm'])->name('import.analysis.confirm');
     Route::post('/admin/import-analysis/confirm-course', [App\Http\Controllers\ImportAnalysisController::class, 'confirmStore'])->name('import.analysis.confirm.store');
-    Route::get('/admin/import-notification', [App\Http\Controllers\NotificationDocumentController::class, 'create'])->name('notifications.import');
-    Route::post('/admin/import-notification', [App\Http\Controllers\NotificationDocumentController::class, 'store'])->name('notifications.import.store');
-    Route::post('/admin/import-notification/dropdowns', [App\Http\Controllers\NotificationDocumentController::class, 'storeFolder'])->name('notifications.folders.store');
-    Route::get('/admin/import-notification/confirm-title', [App\Http\Controllers\NotificationDocumentController::class, 'confirm'])->name('notifications.import.confirm');
-    Route::post('/admin/import-notification/confirm-title', [App\Http\Controllers\NotificationDocumentController::class, 'confirmStore'])->name('notifications.import.confirm.store');
+    Route::get('/admin/import-pdf', [App\Http\Controllers\NotificationDocumentController::class, 'create'])->name('notifications.import');
+    Route::post('/admin/import-pdf', [App\Http\Controllers\NotificationDocumentController::class, 'store'])->name('notifications.import.store');
+    Route::post('/admin/import-pdf/dropdowns', [App\Http\Controllers\NotificationDocumentController::class, 'storeFolder'])->name('notifications.folders.store');
+    Route::get('/admin/import-pdf/confirm-title', [App\Http\Controllers\NotificationDocumentController::class, 'confirm'])->name('notifications.import.confirm');
+    Route::post('/admin/import-pdf/confirm-title', [App\Http\Controllers\NotificationDocumentController::class, 'confirmStore'])->name('notifications.import.confirm.store');
 });
 
 // Analysis Routes (OTP based or regular Auth)

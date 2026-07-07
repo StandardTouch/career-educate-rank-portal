@@ -43,7 +43,7 @@
                     Import Predicted Rank
                 </a>
                 <a href="{{ route('notifications.import') }}" class="inline-flex justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
-                    Import Notification
+                    Import PDF
                 </a>
             </div>
         </section>
@@ -236,8 +236,8 @@
 
         <section class="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div class="border-b border-slate-100 px-6 py-5">
-                <h2 class="text-lg font-bold text-slate-950">Notification PDFs</h2>
-                <p class="mt-1 text-xs text-slate-500">PDFs shown in the Notifications dropdown. Showing {{ number_format($notificationDocuments->total()) }} notification PDFs.</p>
+                <h2 class="text-lg font-bold text-slate-950">PDF Imports</h2>
+                <p class="mt-1 text-xs text-slate-500">PDFs shown in header dropdowns. Showing {{ number_format($notificationDocuments->total()) }} PDF imports.</p>
             </div>
 
             <div class="overflow-x-auto">
@@ -276,7 +276,7 @@
                                         <button type="button" data-modal-target="notification-edit-{{ $document->id }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
                                             Edit
                                         </button>
-                                        <form action="{{ route('admin.imports.notifications.destroy', $document) }}" method="POST" onsubmit="return confirm('Delete this notification PDF and remove it from the Notifications dropdown?');">
+                                        <form action="{{ route('admin.imports.notifications.destroy', $document) }}" method="POST" onsubmit="return confirm('Delete this PDF and remove it from the header dropdown?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-100">
@@ -288,7 +288,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-10 text-center text-sm font-semibold text-slate-400">No notification PDFs found.</td>
+                                <td colspan="6" class="px-6 py-10 text-center text-sm font-semibold text-slate-400">No PDF imports found.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -379,8 +379,8 @@
                     @method('PATCH')
                     <div class="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
                         <div>
-                            <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">Edit Notification PDF</p>
-                            <h3 class="mt-1 text-xl font-extrabold text-slate-950">Notification Details</h3>
+                            <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">Edit PDF</p>
+                            <h3 class="mt-1 text-xl font-extrabold text-slate-950">PDF Details</h3>
                         </div>
                         <button type="button" data-modal-close class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-bold text-slate-500 hover:text-rose-600">Close</button>
                     </div>

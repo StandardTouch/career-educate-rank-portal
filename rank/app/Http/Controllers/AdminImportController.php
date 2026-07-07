@@ -142,7 +142,7 @@ class AdminImportController extends Controller
 
         return redirect()
             ->route('admin.imports')
-            ->with('status', 'Updated notification PDF.');
+            ->with('status', 'Updated PDF.');
     }
 
     public function destroyResult(Import $import): RedirectResponse
@@ -215,7 +215,7 @@ class AdminImportController extends Controller
 
         return redirect()
             ->route('admin.imports')
-            ->with('status', 'Deleted notification PDF "' . $name . '" and removed it from the Notifications dropdown.');
+            ->with('status', 'Deleted PDF "' . $name . '" and removed it from the header dropdown.');
     }
 
     protected function deleteStoredFiles(array $paths): void

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirm Notification Title - Career Educate</title>
+    <title>Confirm PDF Title - Career Educate</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -21,8 +21,8 @@
     <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 mt-12">
         <section class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
             <div class="px-6 pt-8 pb-5 border-b border-slate-200">
-                <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">Notification Title</p>
-                <h1 class="mt-2 text-3xl font-bold text-slate-950">Confirm Notification Title</h1>
+                <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">PDF Title</p>
+                <h1 class="mt-2 text-3xl font-bold text-slate-950">Confirm PDF Title</h1>
                 <p class="mt-2 text-slate-500 max-w-2xl">
                     We suggested a title from the PDF filename. Keep it as-is or edit it, then choose where this PDF should appear in the header dropdown tree.
                 </p>
@@ -43,7 +43,7 @@
                 </div>
 
                 <div>
-                    <label for="title" class="block text-sm font-bold uppercase tracking-wide text-slate-600">Notification Title</label>
+                    <label for="title" class="block text-sm font-bold uppercase tracking-wide text-slate-600">PDF Title</label>
                     <input
                         id="title"
                         name="title"

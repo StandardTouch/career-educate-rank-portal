@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Import Notification - Career Educate</title>
+    <title>Import PDF - Career Educate</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -21,10 +21,10 @@
     <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 mt-12">
         <section class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
             <div class="px-6 pt-8 pb-5 border-b border-slate-200 mb-8">
-                <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">PDF Notification Import</p>
-                <h1 class="mt-2 text-3xl font-bold text-slate-950">Import Notification</h1>
+                <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">PDF Import</p>
+                <h1 class="mt-2 text-3xl font-bold text-slate-950">Import PDF</h1>
                 <p class="mt-2 text-slate-500 max-w-2xl">
-                    Upload a notification PDF, or create dropdown folders first. Dropdown nesting is limited to {{ $maxDepth ?? 3 }} levels to keep the header easy to use.
+                    Upload a PDF, or create dropdown folders first. Dropdown nesting is limited to {{ $maxDepth ?? 3 }} levels to keep the header easy to use.
                 </p>
             </div>
 
@@ -45,7 +45,7 @@
                 @endif
 
                 <div>
-                    <label for="pdf_file" class="block text-sm font-bold uppercase tracking-wide text-slate-600">Notification PDF</label>
+                    <label for="pdf_file" class="block text-sm font-bold uppercase tracking-wide text-slate-600">PDF File</label>
                     <input
                         id="pdf_file"
                         name="pdf_file"

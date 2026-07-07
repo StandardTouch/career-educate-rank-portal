@@ -13,7 +13,7 @@ class EnsureSingleDeviceSession
     {
         $user = $request->user();
 
-        if (! $user) {
+        if (! $user || $user->is_admin) {
             return $next($request);
         }
 
