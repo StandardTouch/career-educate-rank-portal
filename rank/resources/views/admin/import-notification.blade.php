@@ -63,6 +63,7 @@
                 </div>
             </form>
 
+            <div class="space-y-5">
             <form action="{{ route('notifications.folders.store') }}" method="POST" class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                 @csrf
                 <p class="text-sm font-bold text-slate-900">Create Dropdown</p>
@@ -98,6 +99,34 @@
                     Create Dropdown
                 </button>
             </form>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                <p class="text-sm font-bold text-slate-900">Existing Dropdowns</p>
+                <p class="mt-1 text-xs leading-5 text-slate-500">Delete a custom dropdown to remove it, all sub-dropdowns, and all PDFs inside it.</p>
+
+                <div class="mt-4 max-h-80 space-y-2 overflow-y-auto pr-1">
+                    @foreach ($folderOptions ?? [] as $folder)
+                        <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+                            <div class="min-w-0">
+                                <p class="truncate text-sm font-bold text-slate-800">{{ str_repeat('-- ', max(0, $folder['depth'] - 1)) }}{{ $folder['path'] }}</p>
+                                <p class="mt-0.5 text-xs font-semibold text-slate-400">{{ $folder['document_count'] ?? 0 }} PDF file(s)</p>
+                            </div>
+                            @if ($folder['can_delete'] ?? false)
+                                <form action="{{ route('notifications.folders.destroy', $folder['id']) }}" method="POST" onsubmit="return confirm('Delete this dropdown, all sub-dropdowns, and all PDFs inside it?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 transition hover:bg-rose-100">
+                                        Delete
+                                    </button>
+                                </form>
+                            @else
+                                <span class="shrink-0 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-400">Default</span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            </div>
             </div>
         </section>
     </main>

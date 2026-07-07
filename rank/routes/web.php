@@ -119,6 +119,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/import-pdf', [App\Http\Controllers\NotificationDocumentController::class, 'create'])->name('notifications.import');
     Route::post('/admin/import-pdf', [App\Http\Controllers\NotificationDocumentController::class, 'store'])->name('notifications.import.store');
     Route::post('/admin/import-pdf/dropdowns', [App\Http\Controllers\NotificationDocumentController::class, 'storeFolder'])->name('notifications.folders.store');
+    Route::delete('/admin/import-pdf/dropdowns/{menuFolder}', [App\Http\Controllers\NotificationDocumentController::class, 'destroyFolder'])->name('notifications.folders.destroy');
     Route::get('/admin/import-pdf/confirm-title', [App\Http\Controllers\NotificationDocumentController::class, 'confirm'])->name('notifications.import.confirm');
     Route::post('/admin/import-pdf/confirm-title', [App\Http\Controllers\NotificationDocumentController::class, 'confirmStore'])->name('notifications.import.confirm.store');
 });

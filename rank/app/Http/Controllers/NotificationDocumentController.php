@@ -66,6 +66,46 @@ class NotificationDocumentController extends Controller
             ->with('status', 'Dropdown "' . $folder->pathTitle() . '" created successfully.');
     }
 
+    public function destroyFolder(MenuFolder $menuFolder): RedirectResponse
+    {
+        if ($this->isProtectedFolder($menuFolder)) {
+            return redirect()
+                ->route('notifications.import')
+                ->withErrors(['folder' => 'This default dropdown cannot be deleted.']);
+        }
+
+        $folderName = $menuFolder->pathTitle();
+        $storedPaths = [];
+        $deletedPdfCount = 0;
+
+        DB::transaction(function () use ($menuFolder, &$storedPaths, &$deletedPdfCount): void {
+            $folderIds = $this->folderAndDescendantIds($menuFolder);
+            $documents = NotificationDocument::query()
+                ->whereIn('menu_folder_id', $folderIds)
+                ->get(['id', 'stored_path']);
+
+            $storedPaths = $documents->pluck('stored_path')->filter()->values()->all();
+            $deletedPdfCount = $documents->count();
+
+            NotificationDocument::query()
+                ->whereIn('id', $documents->pluck('id'))
+                ->delete();
+
+            MenuFolder::query()
+                ->whereIn('id', $folderIds)
+                ->orderByDesc('depth')
+                ->delete();
+        });
+
+        foreach (array_unique($storedPaths) as $path) {
+            Storage::disk('public')->delete($path);
+        }
+
+        return redirect()
+            ->route('notifications.import')
+            ->with('status', 'Deleted dropdown "' . $folderName . '" and removed ' . $deletedPdfCount . ' PDF file(s).');
+    }
+
     public function confirm(Request $request): View|RedirectResponse
     {
         $pending = $request->session()->get('pending_notification_document');
@@ -167,6 +207,10 @@ class NotificationDocumentController extends Controller
                 'path' => $folder->pathTitle(),
                 'depth' => $folder->depth,
                 'can_have_children' => $folder->canHaveChildren(),
+                'document_count' => NotificationDocument::query()
+                    ->whereIn('menu_folder_id', $this->folderAndDescendantIds($folder))
+                    ->count(),
+                'can_delete' => ! $this->isProtectedFolder($folder),
             ])
             ->values()
             ->all();
@@ -247,5 +291,34 @@ class NotificationDocumentController extends Controller
     {
         return collect(['Notifications', 'MBBS Study Abroad'])
             ->map(fn (string $title) => $this->createFolder($title));
+    }
+
+    protected function folderAndDescendantIds(MenuFolder $folder): array
+    {
+        $ids = [$folder->id];
+        $parentIds = [$folder->id];
+
+        while ($parentIds !== []) {
+            $childIds = MenuFolder::query()
+                ->whereIn('parent_id', $parentIds)
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+
+            if ($childIds === []) {
+                break;
+            }
+
+            $ids = array_merge($ids, $childIds);
+            $parentIds = $childIds;
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    protected function isProtectedFolder(MenuFolder $folder): bool
+    {
+        return $folder->parent_id === null
+            && in_array($folder->slug, ['notifications', 'mbbs-study-abroad'], true);
     }
 }
