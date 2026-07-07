@@ -12,6 +12,7 @@ class NotificationDocument extends Model
         'original_filename',
         'stored_path',
         'dropdown_name',
+        'menu_folder_id',
         'is_active',
         'sort_order',
         'uploaded_by',
@@ -28,5 +29,10 @@ class NotificationDocument extends Model
     public function uploader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+    public function menuFolder(): BelongsTo
+    {
+        return $this->belongsTo(MenuFolder::class);
     }
 }

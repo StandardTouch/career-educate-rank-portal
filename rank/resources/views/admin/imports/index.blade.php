@@ -95,7 +95,20 @@
                         @forelse ($resultImports as $import)
                             <tr>
                                 <td class="px-6 py-4">
-                                    <div class="font-bold text-slate-900">{{ $import->dataset?->title ?? 'Deleted dataset' }}</div>
+                                    @if ($import->dataset)
+                                        <form id="result-update-{{ $import->id }}" action="{{ route('admin.imports.results.update', $import) }}" method="POST" class="space-y-2">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input
+                                                name="title"
+                                                value="{{ $import->dataset->title }}"
+                                                maxlength="180"
+                                                class="block w-full min-w-64 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                                            >
+                                        </form>
+                                    @else
+                                        <div class="font-bold text-slate-900">Deleted dataset</div>
+                                    @endif
                                     @if ($import->dataset)
                                         <a href="{{ route('results.show', $import->dataset) }}" class="mt-1 inline-flex text-xs font-bold text-rose-500 hover:text-rose-600">Open page</a>
                                     @endif
@@ -112,6 +125,11 @@
                                 </td>
                                 <td class="px-6 py-4 font-semibold text-slate-500">{{ optional($import->created_at)->format('d M Y, h:i A') }}</td>
                                 <td class="px-6 py-4 text-right">
+                                    @if ($import->dataset)
+                                        <button form="result-update-{{ $import->id }}" type="submit" class="mr-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
+                                            Save
+                                        </button>
+                                    @endif
                                     <form action="{{ route('admin.imports.results.destroy', $import) }}" method="POST" onsubmit="return confirm('Delete this result import and remove its imported page from everywhere?');">
                                         @csrf
                                         @method('DELETE')
@@ -160,7 +178,20 @@
                         @forelse ($predictedRankImports as $import)
                             <tr>
                                 <td class="px-6 py-4">
-                                    <div class="font-bold text-slate-900">{{ $import->analysisDataset?->title ?? 'Deleted dataset' }}</div>
+                                    @if ($import->analysisDataset)
+                                        <form id="analysis-update-{{ $import->id }}" action="{{ route('admin.imports.predicted-rank.update', $import) }}" method="POST" class="space-y-2">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input
+                                                name="title"
+                                                value="{{ $import->analysisDataset->title }}"
+                                                maxlength="180"
+                                                class="block w-full min-w-64 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                                            >
+                                        </form>
+                                    @else
+                                        <div class="font-bold text-slate-900">Deleted dataset</div>
+                                    @endif
                                     @if ($import->analysisDataset)
                                         <a href="{{ route('analysis.show', $import->analysisDataset) }}" class="mt-1 inline-flex text-xs font-bold text-rose-500 hover:text-rose-600">Open page</a>
                                     @endif
@@ -177,6 +208,11 @@
                                 </td>
                                 <td class="px-6 py-4 font-semibold text-slate-500">{{ optional($import->created_at)->format('d M Y, h:i A') }}</td>
                                 <td class="px-6 py-4 text-right">
+                                    @if ($import->analysisDataset)
+                                        <button form="analysis-update-{{ $import->id }}" type="submit" class="mr-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
+                                            Save
+                                        </button>
+                                    @endif
                                     <form action="{{ route('admin.imports.predicted-rank.destroy', $import) }}" method="POST" onsubmit="return confirm('Delete this predicted rank import and remove its imported page from everywhere?');">
                                         @csrf
                                         @method('DELETE')
@@ -224,20 +260,56 @@
                         @forelse ($notificationDocuments as $document)
                             <tr>
                                 <td class="px-6 py-4">
-                                    <div class="font-bold text-slate-900">{{ $document->title }}</div>
+                                    <form id="notification-update-{{ $document->id }}" action="{{ route('admin.imports.notifications.update', $document) }}" method="POST" class="space-y-2">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input
+                                            name="title"
+                                            value="{{ $document->title }}"
+                                            maxlength="160"
+                                            class="block w-full min-w-64 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                                        >
+                                    </form>
                                     <a href="{{ route('notifications.view', $document) }}" target="_blank" rel="noopener" class="mt-1 inline-flex text-xs font-bold text-rose-500 hover:text-rose-600">Open PDF</a>
                                 </td>
-                                <td class="px-6 py-4 font-semibold text-slate-600">{{ $document->dropdown_name }}</td>
+                                <td class="px-6 py-4">
+                                    <select
+                                        name="menu_folder_id"
+                                        form="notification-update-{{ $document->id }}"
+                                        class="block w-full min-w-56 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                                    >
+                                        @foreach ($folderOptions as $folder)
+                                            <option value="{{ $folder['id'] }}" @selected((int) ($document->menu_folder_id ?? 0) === (int) $folder['id'])>
+                                                {{ str_repeat('-- ', max(0, $folder['depth'] - 1)) }}{{ $folder['path'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <input
+                                        name="sort_order"
+                                        form="notification-update-{{ $document->id }}"
+                                        type="number"
+                                        min="0"
+                                        max="999999"
+                                        value="{{ $document->sort_order }}"
+                                        placeholder="Sort order"
+                                        class="mt-2 block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                                    >
+                                </td>
                                 <td class="max-w-xs px-6 py-4">
                                     <div class="truncate font-semibold text-slate-700" title="{{ $document->original_filename }}">{{ $document->original_filename }}</div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-bold {{ $document->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
-                                        {{ $document->is_active ? 'Active' : 'Hidden' }}
-                                    </span>
+                                    <label class="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700">
+                                        <input type="hidden" name="is_active" value="0" form="notification-update-{{ $document->id }}">
+                                        <input type="checkbox" name="is_active" value="1" form="notification-update-{{ $document->id }}" class="rounded border-slate-300 text-rose-500 focus:ring-rose-500" @checked($document->is_active)>
+                                        Active
+                                    </label>
                                 </td>
                                 <td class="px-6 py-4 font-semibold text-slate-500">{{ optional($document->created_at)->format('d M Y, h:i A') }}</td>
-                                <td class="px-6 py-4 text-right">
+                                <td class="px-6 py-4 text-right whitespace-nowrap">
+                                    <button form="notification-update-{{ $document->id }}" type="submit" class="mr-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
+                                        Save
+                                    </button>
                                     <form action="{{ route('admin.imports.notifications.destroy', $document) }}" method="POST" onsubmit="return confirm('Delete this notification PDF and remove it from the Notifications dropdown?');">
                                         @csrf
                                         @method('DELETE')

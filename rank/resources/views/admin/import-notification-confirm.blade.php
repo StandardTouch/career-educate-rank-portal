@@ -24,7 +24,7 @@
                 <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">Notification Title</p>
                 <h1 class="mt-2 text-3xl font-bold text-slate-950">Confirm Notification Title</h1>
                 <p class="mt-2 text-slate-500 max-w-2xl">
-                    We suggested a title from the PDF filename. Keep it as-is or edit it, then choose which header dropdown should show this PDF.
+                    We suggested a title from the PDF filename. Keep it as-is or edit it, then choose where this PDF should appear in the header dropdown tree.
                 </p>
             </div>
 
@@ -56,25 +56,54 @@
                 </div>
 
                 <div>
-                    <label for="dropdown_name" class="block text-sm font-bold uppercase tracking-wide text-slate-600">Header Dropdown</label>
-                    <input
-                        id="dropdown_name"
-                        name="dropdown_name"
-                        list="dropdown-options"
-                        type="text"
-                        value="{{ old('dropdown_name', 'Notifications') }}"
-                        required
-                        maxlength="80"
+                    <label for="menu_folder_id" class="block text-sm font-bold uppercase tracking-wide text-slate-600">Publish In Dropdown</label>
+                    <select
+                        id="menu_folder_id"
+                        name="menu_folder_id"
                         class="mt-3 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
                     >
-                    <datalist id="dropdown-options">
-                        @foreach ($dropdownOptions as $dropdownOption)
-                            <option value="{{ $dropdownOption }}"></option>
+                        @foreach ($folderOptions as $folder)
+                            <option value="{{ $folder['id'] }}" @selected((string) old('menu_folder_id', '') === (string) $folder['id'] || (old('menu_folder_id') === null && $folder['path'] === 'Notifications'))>
+                                {{ str_repeat('-- ', max(0, $folder['depth'] - 1)) }}{{ $folder['path'] }}
+                            </option>
                         @endforeach
-                    </datalist>
-                    <p class="mt-2 text-xs text-slate-500">
-                        Choose an existing dropdown or type a new dropdown name.
-                    </p>
+                    </select>
+                    <p class="mt-2 text-xs text-slate-500">Choose any existing dropdown up to {{ $maxDepth ?? 3 }} levels deep.</p>
+                </div>
+
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p class="text-sm font-bold text-slate-900">Create a New Dropdown for This PDF</p>
+                    <p class="mt-1 text-xs leading-5 text-slate-500">Optional. If filled, the PDF will be published inside the new dropdown instead.</p>
+
+                    <div class="mt-4 grid gap-4 md:grid-cols-2">
+                        <div>
+                            <label for="new_dropdown_title" class="block text-xs font-bold uppercase tracking-wide text-slate-500">New Dropdown Title</label>
+                            <input
+                                id="new_dropdown_title"
+                                name="new_dropdown_title"
+                                type="text"
+                                value="{{ old('new_dropdown_title') }}"
+                                maxlength="80"
+                                placeholder="Example: Round Notices"
+                                class="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                            >
+                        </div>
+                        <div>
+                            <label for="new_dropdown_parent_id" class="block text-xs font-bold uppercase tracking-wide text-slate-500">New Dropdown Parent</label>
+                            <select
+                                id="new_dropdown_parent_id"
+                                name="new_dropdown_parent_id"
+                                class="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                            >
+                                <option value="">Create as main dropdown</option>
+                                @foreach ($parentFolderOptions as $folder)
+                                    <option value="{{ $folder['id'] }}" @selected((string) old('new_dropdown_parent_id', '') === (string) $folder['id'])>
+                                        {{ str_repeat('-- ', max(0, $folder['depth'] - 1)) }}{{ $folder['path'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="flex flex-col sm:flex-row sm:items-center gap-3">

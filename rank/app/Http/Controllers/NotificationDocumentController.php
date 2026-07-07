@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MenuFolder;
 use App\Models\NotificationDocument;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -14,7 +17,13 @@ class NotificationDocumentController extends Controller
 {
     public function create(): View
     {
-        return view('admin.import-notification');
+        $this->ensureDefaultFolders();
+
+        return view('admin.import-notification', [
+            'folderOptions' => $this->folderOptions(),
+            'parentFolderOptions' => $this->parentFolderOptions(),
+            'maxDepth' => MenuFolder::MAX_DEPTH,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -40,6 +49,23 @@ class NotificationDocumentController extends Controller
         return redirect()->route('notifications.import.confirm');
     }
 
+    public function storeFolder(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:80'],
+            'parent_id' => ['nullable', 'integer', 'exists:menu_folders,id'],
+        ]);
+
+        $folder = $this->createFolder(
+            $validated['title'],
+            isset($validated['parent_id']) ? (int) $validated['parent_id'] : null
+        );
+
+        return redirect()
+            ->route('notifications.import')
+            ->with('status', 'Dropdown "' . $folder->pathTitle() . '" created successfully.');
+    }
+
     public function confirm(Request $request): View|RedirectResponse
     {
         $pending = $request->session()->get('pending_notification_document');
@@ -52,7 +78,9 @@ class NotificationDocumentController extends Controller
         return view('admin.import-notification-confirm', [
             'originalName' => (string) ($pending['original_name'] ?? 'Notification.pdf'),
             'suggestedTitle' => (string) ($pending['suggested_title'] ?? 'Notification'),
-            'dropdownOptions' => $this->dropdownOptions(),
+            'folderOptions' => $this->folderOptions(),
+            'parentFolderOptions' => $this->parentFolderOptions(),
+            'maxDepth' => MenuFolder::MAX_DEPTH,
         ]);
     }
 
@@ -67,14 +95,19 @@ class NotificationDocumentController extends Controller
 
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:160'],
-            'dropdown_name' => ['required', 'string', 'max:80'],
+            'menu_folder_id' => ['nullable', 'integer', 'exists:menu_folders,id'],
+            'new_dropdown_title' => ['nullable', 'string', 'max:80'],
+            'new_dropdown_parent_id' => ['nullable', 'integer', 'exists:menu_folders,id'],
         ]);
+
+        $folder = $this->resolveSelectedFolder($validated);
 
         NotificationDocument::create([
             'title' => trim($validated['title']),
             'original_filename' => (string) ($pending['original_name'] ?? 'Notification.pdf'),
             'stored_path' => (string) $pending['stored_path'],
-            'dropdown_name' => $this->normalizeDropdownName($validated['dropdown_name']),
+            'dropdown_name' => $folder->title,
+            'menu_folder_id' => $folder->id,
             'is_active' => true,
             'uploaded_by' => $request->user()?->id,
         ]);
@@ -116,20 +149,33 @@ class NotificationDocumentController extends Controller
         return trim(Str::title(strtolower((string) $name))) ?: 'Notification';
     }
 
-    protected function dropdownOptions(): array
+    protected function folderOptions(): array
     {
-        $defaults = ['Notifications', 'MBBS Study Abroad'];
+        $this->ensureDefaultFolders();
 
-        $existing = NotificationDocument::query()
-            ->whereNotNull('dropdown_name')
-            ->pluck('dropdown_name')
-            ->filter()
+        $folders = MenuFolder::with('parent.parent')
+            ->orderBy('depth')
+            ->orderByRaw('sort_order is null')
+            ->orderBy('sort_order')
+            ->orderBy('title')
+            ->get();
+
+        return $folders
+            ->map(fn (MenuFolder $folder) => [
+                'id' => $folder->id,
+                'title' => $folder->title,
+                'path' => $folder->pathTitle(),
+                'depth' => $folder->depth,
+                'can_have_children' => $folder->canHaveChildren(),
+            ])
+            ->values()
             ->all();
+    }
 
-        return collect([...$defaults, ...$existing])
-            ->map(fn ($name) => $this->normalizeDropdownName((string) $name))
-            ->filter()
-            ->unique()
+    protected function parentFolderOptions(): array
+    {
+        return collect($this->folderOptions())
+            ->filter(fn (array $folder) => $folder['can_have_children'])
             ->values()
             ->all();
     }
@@ -138,6 +184,68 @@ class NotificationDocumentController extends Controller
     {
         $name = preg_replace('/\s+/', ' ', trim($name));
 
-        return Str::title(strtolower((string) $name));
+        $name = Str::title(strtolower((string) $name));
+
+        return str_replace(['Mbbs', 'Bds', 'Neet'], ['MBBS', 'BDS', 'NEET'], $name);
+    }
+
+    protected function resolveSelectedFolder(array $validated): MenuFolder
+    {
+        $newTitle = trim((string) ($validated['new_dropdown_title'] ?? ''));
+
+        if ($newTitle !== '') {
+            $parentId = isset($validated['new_dropdown_parent_id']) && $validated['new_dropdown_parent_id'] !== null
+                ? (int) $validated['new_dropdown_parent_id']
+                : (isset($validated['menu_folder_id']) ? (int) $validated['menu_folder_id'] : null);
+
+            return $this->createFolder($newTitle, $parentId);
+        }
+
+        if (! empty($validated['menu_folder_id'])) {
+            return MenuFolder::findOrFail((int) $validated['menu_folder_id']);
+        }
+
+        return $this->ensureDefaultFolders()->firstWhere('title', 'Notifications')
+            ?? MenuFolder::query()->orderBy('id')->firstOrFail();
+    }
+
+    protected function createFolder(string $title, ?int $parentId = null): MenuFolder
+    {
+        $title = $this->normalizeDropdownName($title);
+        $parent = $parentId ? MenuFolder::findOrFail($parentId) : null;
+        $depth = $parent ? $parent->depth + 1 : 1;
+
+        if ($depth > MenuFolder::MAX_DEPTH) {
+            throw ValidationException::withMessages([
+                'parent_id' => 'Dropdown nesting is limited to ' . MenuFolder::MAX_DEPTH . ' levels.',
+            ]);
+        }
+
+        $slug = MenuFolder::makeSlug($title);
+
+        return DB::transaction(function () use ($parent, $title, $slug, $depth): MenuFolder {
+            $existing = MenuFolder::query()
+                ->where('parent_id', $parent?->id)
+                ->where('slug', $slug)
+                ->first();
+
+            if ($existing) {
+                return $existing;
+            }
+
+            return MenuFolder::create([
+                'parent_id' => $parent?->id,
+                'title' => $title,
+                'slug' => $slug,
+                'depth' => $depth,
+                'is_active' => true,
+            ]);
+        });
+    }
+
+    protected function ensureDefaultFolders()
+    {
+        return collect(['Notifications', 'MBBS Study Abroad'])
+            ->map(fn (string $title) => $this->createFolder($title));
     }
 }

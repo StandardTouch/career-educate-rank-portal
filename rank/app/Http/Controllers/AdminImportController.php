@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AnalysisImport;
 use App\Models\Import;
+use App\Models\MenuFolder;
 use App\Models\NotificationDocument;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -57,20 +58,91 @@ class AdminImportController extends Controller
             ->paginate(15, ['*'], 'predicted_page')
             ->withQueryString();
 
-        $notificationDocuments = NotificationDocument::query()
+        $notificationDocuments = NotificationDocument::with('menuFolder.parent.parent')
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($nested) use ($search): void {
                     $nested->where('title', 'like', "%{$search}%")
                         ->orWhere('dropdown_name', 'like', "%{$search}%")
                         ->orWhere('original_filename', 'like', "%{$search}%")
-                        ->orWhereDate('created_at', $search);
+                        ->orWhereDate('created_at', $search)
+                        ->orWhereHas('menuFolder', function ($folderQuery) use ($search): void {
+                            $folderQuery->where('title', 'like', "%{$search}%");
+                        });
                 });
             })
             ->latest('id')
             ->paginate(15, ['*'], 'notification_page')
             ->withQueryString();
 
-        return view('admin.imports.index', compact('resultImports', 'predictedRankImports', 'notificationDocuments', 'search'));
+        $folderOptions = MenuFolder::with('parent.parent')
+            ->orderBy('depth')
+            ->orderByRaw('sort_order is null')
+            ->orderBy('sort_order')
+            ->orderBy('title')
+            ->get()
+            ->map(fn (MenuFolder $folder) => [
+                'id' => $folder->id,
+                'path' => $folder->pathTitle(),
+                'depth' => $folder->depth,
+            ])
+            ->values()
+            ->all();
+
+        return view('admin.imports.index', compact('resultImports', 'predictedRankImports', 'notificationDocuments', 'folderOptions', 'search'));
+    }
+
+    public function updateResult(Request $request, Import $import): RedirectResponse
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:180'],
+        ]);
+
+        if ($import->dataset) {
+            $import->dataset->update(['title' => trim($validated['title'])]);
+        }
+
+        return redirect()
+            ->route('admin.imports')
+            ->with('status', 'Updated result import title.');
+    }
+
+    public function updatePredictedRank(Request $request, AnalysisImport $analysisImport): RedirectResponse
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:180'],
+        ]);
+
+        if ($analysisImport->analysisDataset) {
+            $analysisImport->analysisDataset->update(['title' => trim($validated['title'])]);
+        }
+
+        return redirect()
+            ->route('admin.imports')
+            ->with('status', 'Updated predicted rank import title.');
+    }
+
+    public function updateNotification(Request $request, NotificationDocument $notificationDocument): RedirectResponse
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:160'],
+            'menu_folder_id' => ['required', 'integer', 'exists:menu_folders,id'],
+            'sort_order' => ['nullable', 'integer', 'min:0', 'max:999999'],
+            'is_active' => ['nullable', 'boolean'],
+        ]);
+
+        $folder = MenuFolder::findOrFail((int) $validated['menu_folder_id']);
+
+        $notificationDocument->update([
+            'title' => trim($validated['title']),
+            'menu_folder_id' => $folder->id,
+            'dropdown_name' => $folder->title,
+            'sort_order' => $validated['sort_order'] ?? null,
+            'is_active' => (bool) ($validated['is_active'] ?? false),
+        ]);
+
+        return redirect()
+            ->route('admin.imports')
+            ->with('status', 'Updated notification PDF.');
     }
 
     public function destroyResult(Import $import): RedirectResponse

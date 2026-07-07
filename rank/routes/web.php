@@ -96,8 +96,11 @@ Route::middleware(['auth', 'single.device'])->group(function () {
 Route::middleware(['auth', 'single.device', 'admin'])->group(function () {
     Route::get('/admin/dashboard', [App\Http\Controllers\AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/imports', [App\Http\Controllers\AdminImportController::class, 'index'])->name('admin.imports');
+    Route::patch('/admin/imports/results/{import}', [App\Http\Controllers\AdminImportController::class, 'updateResult'])->name('admin.imports.results.update');
     Route::delete('/admin/imports/results/{import}', [App\Http\Controllers\AdminImportController::class, 'destroyResult'])->name('admin.imports.results.destroy');
+    Route::patch('/admin/imports/predicted-rank/{analysisImport}', [App\Http\Controllers\AdminImportController::class, 'updatePredictedRank'])->name('admin.imports.predicted-rank.update');
     Route::delete('/admin/imports/predicted-rank/{analysisImport}', [App\Http\Controllers\AdminImportController::class, 'destroyPredictedRank'])->name('admin.imports.predicted-rank.destroy');
+    Route::patch('/admin/imports/notifications/{notificationDocument}', [App\Http\Controllers\AdminImportController::class, 'updateNotification'])->name('admin.imports.notifications.update');
     Route::delete('/admin/imports/notifications/{notificationDocument}', [App\Http\Controllers\AdminImportController::class, 'destroyNotification'])->name('admin.imports.notifications.destroy');
     Route::get('/admin/users', [App\Http\Controllers\AdminDashboardController::class, 'users'])->name('admin.users');
     Route::get('/admin/payments', [App\Http\Controllers\AdminDashboardController::class, 'payments'])->name('admin.payments');
@@ -115,6 +118,7 @@ Route::middleware(['auth', 'single.device', 'admin'])->group(function () {
     Route::post('/admin/import-analysis/confirm-course', [App\Http\Controllers\ImportAnalysisController::class, 'confirmStore'])->name('import.analysis.confirm.store');
     Route::get('/admin/import-notification', [App\Http\Controllers\NotificationDocumentController::class, 'create'])->name('notifications.import');
     Route::post('/admin/import-notification', [App\Http\Controllers\NotificationDocumentController::class, 'store'])->name('notifications.import.store');
+    Route::post('/admin/import-notification/dropdowns', [App\Http\Controllers\NotificationDocumentController::class, 'storeFolder'])->name('notifications.folders.store');
     Route::get('/admin/import-notification/confirm-title', [App\Http\Controllers\NotificationDocumentController::class, 'confirm'])->name('notifications.import.confirm');
     Route::post('/admin/import-notification/confirm-title', [App\Http\Controllers\NotificationDocumentController::class, 'confirmStore'])->name('notifications.import.confirm.store');
 });

@@ -7,6 +7,7 @@
     $currentDatasetSlug = is_object($currentDataset) ? ($currentDataset->slug ?? null) : $currentDataset;
     $currentDatasetSlug = $currentDatasetSlug ?: (is_object($currentAnalysisDataset) ? ($currentAnalysisDataset->slug ?? null) : $currentAnalysisDataset);
     $notificationDocuments = collect();
+    $menuRootFolders = collect();
     $documentDropdowns = collect([
         'Notifications' => collect(),
         'MBBS Study Abroad' => collect(),
@@ -57,6 +58,22 @@
             }
         }
 
+        if (\Illuminate\Support\Facades\Schema::hasTable('menu_folders')) {
+            $menuRootFolders = \App\Models\MenuFolder::query()
+                ->whereNull('parent_id')
+                ->where('is_active', true)
+                ->with([
+                    'activeNotificationDocuments',
+                    'activeChildren.activeNotificationDocuments',
+                    'activeChildren.activeChildren.activeNotificationDocuments',
+                    'activeChildren.activeChildren.activeChildren.activeNotificationDocuments',
+                ])
+                ->orderByRaw('sort_order is null')
+                ->orderBy('sort_order')
+                ->orderBy('title')
+                ->get();
+        }
+
         if (\Illuminate\Support\Facades\Schema::hasTable('notification_documents')) {
             $notificationDocuments = \App\Models\NotificationDocument::query()
                 ->where('is_active', true)
@@ -72,6 +89,7 @@
     } catch (\Throwable $exception) {
         $rawYearMenus = config('menus');
         $notificationDocuments = collect();
+        $menuRootFolders = collect();
         $documentDropdowns = collect([
             'Notifications' => collect(),
             'MBBS Study Abroad' => collect(),
@@ -79,6 +97,8 @@
     }
 
     $yearMenus = [];
+    $notificationsFolder = $menuRootFolders->first(fn ($folder) => ($folder->slug ?? '') === 'notifications' || strcasecmp((string) $folder->title, 'Notifications') === 0);
+    $mbbsStudyAbroadFolder = $menuRootFolders->first(fn ($folder) => ($folder->slug ?? '') === 'mbbs-study-abroad' || strcasecmp((string) $folder->title, 'MBBS Study Abroad') === 0);
 
     $activeYear = null;
 
@@ -224,11 +244,15 @@
                         <a href="{{ asset('Shaheen-MSIT-Tajikistan-Booklet.pdf') }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
                             MSIT Tajikistan Booklet
                         </a>
-                        @foreach ($documentDropdowns->get('MBBS Study Abroad', collect()) as $document)
-                            <a href="{{ route('notifications.view', $document) }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
-                                {{ \Illuminate\Support\Str::upper($document->title) }}
-                            </a>
-                        @endforeach
+                        @if ($mbbsStudyAbroadFolder)
+                            @include('partials.menu-folder-items', ['folder' => $mbbsStudyAbroadFolder])
+                        @else
+                            @foreach ($documentDropdowns->get('MBBS Study Abroad', collect()) as $document)
+                                <a href="{{ route('notifications.view', $document) }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
+                                    {{ \Illuminate\Support\Str::upper($document->title) }}
+                                </a>
+                            @endforeach
+                        @endif
                     </div>
                     <div class="flex items-center gap-2 border-l border-slate-200 pl-3 ml-2">
                         <a href="tel:9686601088" class="text-rose-500 font-semibold transition-colors px-3 py-2 rounded-lg animate-pulse whitespace-nowrap border border-rose-200 bg-rose-50/50 hover:bg-rose-100 flex items-center gap-2">
@@ -255,19 +279,52 @@
                 >
                     <div class="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Updates</div>
                     <div class="grid gap-1 px-2 pb-2">
-                        @forelse ($documentDropdowns->get('Notifications', collect()) as $document)
-                            <a href="{{ route('notifications.view', $document) }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
-                                {{ \Illuminate\Support\Str::upper($document->title) }}
-                            </a>
-                        @empty
-                            <div class="rounded-xl px-3 py-2 text-sm font-semibold text-slate-400">
-                                No notifications uploaded yet.
-                            </div>
-                        @endforelse
+                        @if ($notificationsFolder)
+                            @include('partials.menu-folder-items', ['folder' => $notificationsFolder])
+                            @if (($notificationsFolder->activeNotificationDocuments ?? collect())->isEmpty() && ($notificationsFolder->activeChildren ?? collect())->isEmpty())
+                                <div class="rounded-xl px-3 py-2 text-sm font-semibold text-slate-400">
+                                    No notifications uploaded yet.
+                                </div>
+                            @endif
+                        @else
+                            @forelse ($documentDropdowns->get('Notifications', collect()) as $document)
+                                <a href="{{ route('notifications.view', $document) }}" target="_blank" rel="noopener" class="results-menu-link text-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-xl px-3 py-2 text-sm transition-colors block">
+                                    {{ \Illuminate\Support\Str::upper($document->title) }}
+                                </a>
+                            @empty
+                                <div class="rounded-xl px-3 py-2 text-sm font-semibold text-slate-400">
+                                    No notifications uploaded yet.
+                                </div>
+                            @endforelse
+                        @endif
                     </div>
                 </div>
             </div>
 
+            @foreach ($menuRootFolders as $rootFolder)
+                @continue(in_array($rootFolder->slug ?? '', ['notifications', 'mbbs-study-abroad'], true))
+                <div class="relative group results-year-menu">
+                    <button
+                        type="button"
+                        class="results-year-trigger px-3 py-2 rounded-lg border border-slate-200 text-slate-700 hover:border-rose-300 hover:text-rose-600 transition-colors inline-flex items-center gap-2 whitespace-nowrap"
+                        aria-expanded="false"
+                    >
+                        <span>{{ $rootFolder->title }}</span>
+                        <span class="results-year-caret text-[10px] leading-none transition-transform">v</span>
+                    </button>
+                    <div
+                        class="results-year-panel hidden fixed z-50 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl p-2"
+                        style="width: min(22rem, calc(100vw - 2rem)); max-height: min(32rem, calc(100vh - 7rem));"
+                    >
+                        <div class="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">{{ $rootFolder->title }}</div>
+                        <div class="grid gap-1 px-2 pb-2">
+                            @include('partials.menu-folder-items', ['folder' => $rootFolder])
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+
+            @if ($menuRootFolders->isEmpty())
             @foreach ($documentDropdowns as $dropdownName => $documents)
                 @continue(in_array($dropdownName, ['Notifications', 'MBBS Study Abroad'], true) || $documents->isEmpty())
                 <div class="relative group results-year-menu">
@@ -294,6 +351,7 @@
                     </div>
                 </div>
             @endforeach
+            @endif
 
             @foreach ($yearMenus as $year => $menu)
                 <div class="relative group results-year-menu">
