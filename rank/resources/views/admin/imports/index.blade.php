@@ -11,6 +11,13 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body { font-family: 'Outfit', sans-serif; }
+        dialog[open] {
+            position: fixed;
+            inset: 0;
+            margin: auto;
+            max-height: calc(100vh - 2rem);
+            overflow-y: auto;
+        }
         dialog::backdrop { background: rgb(15 23 42 / 0.45); }
     </style>
     @include('partials.anti-copy')
@@ -119,7 +126,7 @@
                                         {{ ucfirst($import->status) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 font-semibold text-slate-500">{{ optional($import->created_at)->format('d M Y, h:i A') }}</td>
+                                <td class="px-6 py-4 font-semibold text-slate-500">{{ $import->created_at?->timezone('Asia/Kolkata')->format('d M Y, h:i A') ?? '-' }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="inline-flex flex-col gap-2">
                                         @if ($import->dataset)
@@ -193,7 +200,7 @@
                                         {{ ucfirst($import->status) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 font-semibold text-slate-500">{{ optional($import->created_at)->format('d M Y, h:i A') }}</td>
+                                <td class="px-6 py-4 font-semibold text-slate-500">{{ $import->created_at?->timezone('Asia/Kolkata')->format('d M Y, h:i A') ?? '-' }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="inline-flex flex-col gap-2">
                                         @if ($import->analysisDataset)
@@ -263,7 +270,7 @@
                                         {{ $document->is_active ? 'Active' : 'Hidden' }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 font-semibold text-slate-500">{{ optional($document->created_at)->format('d M Y, h:i A') }}</td>
+                                <td class="px-6 py-4 font-semibold text-slate-500">{{ $document->created_at?->timezone('Asia/Kolkata')->format('d M Y, h:i A') ?? '-' }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="inline-flex flex-col gap-2">
                                         <button type="button" data-modal-target="notification-edit-{{ $document->id }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
@@ -318,7 +325,7 @@
                                 <div><span class="font-bold text-slate-900">Course:</span> {{ $import->dataset?->course ?? '-' }}</div>
                                 <div><span class="font-bold text-slate-900">Rows:</span> {{ number_format($import->total_rows ?? 0) }}</div>
                                 <div><span class="font-bold text-slate-900">Status:</span> {{ ucfirst($import->status) }}</div>
-                                <div><span class="font-bold text-slate-900">Imported:</span> {{ optional($import->created_at)->format('d M Y, h:i A') }}</div>
+                                <div><span class="font-bold text-slate-900">Imported:</span> {{ $import->created_at?->timezone('Asia/Kolkata')->format('d M Y, h:i A') ?? '-' }}</div>
                             </div>
                         </div>
                         <div class="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-4">
@@ -353,7 +360,7 @@
                                 <div><span class="font-bold text-slate-900">Course:</span> {{ $import->analysisDataset?->course ?? '-' }}</div>
                                 <div><span class="font-bold text-slate-900">Rows:</span> {{ number_format($import->total_rows ?? 0) }}</div>
                                 <div><span class="font-bold text-slate-900">Status:</span> {{ ucfirst($import->status) }}</div>
-                                <div><span class="font-bold text-slate-900">Imported:</span> {{ optional($import->created_at)->format('d M Y, h:i A') }}</div>
+                                <div><span class="font-bold text-slate-900">Imported:</span> {{ $import->created_at?->timezone('Asia/Kolkata')->format('d M Y, h:i A') ?? '-' }}</div>
                             </div>
                         </div>
                         <div class="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-4">
@@ -405,7 +412,7 @@
                         </div>
                         <div class="grid gap-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
                             <div><span class="font-bold text-slate-900">File:</span> {{ $document->original_filename }}</div>
-                            <div><span class="font-bold text-slate-900">Uploaded:</span> {{ optional($document->created_at)->format('d M Y, h:i A') }}</div>
+                            <div><span class="font-bold text-slate-900">Uploaded:</span> {{ $document->created_at?->timezone('Asia/Kolkata')->format('d M Y, h:i A') ?? '-' }}</div>
                         </div>
                     </div>
                     <div class="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-4">
