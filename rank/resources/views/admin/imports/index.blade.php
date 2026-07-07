@@ -11,6 +11,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body { font-family: 'Outfit', sans-serif; }
+        dialog::backdrop { background: rgb(15 23 42 / 0.45); }
     </style>
     @include('partials.anti-copy')
 </head>
@@ -43,6 +44,12 @@
         @if (session('status'))
             <div class="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
                 {{ session('status') }}
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+                {{ $errors->first() }}
             </div>
         @endif
 
@@ -95,20 +102,9 @@
                         @forelse ($resultImports as $import)
                             <tr>
                                 <td class="px-6 py-4">
-                                    @if ($import->dataset)
-                                        <form id="result-update-{{ $import->id }}" action="{{ route('admin.imports.results.update', $import) }}" method="POST" class="space-y-2">
-                                            @csrf
-                                            @method('PATCH')
-                                            <input
-                                                name="title"
-                                                value="{{ $import->dataset->title }}"
-                                                maxlength="180"
-                                                class="block w-full min-w-64 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
-                                            >
-                                        </form>
-                                    @else
-                                        <div class="font-bold text-slate-900">Deleted dataset</div>
-                                    @endif
+                                    <div class="max-w-56 truncate font-bold text-slate-900" title="{{ $import->dataset?->title ?? 'Deleted dataset' }}">
+                                        {{ $import->dataset?->title ?? 'Deleted dataset' }}
+                                    </div>
                                     @if ($import->dataset)
                                         <a href="{{ route('results.show', $import->dataset) }}" class="mt-1 inline-flex text-xs font-bold text-rose-500 hover:text-rose-600">Open page</a>
                                     @endif
@@ -125,18 +121,20 @@
                                 </td>
                                 <td class="px-6 py-4 font-semibold text-slate-500">{{ optional($import->created_at)->format('d M Y, h:i A') }}</td>
                                 <td class="px-6 py-4 text-right">
-                                    @if ($import->dataset)
-                                        <button form="result-update-{{ $import->id }}" type="submit" class="mr-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
-                                            Save
-                                        </button>
-                                    @endif
-                                    <form action="{{ route('admin.imports.results.destroy', $import) }}" method="POST" onsubmit="return confirm('Delete this result import and remove its imported page from everywhere?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-100">
-                                            Delete
-                                        </button>
-                                    </form>
+                                    <div class="inline-flex flex-col gap-2">
+                                        @if ($import->dataset)
+                                            <button type="button" data-modal-target="result-edit-{{ $import->id }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
+                                                Edit
+                                            </button>
+                                        @endif
+                                        <form action="{{ route('admin.imports.results.destroy', $import) }}" method="POST" onsubmit="return confirm('Delete this result import and remove its imported page from everywhere?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-100">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -178,20 +176,9 @@
                         @forelse ($predictedRankImports as $import)
                             <tr>
                                 <td class="px-6 py-4">
-                                    @if ($import->analysisDataset)
-                                        <form id="analysis-update-{{ $import->id }}" action="{{ route('admin.imports.predicted-rank.update', $import) }}" method="POST" class="space-y-2">
-                                            @csrf
-                                            @method('PATCH')
-                                            <input
-                                                name="title"
-                                                value="{{ $import->analysisDataset->title }}"
-                                                maxlength="180"
-                                                class="block w-full min-w-64 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
-                                            >
-                                        </form>
-                                    @else
-                                        <div class="font-bold text-slate-900">Deleted dataset</div>
-                                    @endif
+                                    <div class="max-w-56 truncate font-bold text-slate-900" title="{{ $import->analysisDataset?->title ?? 'Deleted dataset' }}">
+                                        {{ $import->analysisDataset?->title ?? 'Deleted dataset' }}
+                                    </div>
                                     @if ($import->analysisDataset)
                                         <a href="{{ route('analysis.show', $import->analysisDataset) }}" class="mt-1 inline-flex text-xs font-bold text-rose-500 hover:text-rose-600">Open page</a>
                                     @endif
@@ -208,18 +195,20 @@
                                 </td>
                                 <td class="px-6 py-4 font-semibold text-slate-500">{{ optional($import->created_at)->format('d M Y, h:i A') }}</td>
                                 <td class="px-6 py-4 text-right">
-                                    @if ($import->analysisDataset)
-                                        <button form="analysis-update-{{ $import->id }}" type="submit" class="mr-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
-                                            Save
-                                        </button>
-                                    @endif
-                                    <form action="{{ route('admin.imports.predicted-rank.destroy', $import) }}" method="POST" onsubmit="return confirm('Delete this predicted rank import and remove its imported page from everywhere?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-100">
-                                            Delete
-                                        </button>
-                                    </form>
+                                    <div class="inline-flex flex-col gap-2">
+                                        @if ($import->analysisDataset)
+                                            <button type="button" data-modal-target="analysis-edit-{{ $import->id }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
+                                                Edit
+                                            </button>
+                                        @endif
+                                        <form action="{{ route('admin.imports.predicted-rank.destroy', $import) }}" method="POST" onsubmit="return confirm('Delete this predicted rank import and remove its imported page from everywhere?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-100">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -260,63 +249,34 @@
                         @forelse ($notificationDocuments as $document)
                             <tr>
                                 <td class="px-6 py-4">
-                                    <form id="notification-update-{{ $document->id }}" action="{{ route('admin.imports.notifications.update', $document) }}" method="POST" class="space-y-2">
-                                        @csrf
-                                        @method('PATCH')
-                                        <input
-                                            name="title"
-                                            value="{{ $document->title }}"
-                                            maxlength="160"
-                                            class="block w-full min-w-64 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
-                                        >
-                                    </form>
+                                    <div class="max-w-64 truncate font-bold text-slate-900" title="{{ $document->title }}">{{ $document->title }}</div>
                                     <a href="{{ route('notifications.view', $document) }}" target="_blank" rel="noopener" class="mt-1 inline-flex text-xs font-bold text-rose-500 hover:text-rose-600">Open PDF</a>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <select
-                                        name="menu_folder_id"
-                                        form="notification-update-{{ $document->id }}"
-                                        class="block w-full min-w-56 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
-                                    >
-                                        @foreach ($folderOptions as $folder)
-                                            <option value="{{ $folder['id'] }}" @selected((int) ($document->menu_folder_id ?? 0) === (int) $folder['id'])>
-                                                {{ str_repeat('-- ', max(0, $folder['depth'] - 1)) }}{{ $folder['path'] }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <input
-                                        name="sort_order"
-                                        form="notification-update-{{ $document->id }}"
-                                        type="number"
-                                        min="0"
-                                        max="999999"
-                                        value="{{ $document->sort_order }}"
-                                        placeholder="Sort order"
-                                        class="mt-2 block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
-                                    >
+                                <td class="px-6 py-4 font-semibold text-slate-600">
+                                    {{ $document->menuFolder?->pathTitle() ?? $document->dropdown_name }}
                                 </td>
                                 <td class="max-w-xs px-6 py-4">
                                     <div class="truncate font-semibold text-slate-700" title="{{ $document->original_filename }}">{{ $document->original_filename }}</div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <label class="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700">
-                                        <input type="hidden" name="is_active" value="0" form="notification-update-{{ $document->id }}">
-                                        <input type="checkbox" name="is_active" value="1" form="notification-update-{{ $document->id }}" class="rounded border-slate-300 text-rose-500 focus:ring-rose-500" @checked($document->is_active)>
-                                        Active
-                                    </label>
+                                    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-bold {{ $document->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
+                                        {{ $document->is_active ? 'Active' : 'Hidden' }}
+                                    </span>
                                 </td>
                                 <td class="px-6 py-4 font-semibold text-slate-500">{{ optional($document->created_at)->format('d M Y, h:i A') }}</td>
-                                <td class="px-6 py-4 text-right whitespace-nowrap">
-                                    <button form="notification-update-{{ $document->id }}" type="submit" class="mr-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
-                                        Save
-                                    </button>
-                                    <form action="{{ route('admin.imports.notifications.destroy', $document) }}" method="POST" onsubmit="return confirm('Delete this notification PDF and remove it from the Notifications dropdown?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-100">
-                                            Delete
+                                <td class="px-6 py-4 text-right">
+                                    <div class="inline-flex flex-col gap-2">
+                                        <button type="button" data-modal-target="notification-edit-{{ $document->id }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
+                                            Edit
                                         </button>
-                                    </form>
+                                        <form action="{{ route('admin.imports.notifications.destroy', $document) }}" method="POST" onsubmit="return confirm('Delete this notification PDF and remove it from the Notifications dropdown?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-100">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -334,7 +294,151 @@
                 </div>
             @endif
         </section>
+
+        @foreach ($resultImports as $import)
+            @if ($import->dataset)
+                <dialog id="result-edit-{{ $import->id }}" class="w-[min(34rem,calc(100vw-2rem))] rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl">
+                    <form action="{{ route('admin.imports.results.update', $import) }}" method="POST" class="p-6">
+                        @csrf
+                        @method('PATCH')
+                        <div class="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">Edit Result Import</p>
+                                <h3 class="mt-1 text-xl font-extrabold text-slate-950">Result Details</h3>
+                            </div>
+                            <button type="button" data-modal-close class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-bold text-slate-500 hover:text-rose-600">Close</button>
+                        </div>
+                        <div class="mt-5 space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Title</label>
+                                <input name="title" value="{{ $import->dataset->title }}" maxlength="180" required class="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
+                            </div>
+                            <div class="grid gap-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
+                                <div><span class="font-bold text-slate-900">File:</span> {{ $import->original_filename }}</div>
+                                <div><span class="font-bold text-slate-900">Course:</span> {{ $import->dataset?->course ?? '-' }}</div>
+                                <div><span class="font-bold text-slate-900">Rows:</span> {{ number_format($import->total_rows ?? 0) }}</div>
+                                <div><span class="font-bold text-slate-900">Status:</span> {{ ucfirst($import->status) }}</div>
+                                <div><span class="font-bold text-slate-900">Imported:</span> {{ optional($import->created_at)->format('d M Y, h:i A') }}</div>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-4">
+                            <button type="button" data-modal-close class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">Cancel</button>
+                            <button type="submit" class="rounded-xl bg-rose-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-rose-600">Save</button>
+                        </div>
+                    </form>
+                </dialog>
+            @endif
+        @endforeach
+
+        @foreach ($predictedRankImports as $import)
+            @if ($import->analysisDataset)
+                <dialog id="analysis-edit-{{ $import->id }}" class="w-[min(34rem,calc(100vw-2rem))] rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl">
+                    <form action="{{ route('admin.imports.predicted-rank.update', $import) }}" method="POST" class="p-6">
+                        @csrf
+                        @method('PATCH')
+                        <div class="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">Edit Predicted Rank Import</p>
+                                <h3 class="mt-1 text-xl font-extrabold text-slate-950">Predicted Rank Details</h3>
+                            </div>
+                            <button type="button" data-modal-close class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-bold text-slate-500 hover:text-rose-600">Close</button>
+                        </div>
+                        <div class="mt-5 space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Title</label>
+                                <input name="title" value="{{ $import->analysisDataset->title }}" maxlength="180" required class="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
+                            </div>
+                            <div class="grid gap-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
+                                <div><span class="font-bold text-slate-900">File:</span> {{ $import->original_filename }}</div>
+                                <div><span class="font-bold text-slate-900">Course:</span> {{ $import->analysisDataset?->course ?? '-' }}</div>
+                                <div><span class="font-bold text-slate-900">Rows:</span> {{ number_format($import->total_rows ?? 0) }}</div>
+                                <div><span class="font-bold text-slate-900">Status:</span> {{ ucfirst($import->status) }}</div>
+                                <div><span class="font-bold text-slate-900">Imported:</span> {{ optional($import->created_at)->format('d M Y, h:i A') }}</div>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-4">
+                            <button type="button" data-modal-close class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">Cancel</button>
+                            <button type="submit" class="rounded-xl bg-rose-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-rose-600">Save</button>
+                        </div>
+                    </form>
+                </dialog>
+            @endif
+        @endforeach
+
+        @foreach ($notificationDocuments as $document)
+            <dialog id="notification-edit-{{ $document->id }}" class="w-[min(36rem,calc(100vw-2rem))] rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl">
+                <form action="{{ route('admin.imports.notifications.update', $document) }}" method="POST" class="p-6">
+                    @csrf
+                    @method('PATCH')
+                    <div class="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-500">Edit Notification PDF</p>
+                            <h3 class="mt-1 text-xl font-extrabold text-slate-950">Notification Details</h3>
+                        </div>
+                        <button type="button" data-modal-close class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-bold text-slate-500 hover:text-rose-600">Close</button>
+                    </div>
+                    <div class="mt-5 space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Title</label>
+                            <input name="title" value="{{ $document->title }}" maxlength="160" required class="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Dropdown</label>
+                            <select name="menu_folder_id" class="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
+                                @foreach ($folderOptions as $folder)
+                                    <option value="{{ $folder['id'] }}" @selected((int) ($document->menu_folder_id ?? 0) === (int) $folder['id'])>
+                                        {{ str_repeat('-- ', max(0, $folder['depth'] - 1)) }}{{ $folder['path'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Sort Order</label>
+                                <input name="sort_order" type="number" min="0" max="999999" value="{{ $document->sort_order }}" class="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20">
+                            </div>
+                            <label class="mt-6 inline-flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700">
+                                <input type="hidden" name="is_active" value="0">
+                                <input type="checkbox" name="is_active" value="1" class="rounded border-slate-300 text-rose-500 focus:ring-rose-500" @checked($document->is_active)>
+                                Active
+                            </label>
+                        </div>
+                        <div class="grid gap-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
+                            <div><span class="font-bold text-slate-900">File:</span> {{ $document->original_filename }}</div>
+                            <div><span class="font-bold text-slate-900">Uploaded:</span> {{ optional($document->created_at)->format('d M Y, h:i A') }}</div>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-4">
+                        <button type="button" data-modal-close class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">Cancel</button>
+                        <button type="submit" class="rounded-xl bg-rose-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-rose-600">Save</button>
+                    </div>
+                </form>
+            </dialog>
+        @endforeach
     </main>
+
+    <script>
+        document.querySelectorAll('[data-modal-target]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const modal = document.getElementById(button.dataset.modalTarget);
+                if (modal?.showModal) {
+                    modal.showModal();
+                }
+            });
+        });
+
+        document.querySelectorAll('dialog').forEach((modal) => {
+            modal.querySelectorAll('[data-modal-close]').forEach((button) => {
+                button.addEventListener('click', () => modal.close());
+            });
+
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.close();
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
