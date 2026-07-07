@@ -209,9 +209,11 @@ class AdminImportController extends Controller
     {
         $name = $notificationDocument->title;
         $path = $notificationDocument->stored_path;
+        $folder = $notificationDocument->menuFolder;
 
         $notificationDocument->delete();
         Storage::disk('public')->delete($path);
+        $this->deleteEmptyMenuFolders($folder);
 
         return redirect()
             ->route('admin.imports')
@@ -222,6 +224,21 @@ class AdminImportController extends Controller
     {
         foreach (array_unique(array_filter($paths)) as $path) {
             Storage::disk('local')->delete($path);
+        }
+    }
+
+    protected function deleteEmptyMenuFolders(?MenuFolder $folder): void
+    {
+        while ($folder && ! in_array($folder->slug, ['notifications', 'mbbs-study-abroad'], true)) {
+            $folder->refresh();
+
+            if ($folder->notificationDocuments()->exists() || $folder->children()->exists()) {
+                return;
+            }
+
+            $parent = $folder->parent;
+            $folder->delete();
+            $folder = $parent;
         }
     }
 }
