@@ -176,9 +176,30 @@
                     <a href="{{ route('admin.payments') }}" class="{{ $routeName === 'admin.payments' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
                         Payments
                     </a>
-                    <a href="{{ route('admin.call-details') }}" class="{{ $routeName === 'admin.call-details' ? 'text-rose-500 font-semibold' : 'hover:text-rose-500' }} transition-colors px-3 py-2 rounded-lg whitespace-nowrap">
-                        Call Details
-                    </a>
+                    <div class="relative group results-year-menu">
+                        <button
+                            type="button"
+                            class="results-year-trigger px-3 py-2 rounded-lg border {{ in_array($routeName, ['admin.call-details', 'admin.call-history', 'admin.career-educate-call-log'], true) ? 'border-rose-300 text-rose-600 bg-rose-50' : 'border-slate-200 text-slate-700 hover:border-rose-300 hover:text-rose-600' }} transition-colors inline-flex items-center gap-2 whitespace-nowrap"
+                            aria-expanded="false"
+                        >
+                            <span>Call Details</span>
+                            <span class="results-year-caret text-[10px] leading-none transition-transform">v</span>
+                        </button>
+                        <div
+                            class="results-year-panel hidden fixed z-50 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl p-2"
+                            style="width: min(20rem, calc(100vw - 2rem)); max-height: min(32rem, calc(100vh - 7rem));"
+                        >
+                            <div class="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Call Details</div>
+                            <div class="grid gap-1 px-2 pb-2">
+                                <a href="{{ route('admin.call-details') }}" class="results-menu-link {{ in_array($routeName, ['admin.call-details', 'admin.call-history'], true) ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-rose-50 hover:text-rose-700' }} rounded-xl px-3 py-2 text-sm transition-colors block">
+                                    Student Call Lookup
+                                </a>
+                                <a href="{{ route('admin.career-educate-call-log') }}" class="results-menu-link {{ $routeName === 'admin.career-educate-call-log' ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-rose-50 hover:text-rose-700' }} rounded-xl px-3 py-2 text-sm transition-colors block">
+                                    Career Educate Call Log
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                     <div class="relative group results-year-menu">
                         <button
                             type="button"

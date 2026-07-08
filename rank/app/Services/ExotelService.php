@@ -12,7 +12,94 @@ use RuntimeException;
 
 class ExotelService
 {
+    public function callsForExophone(string $exophone, int $page = 0, int $pageSize = 100, array $filters = []): array
+    {
+        $page = max(0, $page);
+        $pageSize = max(10, min(100, $pageSize));
+        $apiPageSize = 100;
+        $apiPage = intdiv($page * $pageSize, $apiPageSize);
+        $pageOffset = ($page * $pageSize) % $apiPageSize;
+        $variants = $this->phoneVariants($exophone);
+        $baseQuery = $this->callFilterQuery($filters, $exophone);
+        $queryFields = ['VirtualNumber', 'Exophone', 'PhoneNumber', 'To', 'From'];
+        $queryEntries = collect($queryFields)
+            ->flatMap(fn ($field) => collect($variants)->map(fn ($phone) => [
+                'trusted' => in_array($field, ['VirtualNumber', 'Exophone', 'PhoneNumber'], true),
+                'query' => array_merge($baseQuery, [
+                    $field => $phone,
+                    'PageSize' => $apiPageSize,
+                    'Page' => $apiPage,
+                ]),
+            ]))
+            ->push([
+                'trusted' => false,
+                'query' => array_merge($baseQuery, [
+                    'PageSize' => $apiPageSize,
+                    'Page' => $apiPage,
+                ]),
+            ])
+            ->unique(fn ($entry) => json_encode($entry['query']))
+            ->values();
+
+        $responses = $queryEntries->map(function ($entry) {
+            $response = $this->calls($entry['query']);
+            $response['trusted'] = $entry['trusted'];
+
+            return $response;
+        });
+
+        $matchedCalls = $responses
+            ->flatMap(fn ($response) => collect($response['calls'])->map(fn ($call) => [
+                'call' => $call,
+                'trusted' => $response['trusted'],
+            ]))
+            ->filter(fn ($item) => ($item['trusted'] && $this->callLooksLikeCareerEducate($item['call'])) || $this->callMatchesExophone($item['call'], $variants))
+            ->pluck('call')
+            ->filter(fn ($call) => $this->callMatchesFilters($call, $filters))
+            ->unique(fn ($call) => $call['Sid'] ?? $call['CallSid'] ?? md5(json_encode($call)))
+            ->sortByDesc(fn ($call) => strtotime((string) ($call['StartTime'] ?? $call['DateCreated'] ?? '')) ?: 0)
+            ->values();
+
+        $calls = $matchedCalls
+            ->slice($pageOffset, $pageSize)
+            ->values()
+            ->all();
+
+        $incomingTotal = $matchedCalls->filter(fn ($call) => str_contains(strtolower((string) ($call['Direction'] ?? '')), 'in'))->count();
+        $outgoingTotal = $matchedCalls->filter(fn ($call) => str_contains(strtolower((string) ($call['Direction'] ?? '')), 'out'))->count();
+        $hasNextPage = $responses->contains(fn ($response) => !empty($response['metadata']['NextPageUri'] ?? null));
+        $total = ($apiPage * $apiPageSize) + $matchedCalls->count();
+        $hasMoreLocalPages = $pageOffset + $pageSize < $matchedCalls->count();
+
+        return [
+            'calls' => $calls,
+            'metadata' => [
+                'Total' => $total,
+                'PageSize' => $pageSize,
+                'Page' => $page,
+                'IncomingTotal' => $incomingTotal,
+                'OutgoingTotal' => $outgoingTotal,
+                'NextPageUri' => ($hasMoreLocalPages || $hasNextPage) ? 'next' : null,
+                'Start' => $total > 0 ? ($page * $pageSize) + 1 : 0,
+                'End' => min(($page * $pageSize) + count($calls), $total),
+            ],
+            'raw' => [
+                'queries' => $queryEntries->pluck('query')->all(),
+                'responses' => $responses->pluck('raw')->all(),
+            ],
+        ];
+    }
+
     public function callsForPhone(string $phone, int $page = 0, int $pageSize = 100): array
+    {
+        return $this->calls([
+            'From' => $phone,
+            'PageSize' => $pageSize,
+            'Page' => max(0, $page),
+        ]);
+    }
+
+    private function calls(array $query): array
     {
         $accountSid = (string) config('services.exotel.account_sid', 'retailcenter1');
         $apiKey = (string) config('services.exotel.api_key');
@@ -27,11 +114,7 @@ class ExotelService
             $response = Http::withBasicAuth($apiKey, $apiToken)
                 ->acceptJson()
                 ->timeout(20)
-                ->get("{$baseUrl}/v1/Accounts/{$accountSid}/Calls.json", [
-                    'From' => $phone,
-                    'PageSize' => $pageSize,
-                    'Page' => max(0, $page),
-                ])
+                ->get("{$baseUrl}/v1/Accounts/{$accountSid}/Calls.json", $query)
                 ->throw();
         } catch (RequestException $exception) {
             $message = $exception->response?->json('RestException.Message')
@@ -51,6 +134,152 @@ class ExotelService
             'metadata' => $payload['Metadata'] ?? [],
             'raw' => $payload,
         ];
+    }
+
+    private function callFilterQuery(array $filters, string $exophone): array
+    {
+        $query = [];
+        $searchParts = ['vn:' . $this->phoneDigits($exophone)];
+
+        if (filled($filters['start_date'] ?? null) || filled($filters['end_date'] ?? null)) {
+            $start = filled($filters['start_date'] ?? null)
+                ? date('d-m-Y 00:00:00', strtotime((string) $filters['start_date']))
+                : '01-01-1970 00:00:00';
+            $end = filled($filters['end_date'] ?? null)
+                ? date('d-m-Y 23:59:59', strtotime((string) $filters['end_date']))
+                : date('d-m-Y 23:59:59');
+
+            $searchParts[] = "created:{$start}..{$end}";
+            $query['DateCreated>'] = date('Y-m-d 00:00:00', strtotime((string) ($filters['start_date'] ?? '1970-01-01')));
+            $query['DateCreated<'] = date('Y-m-d 23:59:59', strtotime((string) ($filters['end_date'] ?? date('Y-m-d'))));
+            $query['StartTime'] = date('Y-m-d 00:00:00', strtotime((string) ($filters['start_date'] ?? '1970-01-01')));
+            $query['EndTime'] = date('Y-m-d 23:59:59', strtotime((string) ($filters['end_date'] ?? date('Y-m-d'))));
+        }
+
+        if (filled($filters['status'] ?? null)) {
+            $query['Status'] = (string) $filters['status'];
+        }
+
+        if (filled($filters['direction'] ?? null)) {
+            $query['Direction'] = (string) $filters['direction'];
+        }
+
+        $query['Search'] = implode(',', $searchParts);
+
+        return array_filter($query, fn ($value) => filled($value));
+    }
+
+    private function callMatchesFilters(array $call, array $filters): bool
+    {
+        if (filled($filters['phone'] ?? null)) {
+            $needle = $this->phoneDigits((string) $filters['phone']);
+            $from = $this->phoneDigits((string) ($call['From'] ?? ''));
+            $to = $this->phoneDigits((string) ($call['To'] ?? ''));
+
+            if ($needle !== '' && !str_contains($from, $needle) && !str_contains($to, $needle)) {
+                return false;
+            }
+        }
+
+        if (filled($filters['status'] ?? null) && strcasecmp((string) ($call['Status'] ?? ''), (string) $filters['status']) !== 0) {
+            return false;
+        }
+
+        if (filled($filters['direction'] ?? null)) {
+            $direction = strtolower((string) ($call['Direction'] ?? ''));
+            $expected = strtolower((string) $filters['direction']);
+
+            if (!str_contains($direction, $expected)) {
+                return false;
+            }
+        }
+
+        $timestamp = strtotime((string) ($call['StartTime'] ?? $call['DateCreated'] ?? ''));
+
+        if (filled($filters['start_date'] ?? null) && $timestamp && $timestamp < strtotime((string) $filters['start_date'] . ' 00:00:00')) {
+            return false;
+        }
+
+        if (filled($filters['end_date'] ?? null) && $timestamp && $timestamp > strtotime((string) $filters['end_date'] . ' 23:59:59')) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function callMatchesExophone(array $call, array $variants): bool
+    {
+        $needles = collect($variants)->map(fn ($phone) => $this->phoneDigits($phone))->filter()->unique();
+        $fields = [
+            'From',
+            'To',
+            'PhoneNumber',
+            'PhoneNumberSid',
+            'VirtualNumber',
+            'Exophone',
+            'DialWhomNumber',
+        ];
+
+        foreach ($fields as $field) {
+            $digits = $this->phoneDigits((string) ($call[$field] ?? ''));
+
+            if ($digits !== '' && $needles->contains($digits)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function callLooksLikeCareerEducate(array $call): bool
+    {
+        $careerFields = Arr::only($call, [
+            'AppName',
+            'ApplicationName',
+            'App',
+            'Flow',
+            'FlowName',
+            'CallFlow',
+            'CallFlowName',
+            'Exophone',
+            'VirtualNumber',
+            'PhoneNumber',
+        ]);
+        $filledCareerFields = array_filter($careerFields, fn ($value) => filled($value));
+
+        if ($filledCareerFields === []) {
+            return true;
+        }
+
+        $haystack = strtolower(json_encode($filledCareerFields) ?: '');
+
+        return str_contains($haystack, 'careereducate') || str_contains($haystack, 'career educate');
+    }
+
+    private function phoneVariants(string $phone): array
+    {
+        $digits = $this->phoneDigits($phone);
+        $variants = collect([$phone, $digits]);
+
+        if (strlen($digits) === 11 && str_starts_with($digits, '0')) {
+            $withoutTrunk = substr($digits, 1);
+            $variants->push(substr($digits, 0, 3) . '-' . substr($digits, 3, 3) . '-' . substr($digits, 6));
+            $variants->push($withoutTrunk);
+            $variants->push('91' . $withoutTrunk);
+            $variants->push('+91' . $withoutTrunk);
+        }
+
+        return $variants
+            ->map(fn ($value) => trim((string) $value))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    private function phoneDigits(string $phone): string
+    {
+        return preg_replace('/\D+/', '', $phone) ?? '';
     }
 
     public function recording(string $recordingUrl): Response

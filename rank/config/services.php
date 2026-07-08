@@ -45,6 +45,7 @@ return [
         'api_key' => env('EXOTEL_API_KEY'),
         'api_token' => env('EXOTEL_API_TOKEN'),
         'base_url' => env('EXOTEL_BASE_URL', 'https://api.exotel.com'),
+        'career_educate_exophone' => env('EXOTEL_CAREER_EDUCATE_EXOPHONE', '080-472-85479'),
         'voice_analyze_url' => env('EXOTEL_VOICE_ANALYZE_URL'),
         'voice_analyze_format' => env('EXOTEL_VOICE_ANALYZE_FORMAT', 'json'),
         'voice_analyze_method' => env('EXOTEL_VOICE_ANALYZE_METHOD', 'POST'),

@@ -269,6 +269,44 @@ class AdminDashboardController extends Controller
         return view('admin.call-details', compact('students', 'search'));
     }
 
+    public function careerEducateCallLog(Request $request, ExotelService $exotel)
+    {
+        $callPage = max(0, $request->integer('call_page', 0));
+        $pageSize = max(10, min(100, $request->integer('page_size', 10)));
+        $exophone = (string) config('services.exotel.career_educate_exophone', '08047285479');
+        $filters = [
+            'start_date' => $request->query('start_date'),
+            'end_date' => $request->query('end_date'),
+            'status' => $request->query('status'),
+            'direction' => $request->query('direction'),
+            'phone' => trim((string) $request->query('phone', '')),
+        ];
+        $calls = [];
+        $metadata = [];
+        $rawResponse = null;
+        $apiError = null;
+
+        try {
+            $callResponse = $exotel->callsForExophone($exophone, $callPage, $pageSize, $filters);
+            $calls = $callResponse['calls'];
+            $metadata = $callResponse['metadata'];
+            $rawResponse = $callResponse['raw'];
+        } catch (Throwable $exception) {
+            $apiError = $exception->getMessage();
+        }
+
+        return view('admin.career-educate-call-log', compact(
+            'exophone',
+            'callPage',
+            'pageSize',
+            'filters',
+            'calls',
+            'metadata',
+            'rawResponse',
+            'apiError'
+        ));
+    }
+
     public function callHistory(Request $request, User $user, ExotelService $exotel)
     {
         abort_if($user->is_admin, 404);
