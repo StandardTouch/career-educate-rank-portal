@@ -203,7 +203,7 @@
                     <div class="relative group results-year-menu">
                         <button
                             type="button"
-                            class="results-year-trigger px-3 py-2 rounded-lg border {{ in_array($routeName, ['import.excel', 'import.excel.confirm', 'admin.imports', 'import.analysis', 'import.analysis.confirm', 'notifications.import', 'notifications.import.confirm'], true) ? 'border-rose-300 text-rose-600 bg-rose-50' : 'border-slate-200 text-slate-700 hover:border-rose-300 hover:text-rose-600' }} transition-colors inline-flex items-center gap-2 whitespace-nowrap"
+                            class="results-year-trigger px-3 py-2 rounded-lg border {{ in_array($routeName, ['import.excel', 'import.excel.confirm', 'admin.imports', 'admin.imports.duplicates', 'admin.imports.duplicates.show', 'import.analysis', 'import.analysis.confirm', 'notifications.import', 'notifications.import.confirm'], true) ? 'border-rose-300 text-rose-600 bg-rose-50' : 'border-slate-200 text-slate-700 hover:border-rose-300 hover:text-rose-600' }} transition-colors inline-flex items-center gap-2 whitespace-nowrap"
                             aria-expanded="false"
                         >
                             <span>View Imports</span>
@@ -217,6 +217,9 @@
                             <div class="grid gap-1 px-2 pb-2">
                                 <a href="{{ route('admin.imports') }}" class="results-menu-link {{ $routeName === 'admin.imports' ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-rose-50 hover:text-rose-700' }} rounded-xl px-3 py-2 text-sm transition-colors block">
                                     Manage All Imports
+                                </a>
+                                <a href="{{ route('admin.imports.duplicates') }}" class="results-menu-link {{ in_array($routeName, ['admin.imports.duplicates', 'admin.imports.duplicates.show'], true) ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-rose-50 hover:text-rose-700' }} rounded-xl px-3 py-2 text-sm transition-colors block">
+                                    Check Duplicates
                                 </a>
                                 <a href="{{ route('import.excel') }}" class="results-menu-link {{ $routeName === 'import.excel' ? 'bg-rose-50 text-rose-700' : 'text-slate-700 hover:bg-rose-50 hover:text-rose-700' }} rounded-xl px-3 py-2 text-sm transition-colors block">
                                     Import Results

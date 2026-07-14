@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\DynamicAnalysisImportService;
 use App\Services\CourseDetectionService;
+use App\Services\ImportDuplicateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -38,7 +39,12 @@ class ImportAnalysisController extends Controller
         return redirect()->route('import.analysis.confirm');
     }
 
-    public function confirm(Request $request, CourseDetectionService $courseDetection)
+    public function confirm(
+        Request $request,
+        CourseDetectionService $courseDetection,
+        DynamicAnalysisImportService $dynamicImporter,
+        ImportDuplicateService $duplicates
+    )
     {
         $pending = $request->session()->get('pending_analysis_import');
 
@@ -51,6 +57,8 @@ class ImportAnalysisController extends Controller
         $sheetNames = is_array($pending['sheet_names'] ?? null) ? $pending['sheet_names'] : [];
         $detectedCourse = $pending['detected_course'] ?? null;
         $suggestedCourse = $detectedCourse ?: $courseDetection->suggestFromText($originalName, ...$sheetNames);
+        $importMeta = $dynamicImporter->metadataForImport($originalName, $suggestedCourse, $sheetNames);
+        $duplicate = $duplicates->existingAnalysisDuplicate($importMeta);
 
         return view('admin.import-course-confirm', [
             'title' => 'Confirm Predicted Rank Course Tab',
@@ -59,12 +67,14 @@ class ImportAnalysisController extends Controller
                 ? 'Review the course tab detected for this file. You can keep it, choose an existing tab, or type a new tab before importing.'
                 : 'This file does not contain a known course tag. Choose whether it should create a new course tab or live under an existing tab.',
             'action' => route('import.analysis.confirm.store'),
+            'skipAction' => route('import.analysis.confirm.skip'),
             'cancelRoute' => route('import.analysis'),
             'originalName' => $originalName,
             'meta' => ['title' => pathinfo($originalName, PATHINFO_FILENAME), 'sheet_names' => $sheetNames],
             'courses' => $courseDetection->courses(),
             'suggestedCourse' => $suggestedCourse,
             'detectedCourse' => $detectedCourse,
+            'duplicate' => $duplicate,
         ]);
     }
 
@@ -114,6 +124,22 @@ class ImportAnalysisController extends Controller
             ->with('import_output', 'DB predicted rank import completed. Course tab: ' . $course)
             ->with('page_route', route('analysis.show', $dataset, false))
             ->with('page_url', route('analysis.show', $dataset));
+    }
+
+    public function skip(Request $request)
+    {
+        $pending = $request->session()->get('pending_analysis_import');
+        $originalName = is_array($pending) ? (string) ($pending['original_name'] ?? 'uploaded file') : 'uploaded file';
+
+        if (is_array($pending) && ! empty($pending['stored_path'])) {
+            Storage::disk('local')->delete((string) $pending['stored_path']);
+        }
+
+        $request->session()->forget('pending_analysis_import');
+
+        return redirect()
+            ->route('import.analysis')
+            ->with('status', 'Skipped duplicate import for ' . $originalName . '. No existing data was changed.');
     }
 
     protected function safeFilename(string $filename): string

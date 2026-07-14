@@ -45,6 +45,9 @@
                 <a href="{{ route('notifications.import') }}" class="inline-flex justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-rose-300 hover:text-rose-600">
                     Import PDF
                 </a>
+                <a href="{{ route('admin.imports.duplicates') }}" class="inline-flex justify-center rounded-xl border border-amber-200 bg-amber-50 px-5 py-3 text-sm font-bold text-amber-800 transition hover:border-amber-300 hover:bg-amber-100">
+                    Check Duplicates
+                </a>
             </div>
         </section>
 

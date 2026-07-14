@@ -6,6 +6,7 @@ use App\Models\AnalysisImport;
 use App\Models\Import;
 use App\Models\MenuFolder;
 use App\Models\NotificationDocument;
+use App\Services\ImportDuplicateService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -89,6 +90,24 @@ class AdminImportController extends Controller
             ->all();
 
         return view('admin.imports.index', compact('resultImports', 'predictedRankImports', 'notificationDocuments', 'folderOptions', 'search'));
+    }
+
+    public function duplicates(ImportDuplicateService $duplicates): View
+    {
+        $groups = $duplicates->duplicateGroups();
+        $resultGroups = $groups['result'];
+        $analysisGroups = $groups['analysis'];
+
+        return view('admin.imports.duplicates', compact('resultGroups', 'analysisGroups'));
+    }
+
+    public function duplicateDetails(string $type, int $first, int $second, ImportDuplicateService $duplicates): View
+    {
+        $comparison = $duplicates->detail($type, $first, $second);
+
+        abort_if($comparison === null, 404);
+
+        return view('admin.imports.duplicate-details', compact('comparison'));
     }
 
     public function updateResult(Request $request, Import $import): RedirectResponse

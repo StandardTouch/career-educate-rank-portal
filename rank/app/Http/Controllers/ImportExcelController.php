@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\ScaffoldHelper;
 use App\Services\CourseDetectionService;
 use App\Services\DynamicRankImportService;
+use App\Services\ImportDuplicateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
@@ -79,7 +80,12 @@ class ImportExcelController extends Controller
             ->with('page_url', url($route));
     }
 
-    public function confirm(Request $request, CourseDetectionService $courseDetection, DynamicRankImportService $dynamicImporter)
+    public function confirm(
+        Request $request,
+        CourseDetectionService $courseDetection,
+        DynamicRankImportService $dynamicImporter,
+        ImportDuplicateService $duplicates
+    )
     {
         $pending = $request->session()->get('pending_rank_import');
 
@@ -94,6 +100,8 @@ class ImportExcelController extends Controller
         $meta['sheet_names'] = $sheetNames;
         $detectedCourse = $pending['detected_course'] ?? null;
         $suggestedCourse = $detectedCourse ?: $courseDetection->suggestFromText($originalName, ...$sheetNames);
+        $importMeta = $dynamicImporter->metadataForImport($originalName, $suggestedCourse, $sheetNames);
+        $duplicate = $duplicates->existingResultDuplicate($importMeta);
 
         return view('admin.import-course-confirm', [
             'title' => 'Confirm Result Course Tab',
@@ -102,12 +110,14 @@ class ImportExcelController extends Controller
                 ? 'Review the course tab detected for this file. You can keep it, choose an existing tab, or type a new tab before importing.'
                 : 'This file does not contain a known course tag. Choose whether it should create a new course tab or live under an existing tab.',
             'action' => route('import.excel.confirm.store'),
+            'skipAction' => route('import.excel.confirm.skip'),
             'cancelRoute' => route('import.excel'),
             'originalName' => $originalName,
             'meta' => $meta,
             'courses' => $courseDetection->courses(),
             'suggestedCourse' => $suggestedCourse,
             'detectedCourse' => $detectedCourse,
+            'duplicate' => $duplicate,
         ]);
     }
 
@@ -157,6 +167,22 @@ class ImportExcelController extends Controller
             ->with('import_output', 'DB import completed. Course tab: ' . $course)
             ->with('page_route', route('results.show', $dataset, false))
             ->with('page_url', route('results.show', $dataset));
+    }
+
+    public function skip(Request $request)
+    {
+        $pending = $request->session()->get('pending_rank_import');
+        $originalName = is_array($pending) ? (string) ($pending['original_name'] ?? 'uploaded file') : 'uploaded file';
+
+        if (is_array($pending) && ! empty($pending['stored_path'])) {
+            Storage::disk('local')->delete((string) $pending['stored_path']);
+        }
+
+        $request->session()->forget('pending_rank_import');
+
+        return redirect()
+            ->route('import.excel')
+            ->with('status', 'Skipped duplicate import for ' . $originalName . '. No existing data was changed.');
     }
 
     protected function safeFilename(string $filename): string

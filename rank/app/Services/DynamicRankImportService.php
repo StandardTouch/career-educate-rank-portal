@@ -40,6 +40,11 @@ class DynamicRankImportService
         return $meta;
     }
 
+    public function metadataForImport(string $filename, ?string $courseOverride = null, array $extraCourseText = []): array
+    {
+        return $this->metadataFromFilename($filename, $courseOverride, $extraCourseText);
+    }
+
     public function importFile(string $absolutePath, string $originalName, string $storedPath, ?int $userId = null, ?string $courseOverride = null): Dataset
     {
         $meta = $this->metadataFromFilename($originalName, $courseOverride);

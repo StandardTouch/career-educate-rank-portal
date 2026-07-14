@@ -96,6 +96,8 @@ Route::middleware(['auth', 'single.device'])->group(function () {
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/dashboard', [App\Http\Controllers\AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/imports', [App\Http\Controllers\AdminImportController::class, 'index'])->name('admin.imports');
+    Route::get('/admin/imports/duplicates', [App\Http\Controllers\AdminImportController::class, 'duplicates'])->name('admin.imports.duplicates');
+    Route::get('/admin/imports/duplicates/{type}/{first}/{second}', [App\Http\Controllers\AdminImportController::class, 'duplicateDetails'])->name('admin.imports.duplicates.show');
     Route::patch('/admin/imports/results/{import}', [App\Http\Controllers\AdminImportController::class, 'updateResult'])->name('admin.imports.results.update');
     Route::delete('/admin/imports/results/{import}', [App\Http\Controllers\AdminImportController::class, 'destroyResult'])->name('admin.imports.results.destroy');
     Route::patch('/admin/imports/predicted-rank/{analysisImport}', [App\Http\Controllers\AdminImportController::class, 'updatePredictedRank'])->name('admin.imports.predicted-rank.update');
@@ -113,10 +115,12 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/import-excel', [App\Http\Controllers\ImportExcelController::class, 'store'])->name('import.excel.store');
     Route::get('/import-excel/confirm-course', [App\Http\Controllers\ImportExcelController::class, 'confirm'])->name('import.excel.confirm');
     Route::post('/import-excel/confirm-course', [App\Http\Controllers\ImportExcelController::class, 'confirmStore'])->name('import.excel.confirm.store');
+    Route::post('/import-excel/confirm-course/skip', [App\Http\Controllers\ImportExcelController::class, 'skip'])->name('import.excel.confirm.skip');
     Route::get('/admin/import-analysis', [App\Http\Controllers\ImportAnalysisController::class, 'create'])->name('import.analysis');
     Route::post('/admin/import-analysis', [App\Http\Controllers\ImportAnalysisController::class, 'store'])->name('import.analysis.store');
     Route::get('/admin/import-analysis/confirm-course', [App\Http\Controllers\ImportAnalysisController::class, 'confirm'])->name('import.analysis.confirm');
     Route::post('/admin/import-analysis/confirm-course', [App\Http\Controllers\ImportAnalysisController::class, 'confirmStore'])->name('import.analysis.confirm.store');
+    Route::post('/admin/import-analysis/confirm-course/skip', [App\Http\Controllers\ImportAnalysisController::class, 'skip'])->name('import.analysis.confirm.skip');
     Route::get('/admin/import-pdf', [App\Http\Controllers\NotificationDocumentController::class, 'create'])->name('notifications.import');
     Route::post('/admin/import-pdf', [App\Http\Controllers\NotificationDocumentController::class, 'store'])->name('notifications.import.store');
     Route::post('/admin/import-pdf/dropdowns', [App\Http\Controllers\NotificationDocumentController::class, 'storeFolder'])->name('notifications.folders.store');
