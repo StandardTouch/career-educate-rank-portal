@@ -174,6 +174,10 @@ class ImportDuplicateService
             'page_url' => $dataset
                 ? ($type === 'result' ? route('results.show', $dataset) : route('analysis.show', $dataset))
                 : null,
+            'delete_url' => route('admin.imports.duplicates.destroy', [
+                'type' => $type,
+                'import' => $import->id,
+            ]),
             'sheets' => $import->sheets->map(fn ($sheet) => [
                 'name' => $sheet->sheet_name,
                 'type' => $sheet->sheet_type,

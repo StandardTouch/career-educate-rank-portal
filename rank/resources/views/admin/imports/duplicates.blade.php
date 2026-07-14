@@ -32,6 +32,12 @@
             </a>
         </section>
 
+        @if (session('status'))
+            <div class="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+                {{ session('status') }}
+            </div>
+        @endif
+
         @php
             $sections = [
                 ['title' => 'Result Duplicate Entries', 'groups' => $resultGroups],
@@ -101,6 +107,13 @@
                                                     Open Page
                                                 </a>
                                             @endif
+                                            <form action="{{ $item['delete_url'] }}" method="POST" onsubmit="return confirm('Delete this duplicate import entry? The imported page will remain available through the remaining entry.');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="inline-flex rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-100">
+                                                    Delete
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
                                 @endforeach

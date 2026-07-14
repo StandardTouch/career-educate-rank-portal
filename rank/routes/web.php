@@ -98,6 +98,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/imports', [App\Http\Controllers\AdminImportController::class, 'index'])->name('admin.imports');
     Route::get('/admin/imports/duplicates', [App\Http\Controllers\AdminImportController::class, 'duplicates'])->name('admin.imports.duplicates');
     Route::get('/admin/imports/duplicates/{type}/{first}/{second}', [App\Http\Controllers\AdminImportController::class, 'duplicateDetails'])->name('admin.imports.duplicates.show');
+    Route::delete('/admin/imports/duplicates/{type}/{import}', [App\Http\Controllers\AdminImportController::class, 'destroyDuplicate'])->name('admin.imports.duplicates.destroy');
     Route::patch('/admin/imports/results/{import}', [App\Http\Controllers\AdminImportController::class, 'updateResult'])->name('admin.imports.results.update');
     Route::delete('/admin/imports/results/{import}', [App\Http\Controllers\AdminImportController::class, 'destroyResult'])->name('admin.imports.results.destroy');
     Route::patch('/admin/imports/predicted-rank/{analysisImport}', [App\Http\Controllers\AdminImportController::class, 'updatePredictedRank'])->name('admin.imports.predicted-rank.update');

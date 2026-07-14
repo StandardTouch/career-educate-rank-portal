@@ -110,6 +110,69 @@ class AdminImportController extends Controller
         return view('admin.imports.duplicate-details', compact('comparison'));
     }
 
+    public function destroyDuplicate(string $type, int $import): RedirectResponse
+    {
+        if ($type === 'result') {
+            $duplicateImport = Import::with('dataset.imports')->findOrFail($import);
+            $dataset = $duplicateImport->dataset;
+
+            abort_if(! $dataset || $dataset->imports->count() <= 1, 404);
+
+            DB::transaction(function () use ($duplicateImport, $dataset): void {
+                $fallback = $dataset->imports()
+                    ->where('id', '!=', $duplicateImport->id)
+                    ->latest('id')
+                    ->firstOrFail();
+
+                $dataset->rankRecords()
+                    ->where('import_id', $duplicateImport->id)
+                    ->update([
+                        'import_id' => $fallback->id,
+                        'import_sheet_id' => null,
+                    ]);
+
+                $path = $duplicateImport->stored_path;
+                $duplicateImport->delete();
+                $this->deleteStoredFiles([$path]);
+            });
+
+            return redirect()
+                ->route('admin.imports.duplicates')
+                ->with('status', 'Deleted duplicate result import entry.');
+        }
+
+        if ($type === 'analysis') {
+            $duplicateImport = AnalysisImport::with('analysisDataset.imports')->findOrFail($import);
+            $dataset = $duplicateImport->analysisDataset;
+
+            abort_if(! $dataset || $dataset->imports->count() <= 1, 404);
+
+            DB::transaction(function () use ($duplicateImport, $dataset): void {
+                $fallback = $dataset->imports()
+                    ->where('id', '!=', $duplicateImport->id)
+                    ->latest('id')
+                    ->firstOrFail();
+
+                $dataset->analysisRecords()
+                    ->where('analysis_import_id', $duplicateImport->id)
+                    ->update([
+                        'analysis_import_id' => $fallback->id,
+                        'analysis_import_sheet_id' => null,
+                    ]);
+
+                $path = $duplicateImport->stored_path;
+                $duplicateImport->delete();
+                $this->deleteStoredFiles([$path]);
+            });
+
+            return redirect()
+                ->route('admin.imports.duplicates')
+                ->with('status', 'Deleted duplicate predicted rank import entry.');
+        }
+
+        abort(404);
+    }
+
     public function updateResult(Request $request, Import $import): RedirectResponse
     {
         $validated = $request->validate([
