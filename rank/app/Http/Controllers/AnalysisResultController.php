@@ -205,7 +205,10 @@ class AnalysisResultController extends Controller
         $value = $request->input($field, $default);
         $values = is_array($value) ? $value : [$value];
 
-        return array_values(array_filter($values, fn ($item) => $item !== null && $item !== ''));
+        return array_values(array_filter(
+            array_map(fn($item) => is_string($item) ? str_replace("\r\n", "\n", $item) : $item, $values),
+            fn ($item) => $item !== null && $item !== ''
+        ));
     }
 
     protected function distinctValues(AnalysisDataset $dataset, string $column)
