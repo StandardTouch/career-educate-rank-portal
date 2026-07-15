@@ -365,14 +365,14 @@ class DynamicRankImportService
 
     protected function normalizeRoundHeader(string $normalized): string
     {
-        if (preg_match('/^(gen|general|fem|female)_.+_rank$/', $normalized)) {
-            return str_starts_with($normalized, 'fem') || str_starts_with($normalized, 'female')
+        if (str_ends_with($normalized, '_rank') || str_ends_with($normalized, '_ranks')) {
+            return str_contains($normalized, 'fem') || str_contains($normalized, 'female')
                 ? 'female_closing_rank'
                 : 'closing_rank';
         }
 
-        if (preg_match('/^(gen|general|fem|female)_.+_mark$/', $normalized)) {
-            return str_starts_with($normalized, 'fem') || str_starts_with($normalized, 'female')
+        if (str_ends_with($normalized, '_mark') || str_ends_with($normalized, '_marks')) {
+            return str_contains($normalized, 'fem') || str_contains($normalized, 'female')
                 ? 'female_marks'
                 : 'marks';
         }
