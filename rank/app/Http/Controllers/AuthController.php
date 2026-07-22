@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -140,10 +141,17 @@ class AuthController extends Controller
     public function sendRegistrationOtp(Request $request)
     {
         $data = $request->validate([
-            'phone' => ['required', 'digits_between:10,12', 'unique:users,phone'],
+            'phone' => ['required', 'digits_between:10,12'],
         ]);
 
         $phone = $this->normalizePhone($data['phone']);
+
+        if (User::where('phone', $phone)->exists()) {
+            return back()
+                ->withErrors(['phone' => 'This mobile number is already registered. Please login instead.'])
+                ->onlyInput('phone');
+        }
+
         $otp = (string) random_int(100000, 999999);
 
         $request->session()->put('registration_phone', $phone);
@@ -218,6 +226,17 @@ class AuthController extends Controller
 
         $phone = $request->session()->get('registration_phone');
 
+        if (! $phone) {
+            return redirect()->route('register');
+        }
+
+        if (User::where('phone', $phone)->exists()) {
+            $request->session()->forget(['registration_phone', 'registration_mobile_verified']);
+
+            return redirect()->route('login')
+                ->withErrors(['phone' => 'This mobile number is already registered. Please login instead.']);
+        }
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
@@ -228,21 +247,32 @@ class AuthController extends Controller
             'state' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'phone' => $phone,
-            'password' => Str::random(32),
-            'mobile_verified_at' => now(),
-            'is_admin' => false,
-            'neet_rank' => $data['neet_rank'] ?? null,
-            'neet_marks' => $data['neet_marks'] ?? null,
-            'quota' => $data['quota'] ?? null,
-            'category' => $data['category'] ?? null,
-            'state' => $data['state'] ?? null,
-            'plan' => 'none',
-            'payment_status' => 'unpaid',
-        ]);
+        try {
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'phone' => $phone,
+                'password' => Str::random(32),
+                'mobile_verified_at' => now(),
+                'is_admin' => false,
+                'neet_rank' => $data['neet_rank'] ?? null,
+                'neet_marks' => $data['neet_marks'] ?? null,
+                'quota' => $data['quota'] ?? null,
+                'category' => $data['category'] ?? null,
+                'state' => $data['state'] ?? null,
+                'plan' => 'none',
+                'payment_status' => 'unpaid',
+            ]);
+        } catch (QueryException $exception) {
+            if ($this->isDuplicateUserKey($exception)) {
+                $request->session()->forget(['registration_phone', 'registration_mobile_verified']);
+
+                return redirect()->route('login')
+                    ->withErrors(['phone' => 'This mobile number or email is already registered. Please login instead.']);
+            }
+
+            throw $exception;
+        }
 
         $request->session()->forget(['registration_phone', 'registration_mobile_verified']);
 
@@ -275,6 +305,14 @@ class AuthController extends Controller
         $phone = preg_replace('/\D+/', '', $phone);
 
         return str_starts_with($phone, '91') ? $phone : '91' . ltrim($phone, '0');
+    }
+
+    private function isDuplicateUserKey(QueryException $exception): bool
+    {
+        $message = $exception->getMessage();
+
+        return $exception->getCode() === '23000'
+            && (str_contains($message, 'users_phone_unique') || str_contains($message, 'users_email_unique'));
     }
 
     private function postAuthRedirect(User $user): string
